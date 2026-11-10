@@ -834,3 +834,346 @@
 16:21:11.773 [Info] Light source: Off
 16:21:11.774 [Info] BigBox closed: all lights off.
 16:21:12.833 [Info] Front end disconnected (0 connected).
+16:55:48.591 [Info] Output thread stopped.
+16:55:49.004 [Info] LED-Next stopped.
+16:57:10.926 [Info] LED-Next starting (64-bit). Config: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\cabinet.json
+16:57:10.977 [Info] Loaded C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\PacDrive64.dll
+16:57:11.006 [Info] PacDrive SDK reports 2 Ultimarc device(s).
+16:57:11.007 [Info]   device 0: VID D209 PID 1401 type 5 version 25
+16:57:11.013 [Info]   device 1: VID D209 PID 1402 type 5 version 25
+16:57:11.014 [Info] PacLED64: 2 board(s): PacLED64#1, PacLED64#2
+16:57:11.015 [Info] Output thread started.
+16:57:11.070 [Info] Game library: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\games.db (75,273 games)
+16:57:11.497 [Info] Started minimized (by a front-end plugin).
+16:57:11.625 [Info] Listening for front ends on pipe 'LedNext.FrontEnd'.
+16:57:12.845 [Info] Front end connected (1 connected).
+16:57:12.852 [Info] Front end: LaunchBox started
+16:57:12.874 [Info] LaunchBox: platform 'Arcade' → MAME (LaunchBox games); MAME default.
+16:57:12.874 [Info] Light source: LaunchBox (platform): Arcade
+16:57:13.081 [Info] Timing 'platform Arcade': pipe 1009 ms, wait 0 ms, lookup 22 ms, boards 206 ms (write 206 ms); total 1239 ms.
+16:57:16.602 [Info] Read 41,633 games from LaunchBox at D:\LaunchBox.
+16:57:18.544 [Info] LaunchBox: 'Rim Rockin' Basketball' → MAME/rimrockn (LaunchBox id).
+16:57:18.544 [Info] Light source: LaunchBox (browsing): Rim Rockin' Basketball
+16:57:18.751 [Info] Timing 'Rim Rockin' Basketball': pipe 0 ms, wait 0 ms, lookup 4 ms, boards 206 ms (write 206 ms); total 211 ms.
+16:57:20.182 [Info] LaunchBox: 'Powerball' → MAME/pwball (LaunchBox id).
+16:57:20.182 [Info] Light source: LaunchBox (browsing): Powerball
+16:57:20.389 [Info] Timing 'Powerball': pipe 0 ms, wait 0 ms, lookup 3 ms, boards 207 ms (write 207 ms); total 209 ms.
+16:57:21.985 [Info] LaunchBox: 'Heavy Barrel' → MAME/hbarrel (LaunchBox id).
+16:57:21.985 [Info] Light source: LaunchBox (browsing): Heavy Barrel
+16:57:22.192 [Info] Timing 'Heavy Barrel': pipe 0 ms, wait 0 ms, lookup 3 ms, boards 207 ms (write 206 ms); total 210 ms.
+16:57:24.070 [Info] LaunchBox: 'ESP Ra.De.' → Cave/esprade (LaunchBox id).
+16:57:24.070 [Info] Light source: LaunchBox (browsing): ESP Ra.De.
+16:57:24.277 [Info] Timing 'ESP Ra.De.': pipe 1 ms, wait 0 ms, lookup 4 ms, boards 206 ms (write 206 ms); total 211 ms.
+16:57:27.555 [Info] LaunchBox: 'Hang Pilot' → TEKNO_PARROT/hangplt (LaunchBox id).
+16:57:27.555 [Info] Light source: LaunchBox (browsing): Hang Pilot
+16:57:27.761 [Info] Timing 'Hang Pilot': pipe 0 ms, wait 0 ms, lookup 11 ms, boards 206 ms (write 206 ms); total 217 ms.
+16:57:28.496 [Info] LaunchBox: 'Wangan Midnight Maximum Tune 4' → MAME/Wangan Midnight Maximum Tune 4 (TeknoRaven WMMT4) (LaunchBox id).
+16:57:28.496 [Info] Light source: LaunchBox (browsing): Wangan Midnight Maximum Tune 4
+16:57:28.703 [Info] Timing 'Wangan Midnight Maximum Tune 4': pipe 0 ms, wait 0 ms, lookup 3 ms, boards 206 ms (write 206 ms); total 209 ms.
+16:57:29.226 [Info] LaunchBox: 'Pop'n Music Animelo' → MAME/popnanm (LaunchBox id).
+16:57:29.227 [Info] Light source: LaunchBox (browsing): Pop'n Music Animelo
+16:57:29.227 [Info] Timing 'Pop'n Music Animelo': pipe 0 ms, wait 0 ms, lookup 3 ms, boards 0 ms (write 0 ms); total 3 ms.
+16:57:30.321 [Info] LaunchBox: 'Tokyo Cop: Special Police Reinforcement' → TEKNO_PARROT/TokyoCop (LaunchBox id).
+16:57:30.321 [Info] Light source: LaunchBox (browsing): Tokyo Cop: Special Police Reinforcement
+16:57:30.528 [Info] Timing 'Tokyo Cop: Special Police Reinforcement': pipe 0 ms, wait 0 ms, lookup 11 ms, boards 207 ms (write 207 ms); total 218 ms.
+16:57:30.991 [Info] LaunchBox: 'Euro League' → MAME/eurogael (LaunchBox id).
+16:57:30.991 [Info] Light source: LaunchBox (browsing): Euro League
+16:57:31.199 [Info] Timing 'Euro League': pipe 0 ms, wait 0 ms, lookup 3 ms, boards 207 ms (write 207 ms); total 210 ms.
+16:57:32.129 [Info] LaunchBox: 'Smashing Drive' → TEKNO_PARROT/teknog4_smashdrv (LaunchBox id).
+16:57:32.130 [Info] Light source: LaunchBox (browsing): Smashing Drive
+16:57:32.336 [Info] Timing 'Smashing Drive': pipe 1 ms, wait 0 ms, lookup 10 ms, boards 207 ms (write 207 ms); total 218 ms.
+16:57:33.151 [Info] LaunchBox: 'Galaxian 3: Theater 6 : Attack of the Zolgear' → Laser_Disc/gal3zlgr (LaunchBox id).
+16:57:33.151 [Info] Light source: LaunchBox (browsing): Galaxian 3: Theater 6 : Attack of the Zolgear
+16:57:33.357 [Info] Timing 'Galaxian 3: Theater 6 : Attack of the Zolgear': pipe 0 ms, wait 0 ms, lookup 3 ms, boards 206 ms (write 206 ms); total 210 ms.
+16:57:34.057 [Info] LaunchBox: 'Power Truck' → IGS_PC/Power Truck (TeknoRaven PT) (LaunchBox id).
+16:57:34.057 [Info] Light source: LaunchBox (browsing): Power Truck
+16:57:34.057 [Info] Timing 'Power Truck': pipe 1 ms, wait 0 ms, lookup 4 ms, boards 0 ms (write 0 ms); total 5 ms.
+16:57:34.975 [Info] LaunchBox: 'Percussion Master 2008' → IGS_PC/Percussion Master 2008 (TeknoRaven PM2008) (LaunchBox id).
+16:57:34.975 [Info] Light source: LaunchBox (browsing): Percussion Master 2008
+16:57:34.975 [Info] Timing 'Percussion Master 2008': pipe 0 ms, wait 0 ms, lookup 4 ms, boards 0 ms (write 0 ms); total 4 ms.
+16:57:36.894 [Info] LaunchBox: 'Espgaluda II' → Cave/espgal2 (LaunchBox id).
+16:57:36.894 [Info] Light source: LaunchBox (browsing): Espgaluda II
+16:57:37.091 [Info] Timing 'Espgaluda II': pipe 0 ms, wait 0 ms, lookup 3 ms, boards 198 ms (write 197 ms); total 201 ms.
+16:57:38.062 [Info] LaunchBox: 'DoDonPachi Dai-Fukkatsu Black Label' → Cave/dfkbl (LaunchBox id).
+16:57:38.062 [Info] Light source: LaunchBox (browsing): DoDonPachi Dai-Fukkatsu Black Label
+16:57:38.062 [Info] Timing 'DoDonPachi Dai-Fukkatsu Black Label': pipe 0 ms, wait 0 ms, lookup 5 ms, boards 0 ms (write 0 ms); total 5 ms.
+16:57:38.901 [Info] LaunchBox: 'Fever SOS' → Cave/feversos (LaunchBox id).
+16:57:38.901 [Info] Light source: LaunchBox (browsing): Fever SOS
+16:57:38.901 [Info] Timing 'Fever SOS': pipe 0 ms, wait 0 ms, lookup 3 ms, boards 0 ms (write 0 ms); total 4 ms.
+16:57:39.868 [Info] LaunchBox: 'Deathsmiles' → Cave/deathsml (LaunchBox id).
+16:57:39.868 [Info] Light source: LaunchBox (browsing): Deathsmiles
+16:57:39.868 [Info] Timing 'Deathsmiles': pipe 0 ms, wait 0 ms, lookup 4 ms, boards 0 ms (write 0 ms); total 4 ms.
+16:57:40.372 [Info] LaunchBox: 'Puzzle! Mushihime-Tama' → Cave/mushitam (LaunchBox id).
+16:57:40.373 [Info] Light source: LaunchBox (browsing): Puzzle! Mushihime-Tama
+16:57:40.570 [Info] Timing 'Puzzle! Mushihime-Tama': pipe 0 ms, wait 0 ms, lookup 4 ms, boards 198 ms (write 198 ms); total 202 ms.
+16:57:41.261 [Info] LaunchBox: 'Espgaluda' → Cave/espgal (LaunchBox id).
+16:57:41.261 [Info] Light source: LaunchBox (browsing): Espgaluda
+16:57:41.459 [Info] Timing 'Espgaluda': pipe 0 ms, wait 0 ms, lookup 4 ms, boards 198 ms (write 198 ms); total 201 ms.
+16:57:42.722 [Info] LaunchBox: 'Ray Storm' → MAME/raystorm (LaunchBox id).
+16:57:42.722 [Info] Light source: LaunchBox (browsing): Ray Storm
+16:57:42.919 [Info] Timing 'Ray Storm': pipe 0 ms, wait 0 ms, lookup 3 ms, boards 197 ms (write 197 ms); total 200 ms.
+16:57:43.747 [Info] LaunchBox: 'Espgaluda' → Cave/espgal (LaunchBox id).
+16:57:43.748 [Info] Light source: LaunchBox (browsing): Espgaluda
+16:57:43.945 [Info] Timing 'Espgaluda': pipe 0 ms, wait 0 ms, lookup 4 ms, boards 198 ms (write 198 ms); total 201 ms.
+16:57:44.505 [Info] LaunchBox: 'Deathsmiles II: Makai no Merry Christmas' → Cave/Game Loader All RH (LaunchBox id).
+16:57:44.505 [Info] Light source: LaunchBox (browsing): Deathsmiles II: Makai no Merry Christmas
+16:57:44.703 [Info] Timing 'Deathsmiles II: Makai no Merry Christmas': pipe 0 ms, wait 0 ms, lookup 4 ms, boards 198 ms (write 198 ms); total 201 ms.
+16:57:45.888 [Info] LaunchBox: 'DoDonPachi III' → Cave/ddp3 (LaunchBox id).
+16:57:45.888 [Info] Light source: LaunchBox (browsing): DoDonPachi III
+16:57:45.888 [Info] Timing 'DoDonPachi III': pipe 0 ms, wait 0 ms, lookup 3 ms, boards 0 ms (write 0 ms); total 4 ms.
+16:57:46.756 [Info] LaunchBox: 'Ibara' → Cave/ibara (LaunchBox id).
+16:57:46.756 [Info] Light source: LaunchBox (browsing): Ibara
+16:57:46.953 [Info] Timing 'Ibara': pipe 0 ms, wait 0 ms, lookup 4 ms, boards 197 ms (write 197 ms); total 201 ms.
+16:57:56.114 [Info] LaunchBox: platform 'Arcade Clones' → ARCADE_CLONES (LaunchBox games); MAME default.
+16:57:56.114 [Info] Light source: LaunchBox (platform): Arcade Clones
+16:57:56.312 [Info] Timing 'platform Arcade Clones': pipe 0 ms, wait 0 ms, lookup 18 ms, boards 198 ms (write 197 ms); total 216 ms.
+16:57:57.447 [Info] LaunchBox: 'Super Poker' → ARCADE_CLONES/spk115it (LaunchBox id).
+16:57:57.448 [Info] Light source: LaunchBox (browsing): Super Poker
+16:57:57.448 [Info] Timing 'Super Poker': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 0 ms (write 0 ms); total 1 ms.
+16:57:59.164 [Info] LaunchBox: 'Super Poker' → ARCADE_CLONES/spk205us (LaunchBox id).
+16:57:59.164 [Info] Light source: LaunchBox (browsing): Super Poker
+16:57:59.164 [Info] Timing 'Super Poker': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 0 ms (write 0 ms); total 1 ms.
+16:57:59.867 [Info] LaunchBox: 'Cycle Warriors' → ARCADE_CLONES/cyclwarrb (LaunchBox id).
+16:57:59.867 [Info] Light source: LaunchBox (browsing): Cycle Warriors
+16:58:00.074 [Info] Timing 'Cycle Warriors': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 206 ms (write 206 ms); total 208 ms.
+16:58:01.005 [Info] LaunchBox: 'S.T.U.N. Runner' → ARCADE_CLONES/stunrun (LaunchBox id).
+16:58:01.005 [Info] Light source: LaunchBox (browsing): S.T.U.N. Runner
+16:58:01.212 [Info] Timing 'S.T.U.N. Runner': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 207 ms (write 207 ms); total 208 ms.
+16:58:02.226 [Info] LaunchBox: 'Cycle Warriors' → ARCADE_CLONES/cyclwarrb (LaunchBox id).
+16:58:02.226 [Info] Light source: LaunchBox (browsing): Cycle Warriors
+16:58:02.433 [Info] Timing 'Cycle Warriors': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 207 ms (write 207 ms); total 208 ms.
+16:58:07.144 [Info] LaunchBox: 'S.T.U.N. Runner' → ARCADE_CLONES/stunrun (LaunchBox id).
+16:58:07.145 [Info] Light source: LaunchBox (browsing): S.T.U.N. Runner
+16:58:07.351 [Info] Timing 'S.T.U.N. Runner': pipe 1 ms, wait 0 ms, lookup 1 ms, boards 206 ms (write 206 ms); total 208 ms.
+16:58:08.615 [Info] LaunchBox: 'X-Men Vs. Street Fighter' → ARCADE_CLONES/xmvsfu1d (LaunchBox id).
+16:58:08.615 [Info] Light source: LaunchBox (browsing): X-Men Vs. Street Fighter
+16:58:08.822 [Info] Timing 'X-Men Vs. Street Fighter': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 207 ms (write 207 ms); total 208 ms.
+16:58:10.055 [Info] LaunchBox: 'X-Men Vs. Street Fighter' → ARCADE_CLONES/xmvsfjr3 (LaunchBox id).
+16:58:10.055 [Info] Light source: LaunchBox (browsing): X-Men Vs. Street Fighter
+16:58:10.055 [Info] Timing 'X-Men Vs. Street Fighter': pipe 1 ms, wait 0 ms, lookup 1 ms, boards 0 ms (write 0 ms); total 2 ms.
+16:58:11.174 [Info] LaunchBox: 'WWF: Wrestlemania' → ARCADE_CLONES/wwfmaniac (LaunchBox id).
+16:58:11.174 [Info] Light source: LaunchBox (browsing): WWF: Wrestlemania
+16:58:11.381 [Info] Timing 'WWF: Wrestlemania': pipe 0 ms, wait 0 ms, lookup 2 ms, boards 206 ms (write 206 ms); total 208 ms.
+16:58:12.117 [Info] LaunchBox: 'WWF WrestleFest' → ARCADE_CLONES/wwfwfestub (LaunchBox id).
+16:58:12.118 [Info] Light source: LaunchBox (browsing): WWF WrestleFest
+16:58:12.325 [Info] Timing 'WWF WrestleFest': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 207 ms (write 207 ms); total 209 ms.
+16:58:12.877 [Info] LaunchBox: 'WWF Superstars' → ARCADE_CLONES/wwfsstarb2 (LaunchBox id).
+16:58:12.877 [Info] Light source: LaunchBox (browsing): WWF Superstars
+16:58:13.084 [Info] Timing 'WWF Superstars': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 206 ms (write 206 ms); total 208 ms.
+16:58:13.694 [Info] LaunchBox: 'World Rally' → ARCADE_CLONES/wrallyat (LaunchBox id).
+16:58:13.694 [Info] Light source: LaunchBox (browsing): World Rally
+16:58:13.901 [Info] Timing 'World Rally': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 207 ms (write 207 ms); total 208 ms.
+16:58:14.400 [Info] LaunchBox: 'World Heroes' → ARCADE_CLONES/wh1ha (LaunchBox id).
+16:58:14.400 [Info] Light source: LaunchBox (browsing): World Heroes
+16:58:14.607 [Info] Timing 'World Heroes': pipe 1 ms, wait 0 ms, lookup 1 ms, boards 207 ms (write 207 ms); total 209 ms.
+16:58:15.344 [Info] LaunchBox: 'Woodpecker' → ARCADE_CLONES/woodpeca (LaunchBox id).
+16:58:15.344 [Info] Light source: LaunchBox (browsing): Woodpecker
+16:58:15.551 [Info] Timing 'Woodpecker': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 206 ms (write 206 ms); total 207 ms.
+16:58:16.236 [Info] LaunchBox: 'Wonder Boy: Monster Land' → ARCADE_CLONES/wbmlbg (LaunchBox id).
+16:58:16.236 [Info] Light source: LaunchBox (browsing): Wonder Boy: Monster Land
+16:58:16.236 [Info] Timing 'Wonder Boy: Monster Land': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 0 ms (write 0 ms); total 1 ms.
+16:58:17.187 [Info] LaunchBox: 'Wonder Boy III: Monster Lair' → ARCADE_CLONES/wb34d (LaunchBox id).
+16:58:17.187 [Info] Light source: LaunchBox (browsing): Wonder Boy III: Monster Lair
+16:58:17.188 [Info] Timing 'Wonder Boy III: Monster Lair': pipe 1 ms, wait 0 ms, lookup 1 ms, boards 0 ms (write 0 ms); total 2 ms.
+16:58:18.532 [Info] LaunchBox: 'Wonder Boy' → ARCADE_CLONES/wboysys2a (LaunchBox id).
+16:58:18.532 [Info] Light source: LaunchBox (browsing): Wonder Boy
+16:58:18.739 [Info] Timing 'Wonder Boy': pipe 1 ms, wait 0 ms, lookup 1 ms, boards 207 ms (write 207 ms); total 209 ms.
+16:58:19.516 [Info] LaunchBox: 'Wiz' → ARCADE_CLONES/wizt (LaunchBox id).
+16:58:19.516 [Info] Light source: LaunchBox (browsing): Wiz
+16:58:19.722 [Info] Timing 'Wiz': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 207 ms (write 207 ms); total 208 ms.
+16:58:20.586 [Info] LaunchBox: 'Willow' → ARCADE_CLONES/willowu (LaunchBox id).
+16:58:20.586 [Info] Light source: LaunchBox (browsing): Willow
+16:58:20.794 [Info] Timing 'Willow': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 207 ms (write 207 ms); total 208 ms.
+16:58:21.633 [Info] LaunchBox: 'Wolf Fang -Kuhga 2001-' → ARCADE_CLONES/wolffang (LaunchBox id).
+16:58:21.633 [Info] Light source: LaunchBox (browsing): Wolf Fang -Kuhga 2001-
+16:58:21.840 [Info] Timing 'Wolf Fang -Kuhga 2001-': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 206 ms (write 206 ms); total 208 ms.
+16:58:22.624 [Info] LaunchBox: 'Wing War' → ARCADE_CLONES/wingwarj (LaunchBox id).
+16:58:22.625 [Info] Light source: LaunchBox (browsing): Wing War
+16:58:22.625 [Info] Timing 'Wing War': pipe 1 ms, wait 0 ms, lookup 1 ms, boards 0 ms (write 0 ms); total 2 ms.
+16:58:23.601 [Info] LaunchBox: 'Wild Western' → ARCADE_CLONES/wwestern1 (LaunchBox id).
+16:58:23.602 [Info] Light source: LaunchBox (browsing): Wild Western
+16:58:23.808 [Info] Timing 'Wild Western': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 207 ms (write 207 ms); total 208 ms.
+16:58:25.200 [Info] LaunchBox: 'Wing War' → ARCADE_CLONES/wingwarj (LaunchBox id).
+16:58:25.200 [Info] Light source: LaunchBox (browsing): Wing War
+16:58:25.406 [Info] Timing 'Wing War': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 207 ms (write 207 ms); total 207 ms.
+16:58:29.839 [Info] LaunchBox: 'Wing War R360' → ARCADE_CLONES/wingwar360 (LaunchBox id).
+16:58:29.839 [Info] Light source: LaunchBox (browsing): Wing War R360
+16:58:29.839 [Info] Timing 'Wing War R360': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 0 ms (write 0 ms); total 1 ms.
+16:58:41.672 [Info] LaunchBox: 'Wise Guy' → ARCADE_CLONES/wiseguy (LaunchBox id).
+16:58:41.672 [Info] Light source: LaunchBox (browsing): Wise Guy
+16:58:41.673 [Info] Timing 'Wise Guy': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 0 ms (write 0 ms); total 2 ms.
+16:58:46.210 [Info] LaunchBox: 'Wild Western' → ARCADE_CLONES/wwestern1 (LaunchBox id).
+16:58:46.210 [Info] Light source: LaunchBox (browsing): Wild Western
+16:58:46.416 [Info] Timing 'Wild Western': pipe 1 ms, wait 0 ms, lookup 1 ms, boards 206 ms (write 206 ms); total 208 ms.
+16:58:47.328 [Info] LaunchBox: 'Wing War' → ARCADE_CLONES/wingwaru (LaunchBox id).
+16:58:47.328 [Info] Light source: LaunchBox (browsing): Wing War
+16:58:47.535 [Info] Timing 'Wing War': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 207 ms (write 207 ms); total 208 ms.
+16:58:48.200 [Info] LaunchBox: 'Wild West C.O.W.-Boys of Moo Mesa' → ARCADE_CLONES/moomesauac (LaunchBox id).
+16:58:48.200 [Info] Light source: LaunchBox (browsing): Wild West C.O.W.-Boys of Moo Mesa
+16:58:48.407 [Info] Timing 'Wild West C.O.W.-Boys of Moo Mesa': pipe 0 ms, wait 0 ms, lookup 2 ms, boards 207 ms (write 207 ms); total 209 ms.
+16:58:51.766 [Info] LaunchBox: 'Western Express' → ARCADE_CLONES/wexpress (LaunchBox id).
+16:58:51.766 [Info] Light source: LaunchBox (browsing): Western Express
+16:58:51.973 [Info] Timing 'Western Express': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 207 ms (write 206 ms); total 208 ms.
+16:58:55.046 [Info] LaunchBox: 'Warzard' → ARCADE_CLONES/warzard (LaunchBox id).
+16:58:55.046 [Info] Light source: LaunchBox (browsing): Warzard
+16:58:55.253 [Info] Timing 'Warzard': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 207 ms (write 207 ms); total 208 ms.
+16:58:57.909 [Info] LaunchBox: 'Warzard' → ARCADE_CLONES/warzardr1 (LaunchBox id).
+16:58:57.909 [Info] Light source: LaunchBox (browsing): Warzard
+16:58:57.909 [Info] Timing 'Warzard': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 0 ms (write 0 ms); total 1 ms.
+16:59:02.201 [Info] LaunchBox: 'Vs. Super Mario Bros.' → ARCADE_CLONES/suprmrioa (LaunchBox id).
+16:59:02.202 [Info] Light source: LaunchBox (browsing): Vs. Super Mario Bros.
+16:59:02.408 [Info] Timing 'Vs. Super Mario Bros.': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 206 ms (write 206 ms); total 207 ms.
+16:59:03.145 [Info] LaunchBox: 'Vs. Stroke & Match Golf' → ARCADE_CLONES/ladygolfe (LaunchBox id).
+16:59:03.145 [Info] Light source: LaunchBox (browsing): Vs. Stroke & Match Golf
+16:59:03.145 [Info] Timing 'Vs. Stroke & Match Golf': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 0 ms (write 0 ms); total 1 ms.
+17:00:54.005 [Info] Front end: LaunchBox closing
+17:00:54.005 [Info] Front end disconnected (0 connected).
+17:00:54.005 [Info] Light source: Off
+17:00:54.006 [Info] LaunchBox closed: all lights off.
+17:00:56.202 [Info] Output thread stopped.
+17:00:56.615 [Info] LED-Next stopped.
+17:02:39.788 [Info] LED-Next starting (64-bit). Config: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\cabinet.json
+17:02:39.830 [Info] Loaded C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\PacDrive64.dll
+17:02:39.859 [Info] PacDrive SDK reports 2 Ultimarc device(s).
+17:02:39.860 [Info]   device 0: VID D209 PID 1401 type 5 version 25
+17:02:39.865 [Info]   device 1: VID D209 PID 1402 type 5 version 25
+17:02:39.867 [Info] PacLED64: 2 board(s): PacLED64#1, PacLED64#2
+17:02:39.868 [Info] Output thread started.
+17:02:39.897 [Info] Game library: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\games.db (75,273 games)
+17:02:40.287 [Info] Started minimized (by a front-end plugin).
+17:02:40.407 [Info] Listening for front ends on pipe 'LedNext.FrontEnd'.
+17:02:41.816 [Info] Front end connected (1 connected).
+17:02:41.826 [Info] Front end: BigBox started
+17:02:41.861 [Warn] BigBox: no LED-Next platform for 'All Platforms'; lights unchanged.
+17:02:44.899 [Warn] BigBox: no LED-Next platform for 'Cinematronics'; lights unchanged.
+17:02:45.447 [Info] Read 41,633 games from LaunchBox at D:\LaunchBox.
+17:02:45.903 [Warn] BigBox: no LED-Next platform for 'Coastal Amusements'; lights unchanged.
+17:02:49.253 [Warn] BigBox: no LED-Next platform for 'Comad'; lights unchanged.
+17:02:52.733 [Warn] BigBox: no LED-Next platform for 'Gaelco'; lights unchanged.
+17:02:56.616 [Info] BigBox: platform 'IGS PC' → IGS_PC (LaunchBox games); MAME default.
+17:02:56.616 [Info] Light source: BigBox (platform): IGS PC
+17:02:56.823 [Info] Timing 'platform IGS PC': pipe 1 ms, wait 0 ms, lookup 21 ms, boards 207 ms (write 207 ms); total 230 ms.
+17:02:58.503 [Warn] BigBox: no LED-Next platform for 'Incredible Technologies'; lights unchanged.
+17:03:01.138 [Info] BigBox: platform 'IGS PC' → IGS_PC (LaunchBox games); MAME default.
+17:03:01.138 [Info] Light source: BigBox (platform): IGS PC
+17:03:01.138 [Info] Timing 'platform IGS PC': pipe 1 ms, wait 0 ms, lookup 16 ms, boards 0 ms (write 0 ms); total 17 ms.
+17:03:03.101 [Warn] BigBox: no LED-Next platform for 'Incredible Technologies'; lights unchanged.
+17:03:05.759 [Warn] BigBox: no LED-Next platform for 'Irem M72'; lights unchanged.
+17:03:08.735 [Warn] BigBox: no LED-Next platform for 'Konami Arcade Collection'; lights unchanged.
+17:03:11.851 [Info] BigBox: platform 'Konami Bemani Python 1' → Konami_Bemani_Python_1 (LaunchBox games); MAME default.
+17:03:11.851 [Info] Light source: BigBox (platform): Konami Bemani Python 1
+17:03:11.851 [Info] Timing 'platform Konami Bemani Python 1': pipe 1 ms, wait 0 ms, lookup 17 ms, boards 0 ms (write 0 ms); total 19 ms.
+17:03:15.365 [Warn] BigBox: no LED-Next platform for 'Konami GTI Club'; lights unchanged.
+17:03:17.731 [Info] BigBox: platform 'Laser Disc' → Laser_Disc (LaunchBox games); MAME default.
+17:03:17.731 [Info] Light source: BigBox (platform): Laser Disc
+17:03:17.731 [Info] Timing 'platform Laser Disc': pipe 1 ms, wait 0 ms, lookup 17 ms, boards 0 ms (write 0 ms); total 18 ms.
+17:03:19.597 [Warn] BigBox: no LED-Next platform for 'Namco System 1'; lights unchanged.
+17:03:21.593 [Warn] BigBox: no LED-Next platform for 'Nichibutsu'; lights unchanged.
+17:03:22.531 [Warn] BigBox: no LED-Next platform for 'Noise Factory'; lights unchanged.
+17:03:24.150 [Info] BigBox: platform 'Sammy Atomiswave' → Sammy_Atomiswave (LaunchBox games); Sammy Atomiswave default.
+17:03:24.150 [Info] Light source: BigBox (platform): Sammy Atomiswave
+17:03:24.356 [Info] Timing 'platform Sammy Atomiswave': pipe 0 ms, wait 0 ms, lookup 17 ms, boards 206 ms (write 206 ms); total 223 ms.
+17:03:26.694 [Warn] BigBox: no LED-Next platform for 'Sega G80'; lights unchanged.
+17:03:28.828 [Info] BigBox: platform 'Sega Naomi' → Sega_Naomi (LaunchBox games); Sega Naomi default.
+17:03:28.828 [Info] Light source: BigBox (platform): Sega Naomi
+17:03:29.034 [Info] Timing 'platform Sega Naomi': pipe 1 ms, wait 0 ms, lookup 16 ms, boards 206 ms (write 206 ms); total 223 ms.
+17:03:29.815 [Warn] BigBox: no LED-Next platform for 'Sega RingWide'; lights unchanged.
+17:03:31.598 [Warn] BigBox: no LED-Next platform for 'Subsino'; lights unchanged.
+17:03:32.348 [Warn] BigBox: no LED-Next platform for 'Sigma'; lights unchanged.
+17:03:33.523 [Info] BigBox: platform 'SNK Neo Geo MVS' → SNK_Neo_Geo_MVS (LaunchBox games); MAME default.
+17:03:33.523 [Info] Light source: BigBox (platform): SNK Neo Geo MVS
+17:03:33.729 [Info] Timing 'platform SNK Neo Geo MVS': pipe 0 ms, wait 0 ms, lookup 19 ms, boards 206 ms (write 206 ms); total 225 ms.
+17:03:35.534 [Info] BigBox: 'Pulstar' → SNK_Neo_Geo_MVS/pulstar (LaunchBox id).
+17:03:35.534 [Info] Light source: BigBox (browsing): Pulstar
+17:03:35.740 [Info] Timing 'Pulstar': pipe 1 ms, wait 0 ms, lookup 10 ms, boards 206 ms (write 206 ms); total 217 ms.
+17:03:37.565 [Info] BigBox: 'Puzzle Bobble' → SNK_Neo_Geo_MVS/pbobblen (LaunchBox id).
+17:03:37.565 [Info] Light source: BigBox (browsing): Puzzle Bobble
+17:03:37.771 [Info] Timing 'Puzzle Bobble': pipe 0 ms, wait 0 ms, lookup 8 ms, boards 206 ms (write 206 ms); total 214 ms.
+17:03:39.326 [Info] BigBox: 'Puzzle Bobble 3' → SNK_Neo_Geo_MVS/pbobble3 (LaunchBox id).
+17:03:39.326 [Info] Light source: BigBox (browsing): Puzzle Bobble 3
+17:03:39.532 [Info] Timing 'Puzzle Bobble 3': pipe 0 ms, wait 0 ms, lookup 8 ms, boards 206 ms (write 206 ms); total 214 ms.
+17:03:42.526 [Info] BigBox: 'Puzzle Bobble 4' → SNK_Neo_Geo_MVS/pbobble4 (LaunchBox id).
+17:03:42.526 [Info] Light source: BigBox (browsing): Puzzle Bobble 4
+17:03:42.526 [Info] Timing 'Puzzle Bobble 4': pipe 0 ms, wait 0 ms, lookup 8 ms, boards 0 ms (write 0 ms); total 8 ms.
+17:03:44.868 [Info] BigBox: 'Puzzle De Pon!' → SNK_Neo_Geo_MVS/puzzledp (LaunchBox id).
+17:03:44.868 [Info] Light source: BigBox (browsing): Puzzle De Pon!
+17:03:45.074 [Info] Timing 'Puzzle De Pon!': pipe 0 ms, wait 0 ms, lookup 7 ms, boards 206 ms (write 206 ms); total 214 ms.
+17:03:47.149 [Info] BigBox: 'Puzzle De Pon! R!' → SNK_Neo_Geo_MVS/puzzldpr (LaunchBox id).
+17:03:47.149 [Info] Light source: BigBox (browsing): Puzzle De Pon! R!
+17:03:47.149 [Info] Timing 'Puzzle De Pon! R!': pipe 0 ms, wait 0 ms, lookup 9 ms, boards 0 ms (write 0 ms); total 9 ms.
+17:03:48.581 [Info] BigBox: 'Puzzled' → SNK_Neo_Geo_MVS/joyjoy (LaunchBox id).
+17:03:48.581 [Info] Light source: BigBox (browsing): Puzzled
+17:03:48.787 [Info] Timing 'Puzzled': pipe 0 ms, wait 0 ms, lookup 8 ms, boards 206 ms (write 206 ms); total 214 ms.
+17:03:50.036 [Info] BigBox: 'Quiz Daisousa Sen: The Last Count Down' → SNK_Neo_Geo_MVS/quizdais (LaunchBox id).
+17:03:50.036 [Info] Light source: BigBox (browsing): Quiz Daisousa Sen: The Last Count Down
+17:03:50.243 [Info] Timing 'Quiz Daisousa Sen: The Last Count Down': pipe 0 ms, wait 0 ms, lookup 8 ms, boards 207 ms (write 207 ms); total 215 ms.
+17:03:51.513 [Info] BigBox: 'Rage of the Dragons' → SNK_Neo_Geo_MVS/rotd (LaunchBox id).
+17:03:51.513 [Info] Light source: BigBox (browsing): Rage of the Dragons
+17:03:51.513 [Info] Timing 'Rage of the Dragons': pipe 0 ms, wait 0 ms, lookup 9 ms, boards 0 ms (write 0 ms); total 9 ms.
+17:03:53.444 [Info] BigBox: 'Ragnagard' → SNK_Neo_Geo_MVS/ragnagrd (LaunchBox id).
+17:03:53.444 [Info] Light source: BigBox (browsing): Ragnagard
+17:03:53.445 [Info] Timing 'Ragnagard': pipe 0 ms, wait 0 ms, lookup 9 ms, boards 0 ms (write 0 ms); total 9 ms.
+17:03:54.828 [Info] BigBox: 'Real Bout Fatal Fury' → SNK_Neo_Geo_MVS/rbff1 (LaunchBox id).
+17:03:54.828 [Info] Light source: BigBox (browsing): Real Bout Fatal Fury
+17:03:54.829 [Info] Timing 'Real Bout Fatal Fury': pipe 0 ms, wait 0 ms, lookup 8 ms, boards 0 ms (write 0 ms); total 8 ms.
+17:03:56.337 [Info] BigBox: 'Real Bout Fatal Fury 2: The Newcomers' → SNK_Neo_Geo_MVS/rbff2 (LaunchBox id).
+17:03:56.337 [Info] Light source: BigBox (browsing): Real Bout Fatal Fury 2: The Newcomers
+17:03:56.337 [Info] Timing 'Real Bout Fatal Fury 2: The Newcomers': pipe 0 ms, wait 0 ms, lookup 8 ms, boards 0 ms (write 0 ms); total 8 ms.
+17:03:58.057 [Info] BigBox: 'Real Bout Fatal Fury Special' → SNK_Neo_Geo_MVS/rbffspec (LaunchBox id).
+17:03:58.057 [Info] Light source: BigBox (browsing): Real Bout Fatal Fury Special
+17:03:58.057 [Info] Timing 'Real Bout Fatal Fury Special': pipe 0 ms, wait 0 ms, lookup 8 ms, boards 0 ms (write 0 ms); total 8 ms.
+17:04:00.002 [Info] BigBox: 'Robo Army' → SNK_Neo_Geo_MVS/roboarmy (LaunchBox id).
+17:04:00.002 [Info] Light source: BigBox (browsing): Robo Army
+17:04:00.208 [Info] Timing 'Robo Army': pipe 1 ms, wait 0 ms, lookup 8 ms, boards 206 ms (write 206 ms); total 215 ms.
+17:04:03.657 [Info] BigBox: 'Samurai Shodown' → SNK_Neo_Geo_MVS/samsho (LaunchBox id).
+17:04:03.657 [Info] Light source: BigBox (browsing): Samurai Shodown
+17:04:03.864 [Info] Timing 'Samurai Shodown': pipe 0 ms, wait 0 ms, lookup 8 ms, boards 206 ms (write 206 ms); total 214 ms.
+17:04:06.149 [Info] BigBox: 'Samurai Shodown II' → SNK_Neo_Geo_MVS/samsho2 (LaunchBox id).
+17:04:06.149 [Info] Light source: BigBox (browsing): Samurai Shodown II
+17:04:06.149 [Info] Timing 'Samurai Shodown II': pipe 0 ms, wait 0 ms, lookup 8 ms, boards 0 ms (write 0 ms); total 9 ms.
+17:04:09.818 [Info] BigBox: platform 'SNK Neo Geo MVS' → SNK_Neo_Geo_MVS (LaunchBox games); MAME default.
+17:04:09.818 [Info] Light source: BigBox (platform): SNK Neo Geo MVS
+17:04:10.025 [Info] Timing 'platform SNK Neo Geo MVS': pipe 0 ms, wait 0 ms, lookup 18 ms, boards 207 ms (write 207 ms); total 225 ms.
+17:04:12.761 [Info] BigBox: 'Samurai Shodown II' → SNK_Neo_Geo_MVS/samsho2 (LaunchBox id).
+17:04:12.761 [Info] Light source: BigBox (browsing): Samurai Shodown II
+17:04:12.968 [Info] Timing 'Samurai Shodown II': pipe 1 ms, wait 0 ms, lookup 8 ms, boards 206 ms (write 206 ms); total 215 ms.
+17:04:13.093 [Info] Front end: BigBox launch: Samurai Shodown II (SNK Neo Geo MVS)
+17:04:13.101 [Info] BigBox: playing 'Samurai Shodown II' → SNK_Neo_Geo_MVS/samsho2 (LaunchBox id); game samsho2 (MAME data).
+17:04:13.101 [Info] Light source: BigBox (playing): Samurai Shodown II
+17:04:13.101 [Info] Timing 'Samurai Shodown II': pipe 1 ms, wait 0 ms, lookup 8 ms, boards 0 ms (write 0 ms); total 10 ms.
+17:04:51.542 [Info] Front end: BigBox exit
+17:04:51.551 [Info] BigBox: 'Samurai Shodown II' → SNK_Neo_Geo_MVS/samsho2 (LaunchBox id).
+17:04:51.551 [Info] Light source: BigBox (browsing): Samurai Shodown II
+17:04:51.551 [Info] Timing 'Samurai Shodown II': pipe 0 ms, wait 0 ms, lookup 9 ms, boards 0 ms (write 0 ms); total 9 ms.
+17:04:58.621 [Info] BigBox: 'Samurai Shodown III' → SNK_Neo_Geo_MVS/samsho3 (LaunchBox id).
+17:04:58.622 [Info] Light source: BigBox (browsing): Samurai Shodown III
+17:04:58.622 [Info] Timing 'Samurai Shodown III': pipe 0 ms, wait 0 ms, lookup 8 ms, boards 0 ms (write 0 ms); total 9 ms.
+17:05:00.742 [Info] BigBox: platform 'SNK Neo Geo MVS' → SNK_Neo_Geo_MVS (LaunchBox games); MAME default.
+17:05:00.742 [Info] Light source: BigBox (platform): SNK Neo Geo MVS
+17:05:00.949 [Info] Timing 'platform SNK Neo Geo MVS': pipe 0 ms, wait 0 ms, lookup 19 ms, boards 207 ms (write 206 ms); total 226 ms.
+17:05:03.400 [Warn] BigBox: no LED-Next platform for 'SSV Sammy Seta Visco'; lights unchanged.
+17:05:06.044 [Info] BigBox: 'Vasara 2' → ARCADE_CLONES/vasara2a (LaunchBox id).
+17:05:06.045 [Info] Light source: BigBox (browsing): Vasara 2
+17:05:06.045 [Info] Timing 'Vasara 2': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 0 ms (write 0 ms); total 1 ms.
+17:05:08.108 [Info] BigBox: 'Change Air Blade' → MAME/cairblad (LaunchBox id).
+17:05:08.108 [Info] Light source: BigBox (browsing): Change Air Blade
+17:05:08.108 [Info] Timing 'Change Air Blade': pipe 1 ms, wait 0 ms, lookup 2 ms, boards 0 ms (write 0 ms); total 3 ms.
+17:05:10.624 [Warn] BigBox: no LED-Next platform for 'SSV Sammy Seta Visco'; lights unchanged.
+17:05:13.617 [Warn] BigBox: no LED-Next platform for 'Taito B System'; lights unchanged.
+17:05:15.394 [Info] BigBox: 'Ashura Blaster' → ARCADE_CLONES/ashurau (LaunchBox id).
+17:05:15.394 [Info] Light source: BigBox (browsing): Ashura Blaster
+17:05:15.394 [Info] Timing 'Ashura Blaster': pipe 1 ms, wait 0 ms, lookup 2 ms, boards 0 ms (write 0 ms); total 3 ms.
+17:05:17.275 [Info] BigBox: 'Ashura Blaster' → ARCADE_CLONES/ashuraj (LaunchBox id).
+17:05:17.275 [Info] Light source: BigBox (browsing): Ashura Blaster
+17:05:17.275 [Info] Timing 'Ashura Blaster': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 0 ms (write 0 ms); total 1 ms.
+17:05:18.569 [Info] BigBox: 'Crime City' → ARCADE_CLONES/crimecj (LaunchBox id).
+17:05:18.569 [Info] Light source: BigBox (browsing): Crime City
+17:05:18.775 [Info] Timing 'Crime City': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 206 ms (write 206 ms); total 207 ms.
+17:05:21.393 [Info] BigBox: 'Hit the Ice' → ARCADE_CLONES/hiticerb (LaunchBox id).
+17:05:21.393 [Info] Light source: BigBox (browsing): Hit the Ice
+17:05:21.599 [Info] Timing 'Hit the Ice': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 206 ms (write 206 ms); total 207 ms.
+17:05:30.975 [Warn] BigBox: no LED-Next platform for 'Taito B System'; lights unchanged.
+17:06:02.715 [Info] Front end: BigBox closing
+17:06:02.715 [Info] Front end disconnected (0 connected).
+17:06:02.715 [Info] Light source: Off
+17:06:02.716 [Info] BigBox closed: all lights off.

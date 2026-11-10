@@ -299,3 +299,51 @@ All mappings looked right; nothing was changed by hand. Notable:
 
 ## Files brought back
 - [x] `cabinet/led-next.log` updated
+
+---
+
+# Visit 6: timing, platform wheel, early connect (2026-11-10)
+
+## Setup
+- Pulled `a2c746f`. Build clean, 111 tests pass. Plugin re-installed (user's OK), same five files in
+  `D:\LaunchBox\Plugins\LED-Next\`.
+
+## Early connect — works
+- LaunchBox: LED-Next listened at 16:57:11.6, the plugin connected at 16:57:12.8, **before any scrolling**, and
+  LED-Next logged "Front end: LaunchBox started". BigBox: connected 1.4 s after LED-Next listened.
+- In LaunchBox the plugin also sent the selected platform at start-up (Arcade → MAME default lit).
+
+## Timing (LaunchBox, 59 changes) — the lag is board #1's USB connection
+- `Timing` lines: pipe 0–1 ms, wait 0 ms, lookup 1–4 ms, **boards ~206 ms** on every change that altered the
+  lights (0 ms when the lights didn't change). The first one had pipe 1,009 ms (the connect retry, once).
+- User: **the lag felt gone** this time.
+- Direct test with LED-Next closed (`tools/pacled64-timing.ps1`, PacDrive64.dll from the app's bin):
+
+  | | PacLED64 #1 (PID 1401) | PacLED64 #2 (PID 1402) |
+  |---|---|---|
+  | `Pac64SetLEDIntensities`, 64 LEDs | **198 ms** | 9 ms |
+  | `Pac64SetLEDIntensity`, one LED | **6.1 ms** | 0.3 ms |
+  | 64 single-LED calls | 385 ms | 18 ms |
+
+- Same firmware (version 25). USB topology: **#2** is on a Genesys hub (05E3:0610) directly under the root hub;
+  **#1** is two hubs deep, on a 34D1:0609 hub shared with another Ultimarc device (PID 0512). The cabinet has
+  seven other Ultimarc devices (PIDs 0430, 0460 ×2, 0511, 0512, 15A1, 15A2).
+- Conclusion: the 200 ms is board #1's USB path, not LED-Next. Writing only changed LEDs would not help (6 ms per
+  LED on #1). **Fix at the cabinet:** move #1's cable to a port on the PC or onto #2's hub, then re-run
+  `pwsh -File tools\pacled64-timing.ps1 -Dll <app bin>\PacDrive64.dll` (LED-Next closed; it flashes the LEDs).
+  The user chose not to move it this visit.
+
+## BigBox platform wheel — works
+- Platforms lit their default: IGS PC, Konami Bemani Python 1, Laser Disc (MAME default), Sammy Atomiswave,
+  Sega Naomi (their own defaults), SNK Neo Geo MVS (MAME default). **User: looked right.**
+- Most entries on this cabinet's wheel are **playlists** (All Platforms, Cinematronics, Gaelco, Comad, Irem M72,
+  Namco System 1, Sega G80, SSV Sammy Seta Visco, Taito B System…; files in `Data\Playlists`): logged
+  "no LED-Next platform for '…'; lights unchanged" (a Warn each time — noisy; could be Info). Games inside them
+  light normally (e.g. SSV → Vasara 2 → ARCADE_CLONES/vasara2a).
+- Game list (Neo Geo MVS, 20 games): lights followed, **no flicker** to the platform between games (user and log).
+  Back to the wheel → platform lights again. Launch Samurai Shodown II (game samsho2, MAME data), exit back to
+  it, closing BigBox → all off.
+
+## Files brought back
+- [x] `cabinet/led-next.log` updated
+- [x] `tools/pacled64-timing.ps1` (the board timing test)

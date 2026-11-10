@@ -83,13 +83,19 @@
 - [x] Slight selection lag in LaunchBox (instant in BigBox): LED-Next now logs a `Timing` line per change
       (pipe / wait / lookup / boards), and the engine shows a new source at once instead of at the next frame
       tick (up to 33 ms sooner). Dev PC, fake host: 1–14 ms from the plugin to the boards
-- [ ] Visit 6: read the `Timing` lines while scrolling in LaunchBox; if they are small, the lag is LaunchBox
-      raising `SelectionChanged` late (then compare with the 150 ms poll)
+- [x] Visit 6: `Timing` shows pipe 0–1 ms, lookup 1–4 ms, **boards ~206 ms**. A direct test found
+      **PacLED64 #1 ~20× slower than #2** (198 ms vs 9 ms for 64 LEDs; 6.1 vs 0.3 ms per LED): #1 sits two
+      hubs deep on a hub shared with another Ultimarc device. The user felt no lag this time
+- [ ] **At the cabinet (no code):** move PacLED64 #1's USB cable to a port on the PC (or #2's hub) and re-run
+      the timing test (CABINET_RESULTS visit 6). Per-pin diff writes would not help on the slow board
+- [ ] BigBox playlists on the wheel (most of the cabinet's wheel: Cinematronics, Gaelco, Taito B System…)
+      keep the last lights. Idea: light a playlist from its games' platform (e.g. MAME default)
 - [x] BigBox platform wheel lights the highlighted platform's default lights (plugin sends the selected
       platform when no game is selected). Playlists / categories (no platform) keep the current lights
-- [ ] Visit 6: check BigBox's platform wheel lights each platform, and that a game list doesn't flicker to
-      the platform while moving between games
+- [x] Visit 6: BigBox's platform wheel lights each platform (IGS PC, Laser Disc, Atomiswave, Naomi, Neo Geo
+      MVS…; user: looked right), no flicker between games in a list, back to the wheel shows the platform
 - [x] The plugin's `started` message is kept while LED-Next starts; the client connects as soon as it listens
+      (visit 6: connected ~1 s after LED-Next listened, before any scrolling)
 - [ ] Attract mode / idle lighting in the front end (with animations, phase 5)
 - [ ] Animations (`*.lwax`) — phase 5
 
