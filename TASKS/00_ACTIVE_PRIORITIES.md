@@ -80,11 +80,16 @@
       LaunchBox and BigBox**: selection, launch, exit, close → off, all games matched by LaunchBox id
 - [x] BigBox selection: the `SelectionChanged` system event + `GetAllSelectedGames()` work in BigBox; the theme
       element is not needed (kept as an option)
-- [ ] Slight selection lag in LaunchBox (instant in BigBox): log timing from "select" received to the boards
-- [ ] BigBox platform / playlist views light nothing (no game selected). Idea: light something there too
-      (e.g. the controls the platform's games use, or an idle pattern); `GetSelectedPlatform()` and the theme
-      element's `OnSelectionChanged` (platform, category, playlist) report what's highlighted
-- [ ] Plugin's `started` message is lost when LED-Next is still starting; connect/retry once LED-Next listens
+- [x] Slight selection lag in LaunchBox (instant in BigBox): LED-Next now logs a `Timing` line per change
+      (pipe / wait / lookup / boards), and the engine shows a new source at once instead of at the next frame
+      tick (up to 33 ms sooner). Dev PC, fake host: 1–14 ms from the plugin to the boards
+- [ ] Visit 6: read the `Timing` lines while scrolling in LaunchBox; if they are small, the lag is LaunchBox
+      raising `SelectionChanged` late (then compare with the 150 ms poll)
+- [x] BigBox platform wheel lights the highlighted platform's default lights (plugin sends the selected
+      platform when no game is selected). Playlists / categories (no platform) keep the current lights
+- [ ] Visit 6: check BigBox's platform wheel lights each platform, and that a game list doesn't flicker to
+      the platform while moving between games
+- [x] The plugin's `started` message is kept while LED-Next starts; the client connects as soon as it listens
 - [ ] Attract mode / idle lighting in the front end (with animations, phase 5)
 - [ ] Animations (`*.lwax`) — phase 5
 

@@ -107,13 +107,57 @@ public static class PluginHost
         }
     }
 
-    /// <summary>Reads LaunchBox's selected game and sends it (for the SelectionChanged system event).</summary>
+    /// <summary>
+    /// Sends "select" with only a platform (BigBox's platform wheel, no game highlighted), unless that platform
+    /// was the last selection sent. LED-Next shows the platform's default lights.
+    /// </summary>
+    public static void SendPlatformSelection(string platform, string via)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(platform)) return;
+            var key = "platform:" + platform;
+            lock (SelectionLock)
+            {
+                if (SelectionSources.Add(via + " (platform)")) Log($"First platform selection via {via}: {platform}");
+                if (key == _lastSelectedId) return;
+                _lastSelectedId = key;
+            }
+            EnsureStarted();
+            _client?.Send(new FrontEndMessage(FrontEndEvents.Select, Source, Platform: platform));
+        }
+        catch (Exception ex)
+        {
+            Log($"Platform selection via {via} failed: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// LaunchBox's selected game, or with no game selected the selected platform (BigBox's platform wheel).
+    /// <c>Key</c> is the game id or "platform:name", null when neither is selected. May throw.
+    /// </summary>
+    public static (IGame? Game, string? Platform, string? Key) ReadSelection()
+    {
+        var state = Unbroken.LaunchBox.Plugins.PluginHelper.StateManager;
+        var games = state?.GetAllSelectedGames();
+        if (games is { Length: > 0 } && games[0]?.Id is { } id) return (games[0], null, id);
+        var platform = state?.GetSelectedPlatform()?.Name;
+        return string.IsNullOrWhiteSpace(platform) ? (null, null, null) : (null, platform, "platform:" + platform);
+    }
+
+    /// <summary>Sends what <see cref="ReadSelection"/> found, if anything.</summary>
+    public static void SendSelection((IGame? Game, string? Platform, string? Key) selection, string via)
+    {
+        if (selection.Game is not null) SendSelection(selection.Game, via);
+        else if (selection.Platform is not null) SendPlatformSelection(selection.Platform, via);
+    }
+
+    /// <summary>Reads the selection and sends it (for the SelectionChanged system event).</summary>
     public static void SendSelectedGame(string via)
     {
         try
         {
-            var games = Unbroken.LaunchBox.Plugins.PluginHelper.StateManager?.GetAllSelectedGames();
-            if (games is { Length: > 0 } && games[0]?.Id is not null) SendSelection(games[0], via);
+            SendSelection(ReadSelection(), via);
         }
         catch (Exception ex)
         {

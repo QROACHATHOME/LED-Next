@@ -171,6 +171,22 @@ public class LaunchBoxDatabaseTests : IDisposable
     }
 
     [Fact]
+    public void FindsThePlatformAFrontEndReports()
+    {
+        var db = Imported();
+        var none = new Dictionary<string, string>();
+        Assert.Equal(("MAME", "LaunchBox games"), db.FindFrontEndPlatform("Arcade", none));
+        Assert.Equal(("Sega_Genesis", "LaunchBox games"), db.FindFrontEndPlatform("Sega Genesis", none));
+        // Not in the LaunchBox data read last: the platform matcher, but only for a platform LED-Next has.
+        Assert.Equal(("MAME", "alias"), db.FindFrontEndPlatform("Arcade MAME", none));
+        Assert.Null(db.FindFrontEndPlatform("Nintendo 64", none));
+        Assert.Null(db.FindFrontEndPlatform(" ", none));
+        // Your mapping wins over where the games were matched.
+        var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { ["Sega Genesis"] = "MAME" };
+        Assert.Equal(("MAME", "your mapping"), db.FindFrontEndPlatform("Sega Genesis", map));
+    }
+
+    [Fact]
     public void LaunchBoxSmartListsAreSeededFirst()
     {
         var db = GameDatabase.Open(_dbPath);

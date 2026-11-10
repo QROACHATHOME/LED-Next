@@ -1,5 +1,24 @@
 # Cabinet session brief (for Claude on the arcade machine)
 
+## Visit 6 (next visit) — timing, platform wheel, early connect
+1. `git pull`, build, test. Close LaunchBox, BigBox and LED-Next. Re-install the plugin (ask the user first):
+   `powershell -ExecutionPolicy Bypass -File tools\install-launchbox-plugin.ps1`.
+2. Start **LaunchBox**. The plugin log should show "Connected to LED-Next." a few seconds after LED-Next
+   starts, **before** any scrolling, and LED-Next's log "Front end: LaunchBox started".
+3. Scroll through games in LaunchBox, slowly and fast. LED-Next's log has a line per change:
+   `Timing '<game>': pipe … ms, wait … ms, lookup … ms, boards … ms; total … ms`. Ask the user if the lag
+   is still there. If the totals are small (under ~30 ms) the lag is inside LaunchBox (the event comes late);
+   note it. If one part is large, record which.
+4. Start **BigBox**. On the **platform wheel** the panel should light each highlighted platform's default
+   (LED-Next log: "platform '<name>' → …"). Ask the user if it looks right for a few platforms (Arcade,
+   Neo Geo, a console). Playlists keep the last lights. Open a game list: lights follow games; going back to
+   the wheel shows the platform again. Watch for a flicker to the platform between games (would mean
+   BigBox briefly reports no selected game).
+5. Add a "Visit 6" section to `CABINET_RESULTS.md` (timing lines, what the user saw); commit, ask before
+   pushing.
+
+---
+
 ## Visit 5 (next visit) — live lighting from LaunchBox / BigBox
 The plugin (`src/LedNext.LaunchBox`) was built on the dev PC against `tools/LaunchBoxPluginStubs`, a
 stand-in for LaunchBox's API written from its plugin docs. This visit builds it against the real file.
@@ -13,7 +32,7 @@ stand-in for LaunchBox's API written from its plugin docs. This visit builds it 
    `ISystemEventsPlugin`, `IGameLaunchingPlugin`, `IBigBoxThemeElementPlugin`, `PluginHelper`,
    `IStateManager`, `SystemEventTypes`, and **any interface with "Selection" in its name** (a better
    selection hook than polling, if LaunchBox 14.1 has one).
-3. Ask the user, then run `powershell -ExecutionPolicy Bypass -File tools\install-launchbox-plugin.ps1`.
+3. Ask the user, then run `powershell -ExecutionPolicy Bypass -File toolsinstall-launchbox-plugin.ps1`.
    It builds against `D:\LaunchBox\Core\Unbroken.LaunchBox.Plugins.dll` and writes **only** to
    `D:\LaunchBox\Plugins\LED-Next\`. Build errors about LaunchBox types = the stand-in differs: fix the
    plugin and `tools/LaunchBoxPluginStubs/Stubs.cs` to match the real API, rebuild, re-run.

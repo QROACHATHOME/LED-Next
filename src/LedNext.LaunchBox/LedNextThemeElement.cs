@@ -33,6 +33,7 @@ public sealed class LedNextThemeElement : UserControl, IBigBoxThemeElementPlugin
         try
         {
             if (game?.Id is not null) PluginHost.SendSelection(game, "theme element");
+            else if (platform?.Name is { Length: > 0 } name) PluginHost.SendPlatformSelection(name, "theme element");
         }
         catch (Exception ex)
         {

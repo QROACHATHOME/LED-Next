@@ -14,6 +14,7 @@ public sealed class LedEngine : IDisposable
     private readonly Stopwatch _clock = Stopwatch.StartNew();
     private readonly Dictionary<string, byte[]> _lastWritten = new();
     private readonly Dictionary<string, TimeSpan> _faultedUntil = new();
+    private readonly AutoResetEvent _wake = new(false);
 
     private volatile PanelSnapshot _snapshot;
     private volatile ILightSource _source = new AllOff();
@@ -22,11 +23,19 @@ public sealed class LedEngine : IDisposable
     private Thread? _thread;
     private volatile bool _running;
     private string? _lastSourceError;
+    private ILightSource? _timedSource;   // the source set last, until its first frame reaches the boards
+    private TimeSpan _timedSourceSetAt;
 
     public LedEngine(CabinetConfig config) => _snapshot = PanelSnapshot.From(config);
 
     /// <summary>Raised on the engine thread after every frame.</summary>
     public event Action<FrameSnapshot>? FrameRendered;
+
+    /// <summary>
+    /// Raised on the engine thread once per new source, when its first frame has been written to the boards:
+    /// the source, the time from setting it to the write finishing, and how long the write itself took.
+    /// </summary>
+    public event Action<ILightSource, TimeSpan, TimeSpan>? SourceShown;
 
     public PanelSnapshot Snapshot => _snapshot;
 
@@ -35,9 +44,13 @@ public sealed class LedEngine : IDisposable
         get => _source;
         set
         {
-            _source = value ?? new AllOff();
+            var source = value ?? new AllOff();
+            _timedSourceSetAt = _clock.Elapsed;
+            _source = source;
+            _timedSource = source; // after _source: a frame that sees it renders this source or a newer one
             _lastSourceError = null;
-            AppLog.Info($"Light source: {_source.Name}");
+            AppLog.Info($"Light source: {source.Name}");
+            _wake.Set(); // render it now instead of at the next frame tick
         }
     }
 
@@ -92,6 +105,7 @@ public sealed class LedEngine : IDisposable
     {
         if (!_running) return;
         _running = false;
+        _wake.Set();
         _thread?.Join(TimeSpan.FromSeconds(2));
         _thread = null;
         lock (_outputLock) BlackoutLocked();
@@ -184,10 +198,19 @@ public sealed class LedEngine : IDisposable
         while (_running)
         {
             var started = _clock.Elapsed;
+            var timed = _timedSource;
             try
             {
                 var frame = RenderFrame(started);
+                var writeStart = _clock.Elapsed;
                 lock (_outputLock) WriteLocked(frame, started);
+                var written = _clock.Elapsed;
+                if (timed is not null && ReferenceEquals(timed, _source) &&
+                    ReferenceEquals(Interlocked.CompareExchange(ref _timedSource, null, timed), timed))
+                {
+                    try { SourceShown?.Invoke(timed, written - _timedSourceSetAt, written - writeStart); }
+                    catch (Exception ex) { AppLog.Error("SourceShown handler failed", ex); }
+                }
                 FrameRendered?.Invoke(frame);
             }
             catch (Exception ex)
@@ -197,7 +220,7 @@ public sealed class LedEngine : IDisposable
 
             var period = TimeSpan.FromSeconds(1.0 / _snapshot.RefreshHz);
             var remaining = period - (_clock.Elapsed - started);
-            if (remaining > TimeSpan.Zero) Thread.Sleep(remaining);
+            if (remaining > TimeSpan.Zero) _wake.WaitOne(remaining); // a new source wakes it early
         }
         AppLog.Info("Output thread stopped.");
     }

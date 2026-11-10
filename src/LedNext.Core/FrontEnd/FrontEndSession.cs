@@ -7,6 +7,8 @@ public abstract record FrontEndAction
 {
     /// <summary>Light this game (browsing or playing).</summary>
     public sealed record LightGame(FrontEndMessage Game, bool Playing) : FrontEndAction;
+    /// <summary>A platform is highlighted (no game): light that platform's default.</summary>
+    public sealed record LightPlatform(FrontEndMessage Selection) : FrontEndAction;
     /// <summary>The front end closed: all off.</summary>
     public sealed record AllOff(string Reason) : FrontEndAction;
     /// <summary>Bring the LED-Next window forward.</summary>
@@ -18,7 +20,8 @@ public abstract record FrontEndAction
 /// <list type="bullet">
 /// <item>select → that game (ignored while a game is running: the front end may still move its selection)</item>
 /// <item>launch → that game, playing; exit → back to the game selected before</item>
-/// <item>closing → all off; a select without a game (platform wheel) keeps the current lights</item>
+/// <item>a select with only a platform (platform wheel) → that platform's default lights</item>
+/// <item>closing → all off; a select with neither a game nor a platform (a playlist) keeps the current lights</item>
 /// </list>
 /// </summary>
 public sealed class FrontEndSession
@@ -32,20 +35,20 @@ public sealed class FrontEndSession
         switch (m.Event)
         {
             case FrontEndEvents.Select:
-                if (!m.HasGame) return null;
+                if (!m.HasGame && !m.HasPlatform) return null;
                 Selected = m;
                 if (Playing is not null) return null;
-                return new FrontEndAction.LightGame(m, Playing: false);
+                return ForSelection(m);
 
             case FrontEndEvents.Launch:
-                if (!m.HasGame) m = Selected ?? m;
+                if (!m.HasGame && Selected is { HasGame: true } selectedGame) m = selectedGame;
                 if (!m.HasGame) return null;
                 Playing = m;
                 return new FrontEndAction.LightGame(m, Playing: true);
 
             case FrontEndEvents.Exit:
                 Playing = null;
-                return Selected is { } back ? new FrontEndAction.LightGame(back, Playing: false) : null;
+                return Selected is { } back ? ForSelection(back) : null;
 
             case FrontEndEvents.Closing:
                 Selected = null;
@@ -59,4 +62,7 @@ public sealed class FrontEndSession
                 return null; // started, and anything newer than this build
         }
     }
+
+    private static FrontEndAction ForSelection(FrontEndMessage m) =>
+        m.HasGame ? new FrontEndAction.LightGame(m, Playing: false) : new FrontEndAction.LightPlatform(m);
 }

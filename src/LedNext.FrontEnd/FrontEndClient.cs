@@ -6,7 +6,8 @@ namespace LedNext.FrontEnd;
 /// <summary>
 /// Sends front-end events to LED-Next. Never blocks and never throws to the caller: messages go to a
 /// background thread, a newer "select" replaces one not sent yet (scrolling fast sends only the last
-/// game), and if LED-Next isn't running messages are dropped and the connection is retried later.
+/// game), and if LED-Next isn't running the connection is retried every <see cref="RetryAfter"/>. While it is
+/// away only what still matters when it comes back is kept: the latest "started" and the latest "select".
 /// </summary>
 public sealed class FrontEndClient : IDisposable
 {
@@ -48,6 +49,7 @@ public sealed class FrontEndClient : IDisposable
     public void Send(FrontEndMessage message)
     {
         if (_stopping) return;
+        message = message.SentAtMs is null ? message with { SentAtMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() } : message;
         lock (_lock)
         {
             // Only the newest selection matters; keep launches/exits in order.
@@ -74,8 +76,9 @@ public sealed class FrontEndClient : IDisposable
             {
                 if (!EnsureConnected())
                 {
-                    // LED-Next isn't there: keep only what still matters when it comes back.
-                    DropAllButLatestSelect();
+                    // LED-Next isn't there: keep only what still matters when it comes back. Anything kept
+                    // makes the loop try again every RetryAfter, so "started" connects as soon as it listens.
+                    KeepOnlyWhatMattersLater();
                     break;
                 }
                 try
@@ -140,13 +143,15 @@ public sealed class FrontEndClient : IDisposable
         lock (_lock) if (ReferenceEquals(_queue.First?.Value, message)) _queue.RemoveFirst();
     }
 
-    private void DropAllButLatestSelect()
+    private void KeepOnlyWhatMattersLater()
     {
         lock (_lock)
         {
-            var latest = _queue.LastOrDefault(m => m.Event == FrontEndEvents.Select);
+            var started = _queue.LastOrDefault(m => m.Event == FrontEndEvents.Started);
+            var select = _queue.LastOrDefault(m => m.Event == FrontEndEvents.Select);
             _queue.Clear();
-            if (latest is not null) _queue.AddLast(latest);
+            if (started is not null) _queue.AddLast(started);
+            if (select is not null) _queue.AddLast(select);
         }
     }
 

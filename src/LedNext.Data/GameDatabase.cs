@@ -558,6 +558,28 @@ public sealed class GameDatabase : IGameLibrary
         return (match.LedPlatform, match.LedGame, "matched now");
     }
 
+    /// <summary>
+    /// The LED-Next platform for a front end's platform name (BigBox's platform wheel): the platform its
+    /// LaunchBox games were matched to, else the platform matcher. Null when LED-Next has no such platform.
+    /// </summary>
+    public (string Platform, string How)? FindFrontEndPlatform(string? launchBoxPlatform, IReadOnlyDictionary<string, string>? overrides)
+    {
+        if (string.IsNullOrWhiteSpace(launchBoxPlatform)) return null;
+        var name = launchBoxPlatform.Trim();
+        if (overrides is null || !overrides.ContainsKey(name))
+        {
+            using var c = Connect();
+            using var cmd = c.CreateCommand();
+            cmd.CommandText = "SELECT platform, COUNT(*) n FROM launchbox_games WHERE lb_platform = $p GROUP BY platform ORDER BY n DESC LIMIT 1";
+            cmd.Parameters.AddWithValue("$p", name);
+            using var r = cmd.ExecuteReader();
+            if (r.Read()) return (r.GetString(0), "LaunchBox games");
+        }
+        var keys = GetPlatformSummaries().Select(p => p.Key).ToList();
+        var (key, how) = Core.Import.LaunchBox.PlatformMatcher.Match(name, keys, overrides);
+        return keys.Contains(key, StringComparer.OrdinalIgnoreCase) ? (key, how) : null;
+    }
+
     /// <summary>Per platform: description (normalised) → game name, for matching LaunchBox titles.</summary>
     /// <remarks>
     /// Only imported (LEDBlinky) games: a game added from LaunchBox earlier is not a match target, or an old

@@ -40,12 +40,10 @@ public sealed class SelectionWatcher
     {
         try
         {
-            var games = PluginHelper.StateManager?.GetAllSelectedGames();
-            var game = games is { Length: > 0 } ? games[0] : null;
-            var id = game?.Id;
-            if (id is null || id == _lastId) return;
-            _lastId = id;
-            PluginHost.SendSelection(game!, "watcher");
+            var selection = PluginHost.ReadSelection();
+            if (selection.Key is null || selection.Key == _lastId) return;
+            _lastId = selection.Key;
+            PluginHost.SendSelection(selection, "watcher");
         }
         catch (Exception ex)
         {

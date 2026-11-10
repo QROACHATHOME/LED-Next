@@ -6,7 +6,10 @@ namespace LedNext.FrontEnd;
 /// <summary>What a front end reports. One JSON object per line on the pipe.</summary>
 public static class FrontEndEvents
 {
-    /// <summary>A game is highlighted in the front end (browsing).</summary>
+    /// <summary>
+    /// A game is highlighted in the front end (browsing). Without a game but with a platform: a platform is
+    /// highlighted (BigBox's platform wheel); LED-Next shows that platform's default lights.
+    /// </summary>
     public const string Select = "select";
     /// <summary>A game is starting.</summary>
     public const string Launch = "launch";
@@ -25,18 +28,24 @@ public static class FrontEndEvents
 /// <param name="GameId">The front end's own game id (LaunchBox's GUID), the most reliable match.</param>
 /// <param name="Platform">The front end's platform name ("Arcade", "Sega Genesis").</param>
 /// <param name="ApplicationPath">The game's rom / launch path.</param>
+/// <param name="SentAtMs">When the client was handed the message (Unix time, ms, UTC); for timing logs.</param>
 public sealed record FrontEndMessage(
     string Event,
     string? Source = null,
     string? GameId = null,
     string? Title = null,
     string? Platform = null,
-    string? ApplicationPath = null)
+    string? ApplicationPath = null,
+    long? SentAtMs = null)
 {
     public bool HasGame => !string.IsNullOrWhiteSpace(GameId) || !string.IsNullOrWhiteSpace(Title);
 
+    public bool HasPlatform => !string.IsNullOrWhiteSpace(Platform);
+
     public override string ToString() =>
-        HasGame ? $"{Source ?? "?"} {Event}: {Title} ({Platform})" : $"{Source ?? "?"} {Event}";
+        HasGame ? $"{Source ?? "?"} {Event}: {Title} ({Platform})"
+        : HasPlatform ? $"{Source ?? "?"} {Event}: platform {Platform}"
+        : $"{Source ?? "?"} {Event}";
 }
 
 public static class FrontEndProtocol

@@ -154,6 +154,23 @@ public class EngineTests
     }
 
     [Fact]
+    public void NewSource_IsShownAtOnce_NotAtTheNextFrameTick()
+    {
+        var config = OneButton();
+        config.Output.RefreshHz = 1; // one frame a second
+        using var engine = new LedEngine(config);
+        engine.Start();
+        Thread.Sleep(100); // the first frame is out; the loop now waits ~1 s
+        var shown = new ManualResetEventSlim();
+        TimeSpan sinceSet = default;
+        var white = new SolidColor(Rgb.White);
+        engine.SourceShown += (source, t, _) => { if (ReferenceEquals(source, white)) { sinceSet = t; shown.Set(); } };
+        engine.Source = white;
+        Assert.True(shown.Wait(500), "the new source should not wait for the next tick");
+        Assert.True(sinceSet < TimeSpan.FromMilliseconds(500));
+    }
+
+    [Fact]
     public void FailingSource_RendersBlackInsteadOfThrowing()
     {
         using var engine = new LedEngine(OneButton()) { Source = new Throwing() };

@@ -58,6 +58,23 @@ public class FrontEndSessionTests
         Assert.IsType<FrontEndAction.ShowWindow>(s.Handle(new FrontEndMessage(FrontEndEvents.Show)));
         Assert.Null(s.Handle(new FrontEndMessage("something-new")));
     }
+
+    [Fact]
+    public void APlatformOnTheWheelLightsThePlatformAndExitReturnsToIt()
+    {
+        var s = new FrontEndSession();
+        var wheel = new FrontEndMessage(FrontEndEvents.Select, "BigBox", Platform: "Sega Genesis");
+        var p = Assert.IsType<FrontEndAction.LightPlatform>(s.Handle(wheel));
+        Assert.Equal("Sega Genesis", p.Selection.Platform);
+
+        // A launch without a game, with only a platform selected, lights nothing new.
+        Assert.Null(s.Handle(new FrontEndMessage(FrontEndEvents.Launch, "BigBox")));
+        s.Handle(new FrontEndMessage(FrontEndEvents.Launch, "BigBox", "son", "Sonic", "Sega Genesis"));
+        Assert.Null(s.Handle(wheel)); // still playing
+        Assert.IsType<FrontEndAction.LightPlatform>(s.Handle(new FrontEndMessage(FrontEndEvents.Exit, "BigBox")));
+        // Neither a game nor a platform (a playlist): lights unchanged.
+        Assert.Null(s.Handle(new FrontEndMessage(FrontEndEvents.Select, "BigBox")));
+    }
 }
 
 public class FrontEndPipeTests
@@ -124,6 +141,26 @@ public class FrontEndPipeTests
         WaitFor(() => got.Any(m => m.Event == FrontEndEvents.Launch));
         // The selection made while LED-Next wasn't running is delivered (only the newest one).
         Assert.Equal(new[] { "Later" }, got.Where(m => m.Event == FrontEndEvents.Select).Select(m => m.Title));
+    }
+
+    [Fact]
+    public void StartedIsDeliveredWhenTheServerComesUpWithNothingElseSent()
+    {
+        var pipe = UniquePipe();
+        using var client = new FrontEndClient(pipe, connectTimeoutMs: 50, retryAfter: TimeSpan.FromMilliseconds(100));
+        client.Send(new FrontEndMessage(FrontEndEvents.Started, "LaunchBox"));
+        client.Send(new FrontEndMessage(FrontEndEvents.Select, "LaunchBox", "a", "A", "Arcade"));
+        client.Send(new FrontEndMessage(FrontEndEvents.Exit, "LaunchBox")); // stale by the time LED-Next listens
+        Thread.Sleep(300);
+
+        var got = new ConcurrentQueue<FrontEndMessage>();
+        using var server = new FrontEndServer(pipe);
+        server.MessageReceived += got.Enqueue;
+        server.Start();
+        // No new message: the client connects by itself because "started" is still waiting.
+        WaitFor(() => got.Count >= 2);
+        Assert.Equal(new[] { FrontEndEvents.Started, FrontEndEvents.Select }, got.Select(m => m.Event));
+        Assert.All(got, m => Assert.NotNull(m.SentAtMs));
     }
 
     [Fact]

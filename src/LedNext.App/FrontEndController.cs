@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Threading;
@@ -22,13 +23,24 @@ public sealed class FrontEndController : IDisposable
     private readonly Dispatcher _dispatcher;
     private readonly FrontEndSession _state = new();
     private readonly FrontEndServer _server = new();
+    private static readonly Stopwatch Clock = Stopwatch.StartNew();
+
+    /// <summary>The front-end light source waiting for its first frame on the boards, with its timings.</summary>
+    private sealed record Timing(ILightSource Source, string What, long? PipeMs, TimeSpan Received, TimeSpan Handled, TimeSpan Resolved);
+    private volatile Timing? _timing;
 
     public FrontEndController(AppSession session, MainViewModel main)
     {
         _session = session;
         _main = main;
         _dispatcher = Application.Current.Dispatcher;
-        _server.MessageReceived += m => _dispatcher.BeginInvoke(() => Handle(m));
+        _server.MessageReceived += m =>
+        {
+            var received = Clock.Elapsed;
+            long? pipeMs = m.SentAtMs is { } sent ? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - sent : null;
+            _dispatcher.BeginInvoke(() => Handle(m, received, pipeMs));
+        };
+        _session.Engine.SourceShown += OnSourceShown;
     }
 
     /// <summary>Raised on the UI thread when a front end asks for the window ("show").</summary>
@@ -50,13 +62,21 @@ public sealed class FrontEndController : IDisposable
         }
     }
 
-    private void Handle(FrontEndMessage m)
+    private void Handle(FrontEndMessage m, TimeSpan received, long? pipeMs)
     {
+        var handled = Clock.Elapsed;
         if (m.Event != FrontEndEvents.Select) AppLog.Info($"Front end: {m}");
+        ILightSource? shown = null;
+        string what = m.Title ?? m.Platform ?? m.Event;
         switch (_state.Handle(m))
         {
             case FrontEndAction.LightGame light:
-                LightGame(light.Game, light.Playing);
+                shown = LightGame(light.Game, light.Playing);
+                what = light.Game.Title ?? what;
+                break;
+            case FrontEndAction.LightPlatform platform:
+                shown = LightPlatform(platform.Selection);
+                what = $"platform {platform.Selection.Platform}";
                 break;
             case FrontEndAction.AllOff off:
                 _main.SetSource(new AllOff());
@@ -67,9 +87,50 @@ public sealed class FrontEndController : IDisposable
                 ShowRequested?.Invoke();
                 break;
         }
+        if (shown is null) return;
+        // Before SetSource: the engine renders a new source at once and may report it before this returns.
+        _timing = new Timing(shown, what, pipeMs, received, handled, Clock.Elapsed);
+        _main.SetSource(shown);
     }
 
-    private void LightGame(FrontEndMessage g, bool playing)
+    /// <summary>
+    /// Engine thread: the first frame of a front-end source reached the boards. Logs where the time went:
+    /// pipe (plugin → LED-Next), wait (for the UI thread), lookup (game + lights), boards (until written).
+    /// </summary>
+    private void OnSourceShown(ILightSource source, TimeSpan sinceSet, TimeSpan write)
+    {
+        var t = _timing;
+        if (t is null || !ReferenceEquals(t.Source, source)) return;
+        _timing = null;
+        var wait = (t.Handled - t.Received).TotalMilliseconds;
+        var lookup = (t.Resolved - t.Handled).TotalMilliseconds;
+        var total = (t.PipeMs ?? 0) + (Clock.Elapsed - t.Received).TotalMilliseconds;
+        AppLog.Info($"Timing '{t.What}': pipe {(t.PipeMs is { } p ? $"{p} ms" : "?")}, wait {wait:0} ms, lookup {lookup:0} ms, " +
+                    $"boards {sinceSet.TotalMilliseconds:0} ms (write {write.TotalMilliseconds:0} ms); total {total:0} ms.");
+    }
+
+    /// <summary>The platform's default lights (not yet shown; the caller sets the source).</summary>
+    private ILightSource? LightPlatform(FrontEndMessage p)
+    {
+        var db = _session.Games;
+        var config = _session.Config;
+        var source = p.Source ?? "Front end";
+        var found = db?.FindFrontEndPlatform(p.Platform, config.Games.LaunchBoxPlatformMap);
+        if (db is null || found is not { } f)
+        {
+            AppLog.Warn($"{source}: no LED-Next platform for '{p.Platform}'; lights unchanged.");
+            _main.FrontEndStatus = $"{source}: platform {p.Platform} (not in the game library)";
+            return null;
+        }
+        var lights = GameLightResolver.Resolve(db, f.Platform, null, config.ControlMap, config.Panel);
+        var light = new GameLights(lights, $"{source} (platform): {p.Platform}");
+        _main.FrontEndStatus = $"{source} · platform {p.Platform}";
+        AppLog.Info($"{source}: platform '{p.Platform}' → {f.Platform} ({f.How}); {lights.From}.");
+        return light;
+    }
+
+    /// <summary>The game's lights (not yet shown; the caller sets the source).</summary>
+    private ILightSource? LightGame(FrontEndMessage g, bool playing)
     {
         var db = _session.Games;
         var config = _session.Config;
@@ -79,16 +140,21 @@ public sealed class FrontEndController : IDisposable
         {
             AppLog.Warn($"{source}: no LED-Next game for '{g.Title}' ({g.Platform}); lights unchanged.");
             _main.FrontEndStatus = $"{source}: {g.Title} (not in the game library)";
-            return;
+            return null;
         }
         var lights = GameLightResolver.Resolve(db, f.Platform, f.Game, config.ControlMap, config.Panel);
         var verb = playing ? "playing" : "browsing";
-        _main.SetSource(new GameLights(lights, $"{source} ({verb}): {g.Title}"));
+        var light = new GameLights(lights, $"{source} ({verb}): {g.Title}");
         _main.FrontEndStatus = $"{source} · {verb} {g.Title}";
         // Selections arrive while scrolling; log them briefly, launches in full.
         if (playing) AppLog.Info($"{source}: playing '{g.Title}' → {f.Platform}/{f.Game} ({f.How}); {lights.From}.");
         else AppLog.Info($"{source}: '{g.Title}' → {f.Platform}/{f.Game} ({f.How}).");
+        return light;
     }
 
-    public void Dispose() => _server.Dispose();
+    public void Dispose()
+    {
+        _session.Engine.SourceShown -= OnSourceShown;
+        _server.Dispose();
+    }
 }

@@ -121,17 +121,25 @@ LaunchBox / BigBox process                      LED-Next app (owns the boards)
 ```
 
 - **Plugin** (thin, never throws into LaunchBox): start-up → connect, or start LED-Next with `--minimized`
-  (path in `LedNext.LaunchBox.json` next to the DLL); game launching/exited; selection from
-  `PluginHelper.StateManager` polled every 150 ms on the UI thread (LaunchBox), or a BigBox theme element
-  (`LedNextThemeElement`, invisible, added to a theme view). Logs to `LedNext.LaunchBox.log` in its folder.
+  (path in `LedNext.LaunchBox.json` next to the DLL); game launching/exited; selection from LaunchBox 14.1's
+  `SelectionChanged` system event (works in LaunchBox and BigBox), backed by a 150 ms `StateManager` poll and
+  the optional BigBox theme element (`LedNextThemeElement`). All three share one de-duplicated send. With no
+  game selected (BigBox platform wheel) the plugin sends the selected platform (`GetSelectedPlatform()`).
+  Logs to `LedNext.LaunchBox.log` in its folder.
 - **Client**: background thread; a new "select" replaces one not sent yet (fast scrolling sends the last
-  game only); while LED-Next is away it keeps only the newest selection and retries every 2 s.
-- **Session rules**: select → that game; launch → that game (selections ignored while playing); exit →
-  the selection again; front end closing → all off; a select without a game (platform wheel) keeps the
-  lights. The last front-end event and the user's own clicks in the app (test patterns, Games tab) take
+  game only); while LED-Next is away it keeps the newest "started" and "select" and retries every 2 s, so
+  it connects as soon as LED-Next listens. Each message carries `sentAtMs` for the timing log.
+- **Session rules**: select → that game; a select with only a platform → that platform's default lights
+  (`GameDatabase.FindFrontEndPlatform`: where its LaunchBox games were matched, else the platform matcher;
+  unknown platform → unchanged); launch → that game (selections ignored while playing); exit → the
+  selection again (game or platform); front end closing → all off; a select with neither (a playlist)
+  keeps the lights. The last front-end event and the user's own clicks in the app (test patterns, Games tab) take
   turns: whichever came last is shown.
 - **Single instance**: a named mutex; a second LED-Next sends `show` over the pipe (the first one comes
   to the front) and exits before touching the boards. The pipe is created with `FirstPipeInstance`.
+- **Timing**: the engine renders a new source at once (it doesn't wait for the next frame tick) and raises
+  `SourceShown` when its first frame is on the boards. LED-Next logs one line per front-end change:
+  `Timing '<game>': pipe, wait (UI thread), lookup (game + lights), boards (write); total`.
 - **Idle cost**: while minimized the panel/boards previews aren't redrawn (`MainViewModel.PreviewVisible`);
   the engine writes boards only when a value changes. Measured on the dev PC: ~0 % CPU, ~146 MB.
 
