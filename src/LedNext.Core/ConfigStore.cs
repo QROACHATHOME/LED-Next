@@ -44,6 +44,15 @@ public static class ConfigStore
             AppLog.Info($"Config upgraded from version {config.Version} to 2 (adds the game control map).");
             config.Version = 2;
         }
+        if (config.Version < 3)
+        {
+            // v3 added Games.LaunchBoxFolder / LaunchBoxPlatformMap; both default to empty.
+            AppLog.Info("Config upgraded from version 2 to 3 (adds LaunchBox settings).");
+            config.Version = 3;
+        }
+        // The deserializer builds a case-sensitive dictionary; LaunchBox platform names are matched ignoring case.
+        config.Games.LaunchBoxPlatformMap = new Dictionary<string, string>(
+            config.Games.LaunchBoxPlatformMap ?? new(), StringComparer.OrdinalIgnoreCase);
     }
 
     /// <summary>Writes to a temp file and swaps it in, so a crash never leaves a half-written config.</summary>

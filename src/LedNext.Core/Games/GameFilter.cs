@@ -23,11 +23,20 @@ public sealed record GameFilter
     public int? MaxButtons { get; init; }
     /// <summary>One of <see cref="ControlTags.All"/>, or null for any.</summary>
     public string? Control { get; init; }
+    /// <summary>Only games added to LaunchBox in the last N days (newest first). Null = any.</summary>
+    public int? AddedWithinDays { get; init; }
+    /// <summary>Only games that are in the LaunchBox library.</summary>
+    public bool InLaunchBoxOnly { get; init; }
+    /// <summary>Only games with no lights of their own (just the platform default) and not customized.</summary>
+    public bool NeedsSetupOnly { get; init; }
 
     /// <summary>Short text for the UI, e.g. "6 buttons · no clones".</summary>
     public string Describe()
     {
         var parts = new List<string>();
+        if (AddedWithinDays is { } days) parts.Add(days == 1 ? "added to LaunchBox today" : $"added to LaunchBox in {days} days");
+        else if (InLaunchBoxOnly) parts.Add("in LaunchBox");
+        if (NeedsSetupOnly) parts.Add("needs setup");
         if (Platform is not null) parts.Add(Platform.Replace('_', ' '));
         if (!string.IsNullOrWhiteSpace(Text)) parts.Add($"\"{Text}\"");
         if (MinButtons is not null || MaxButtons is not null) parts.Add(Range(MinButtons, MaxButtons, "button"));
@@ -35,7 +44,7 @@ public sealed record GameFilter
         if (Control is not null) parts.Add(Control);
         if (HideClones) parts.Add("no clones");
         if (CustomizedOnly) parts.Add("customized");
-        else if (LitOnly) parts.Add("with lights");
+        else if (LitOnly && !NeedsSetupOnly) parts.Add("with lights");
         return parts.Count == 0 ? "all games" : string.Join(" · ", parts);
     }
 

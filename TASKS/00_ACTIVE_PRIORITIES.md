@@ -40,7 +40,27 @@
 - [ ] Next visit: pick "6-button games", apply "6-button fighter", check a fighter on the real panel
       (are buttons 4-6 the bottom row?)
 - [ ] Control map editor (today it is rebuilt on import; re-import after re-wiring)
-- [ ] Platform name mapping LaunchBox ↔ LEDBlinky (`Sega Genesis` ↔ `Sega_Genesis`, `Arcade` → MAME)
+- [x] Platform name mapping LaunchBox ↔ LEDBlinky (`Sega Genesis` ↔ `Sega_Genesis`, `Arcade` → MAME),
+      changeable in Games tab → LaunchBox (done in phase 4a)
+
+## Phase 4 — Front ends
+### 4a — LaunchBox data (dev PC, done 2026-11-10; written from LaunchBox's documented XML layout)
+- [x] Read LaunchBox `Data\Platforms\*.xml` (read only) at start-up and on demand; match each game to an
+      LED-Next platform (same name / alias / your mapping / new) and game (ROM file name, then title)
+- [x] LaunchBox games missing from the LEDBlinky data are added to the library (platform default until
+      set up) and survive LEDBlinky re-imports
+- [x] Filters: added to LaunchBox in the last N days (presets or typed), only in LaunchBox, needs setup.
+      Smart lists: "New in LaunchBox, needs setup (30 days)", "New in LaunchBox (7 days)",
+      "In LaunchBox, needs setup"
+- [ ] **Verify at the cabinet** with `D:\LaunchBox`: counts per platform, matches look right, recent
+      games show up; copy samples to `import-samples/launchbox/` (see its README)
+
+### 4b — Live lighting from LaunchBox / BigBox (needs the arcade machine)
+- [ ] Bring back from the cabinet: LaunchBox's .NET version and plugin API version (`D:\LaunchBox\Core\`
+      `Unbroken.LaunchBox.Plugins.dll` file version; `LaunchBox.runtimeconfig.json` / `BigBox.runtimeconfig.json`
+      if present). Don't commit LaunchBox's DLLs.
+- [ ] Decide the host: `LedNext.Service` owning the boards (spec) vs. the app listening on a named pipe
+- [ ] Plugin: selection changed (BigBox), game launched, game exited, attract mode → light the panel
 - [ ] Animations (`*.lwax`) — phase 5
 
 ## At the arcade machine — suggested order

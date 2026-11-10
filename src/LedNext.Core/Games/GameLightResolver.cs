@@ -22,7 +22,9 @@ public sealed record ResolvedLights(
     string? Game,
     string From,
     IReadOnlyList<ResolvedControl> Controls,
-    IReadOnlyDictionary<string, Rgb> ButtonColors);
+    IReadOnlyDictionary<string, Rgb> ButtonColors,
+    bool GameSpecific = false);
+// GameSpecific: the lit controls come from the game, a parent ROM or MAME's game data, not a platform default.
 
 /// <summary>
 /// Works out a game's lights through the inheritance chain:
@@ -96,7 +98,8 @@ public static class GameLightResolver
             foreach (var id in c.Buttons)
                 colors.TryAdd(id, c.Color);
 
-        return new ResolvedLights(platform, game, from, controls, colors);
+        bool gameSpecific = activeIndex >= 0 && !levels[activeIndex].IsPlatformDefault;
+        return new ResolvedLights(platform, game, from, controls, colors, gameSpecific);
     }
 
     /// <summary>A stand-alone profile (a template) on this panel, with no inheritance; colourless controls are white.</summary>

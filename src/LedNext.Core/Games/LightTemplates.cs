@@ -35,6 +35,14 @@ public static class BuiltIns
         ("My customized games", new GameFilter { CustomizedOnly = true, LitOnly = false }),
     };
 
+    /// <summary>Added in a later version; seeded into existing libraries once, by name.</summary>
+    public static IReadOnlyList<(string Name, GameFilter Filter)> SmartListsV2 { get; } = new[]
+    {
+        ("New in LaunchBox, needs setup (30 days)", new GameFilter { AddedWithinDays = 30, NeedsSetupOnly = true, LitOnly = false }),
+        ("New in LaunchBox (7 days)", new GameFilter { AddedWithinDays = 7, LitOnly = false }),
+        ("In LaunchBox, needs setup", new GameFilter { InLaunchBoxOnly = true, NeedsSetupOnly = true, LitOnly = false }),
+    };
+
     private static LightTemplate Make(string name, string description, int players, params (string Control, string Color)[] perPlayer)
     {
         var controls = new List<ControlLight>();

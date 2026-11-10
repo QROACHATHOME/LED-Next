@@ -23,9 +23,9 @@ public sealed class CabinetConfig
 {
     /// <summary>
     /// 1 = phase 1. 2 = adds <see cref="ControlMap"/> and <see cref="Games"/> (both default to empty,
-    /// so a version 1 file loads unchanged).
+    /// so a version 1 file loads unchanged). 3 = adds the LaunchBox folder and platform map to Games.
     /// </summary>
-    public const int CurrentVersion = 2;
+    public const int CurrentVersion = 3;
 
     public int Version { get; set; } = CurrentVersion;
     public PanelLayout Panel { get; set; } = new();
@@ -41,4 +41,8 @@ public sealed class GameSettings
 {
     /// <summary>LEDBlinky install folder last imported from (read only, never written to).</summary>
     public string? LedBlinkyFolder { get; set; }
+    /// <summary>LaunchBox install folder (read only), e.g. D:\LaunchBox. Added in config version 3.</summary>
+    public string? LaunchBoxFolder { get; set; }
+    /// <summary>Your corrections: LaunchBox platform name → LED-Next platform key. Added in config version 3.</summary>
+    public Dictionary<string, string> LaunchBoxPlatformMap { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 }

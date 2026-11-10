@@ -33,7 +33,9 @@ public sealed record GameInfo(
     GameLighting Lighting,
     bool Customized = false,
     int Buttons = 0,
-    string Tags = "");
+    string Tags = "",
+    DateTimeOffset? AddedToLaunchBox = null);
+// AddedToLaunchBox: newest LaunchBox DateAdded of the LaunchBox games matched to this one (null = not in LaunchBox).
 // Buttons: highest button number the game lights for any player (P1_BUTTON6 → 6), 0 if unknown.
 // Tags: space-separated control types (joystick trackball spinner lightgun paddle pedal), see ControlTags.
 

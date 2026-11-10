@@ -236,7 +236,8 @@ public class ConfigMigrationTests
         try
         {
             var config = ConfigStore.LoadOrCreate(path);
-            Assert.Equal(2, config.Version);
+            Assert.Equal(CabinetConfig.CurrentVersion, config.Version);
+            Assert.Empty(config.Games.LaunchBoxPlatformMap);
             Assert.NotNull(config.ControlMap);
             Assert.Empty(config.ControlMap.Mappings);
             Assert.Equal("P1_B1", config.Panel.Buttons.Single().Id);

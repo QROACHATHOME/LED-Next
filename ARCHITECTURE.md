@@ -80,6 +80,20 @@ LEDBlinky folder ──► LedBlinkyImporter ──► InMemoryGameLibrary ─�
   `P1NumButtons`) and `games.tags` (`ControlTags`: from lit controls and the control description),
   both computed on import. Schema 3 added these columns; an older file gets them empty until re-import.
 
+## LaunchBox (phase 4a)
+
+- `LaunchBoxLibrary` (Core, read only) reads `<LaunchBox>\Data\Platforms\*.xml`: one `<Game>` per game
+  with Title, Platform, ApplicationPath, DateAdded. Written from LaunchBox's documented layout; not
+  yet checked against a real LaunchBox 14 library.
+- `PlatformMatcher`: your mapping (`cabinet.json` → `games.launchBoxPlatformMap`, config v3) → same name
+  ignoring spaces/underscores/case → alias (`Arcade` → MAME…) → a new platform key.
+  `GameMatcher`: ROM file name (`sf2.zip` → `sf2`) → title → new.
+- `GameDatabase.ImportLaunchBox` stores the matches in `launchbox_games` (schema 4) and adds missing
+  games/platforms to the library (new platforms inherit the MAME default, like LEDBlinky's
+  `UseMameDefaultForOtherEmulators`). This merge also runs after every LEDBlinky import.
+- Filters: `AddedWithinDays` (newest first), `InLaunchBoxOnly`, `NeedsSetupOnly` (lighting from the
+  platform default only and not customized).
+
 ## Lighting engine (`LedEngine`)
 
 ```

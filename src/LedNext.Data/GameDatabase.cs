@@ -21,7 +21,8 @@ public sealed class GameDatabase : IGameLibrary
     public const int SchemaVersion = 2;
     private const string GameColumns = """
         g.platform, g.name, g.description, g.parent, g.players, g.info, g.sources, g.lighting,
-        EXISTS(SELECT 1 FROM user_profiles u WHERE u.platform = g.platform AND u.game = g.name), g.buttons, g.tags
+        EXISTS(SELECT 1 FROM user_profiles u WHERE u.platform = g.platform AND u.game = g.name), g.buttons, g.tags,
+        (SELECT MAX(lb.date_added) FROM launchbox_games lb WHERE lb.platform = g.platform AND lb.game = g.name)
         """;
     private readonly string _connectionString;
     private readonly object _cacheLock = new();
@@ -71,6 +72,12 @@ public sealed class GameDatabase : IGameLibrary
                 color_name TEXT, label TEXT, always_active INTEGER NOT NULL, PRIMARY KEY(name, seq));
             CREATE TABLE IF NOT EXISTS smart_lists(
                 name TEXT PRIMARY KEY COLLATE NOCASE, filter TEXT NOT NULL, seq INTEGER NOT NULL);
+            CREATE TABLE IF NOT EXISTS launchbox_games(
+                id TEXT NOT NULL, title TEXT NOT NULL, lb_platform TEXT NOT NULL COLLATE NOCASE, app_path TEXT NOT NULL,
+                rom TEXT NOT NULL, date_added TEXT, platform TEXT NOT NULL COLLATE NOCASE, game TEXT NOT NULL COLLATE NOCASE,
+                matched_by TEXT NOT NULL, platform_how TEXT NOT NULL);
+            CREATE INDEX IF NOT EXISTS launchbox_games_game ON launchbox_games(platform, game);
+            CREATE INDEX IF NOT EXISTS launchbox_games_added ON launchbox_games(date_added);
             """);
 
         // Schema 3 added games.buttons / games.tags. Older files get the columns (empty until the next import).
@@ -79,7 +86,7 @@ public sealed class GameDatabase : IGameLibrary
             Exec(c, "ALTER TABLE games ADD COLUMN buttons INTEGER NOT NULL DEFAULT 0; ALTER TABLE games ADD COLUMN tags TEXT NOT NULL DEFAULT '';");
             AppLog.Info("Game library upgraded to schema 3; re-import from LEDBlinky to fill the button and control filters.");
         }
-        Exec(c, "INSERT OR REPLACE INTO meta(key, value) VALUES('schema_version', '3');");
+        Exec(c, "INSERT OR REPLACE INTO meta(key, value) VALUES('schema_version', '4');");
         db.SeedBuiltIns(c);
         return db;
     }
@@ -95,15 +102,25 @@ public sealed class GameDatabase : IGameLibrary
     /// <summary>Adds the starter templates and smart lists once. Deleted ones stay deleted.</summary>
     private void SeedBuiltIns(SqliteConnection c)
     {
+        string? seeded;
         using (var check = c.CreateCommand())
         {
             check.CommandText = "SELECT value FROM meta WHERE key = 'seeded_builtins'";
-            if (check.ExecuteScalar() is not null) return;
+            seeded = check.ExecuteScalar() as string;
         }
-        foreach (var t in BuiltIns.Templates) SaveTemplate(t);
-        int seq = 0;
-        foreach (var (name, filter) in BuiltIns.SmartLists) SaveSmartList(name, filter, seq++);
-        Exec(c, "INSERT OR REPLACE INTO meta(key, value) VALUES('seeded_builtins', '1');");
+        if (seeded is null)
+        {
+            foreach (var t in BuiltIns.Templates) SaveTemplate(t);
+            int seq = 0;
+            foreach (var (name, filter) in BuiltIns.SmartLists) SaveSmartList(name, filter, seq++);
+        }
+        if (seeded is null or "1")
+        {
+            // The LaunchBox lists go first: they are the everyday "what's new" view.
+            int seq = -BuiltIns.SmartListsV2.Count;
+            foreach (var (name, filter) in BuiltIns.SmartListsV2) SaveSmartList(name, filter, seq++);
+            Exec(c, "INSERT OR REPLACE INTO meta(key, value) VALUES('seeded_builtins', '2');");
+        }
     }
 
     private SqliteConnection Connect()
@@ -218,6 +235,8 @@ public sealed class GameDatabase : IGameLibrary
             _lightCache = new(StringComparer.OrdinalIgnoreCase);
             _platforms = null;
         }
+        // The import replaced the games table; put the LaunchBox-only games back.
+        MergeLaunchBoxGames();
     }
 
     // ---- Queries --------------------------------------------------------------------------------
@@ -274,6 +293,10 @@ public sealed class GameDatabase : IGameLibrary
               AND ($minb IS NULL OR g.buttons >= $minb) AND ($maxb IS NULL OR g.buttons <= $maxb)
               AND ($tag IS NULL OR (' ' || g.tags || ' ') LIKE $tag)
               AND ($t IS NULL OR g.name LIKE $t ESCAPE '\' OR g.description LIKE $t ESCAPE '\')
+              AND ($needs = 0 OR (g.lighting = 0 AND NOT {custom}))
+              AND ($inlb = 0 OR EXISTS(SELECT 1 FROM launchbox_games lb WHERE lb.platform = g.platform AND lb.game = g.name))
+              AND ($since IS NULL OR EXISTS(SELECT 1 FROM launchbox_games lb
+                    WHERE lb.platform = g.platform AND lb.game = g.name AND lb.date_added >= $since))
             """;
         void Bind(SqliteCommand cmd)
         {
@@ -290,6 +313,9 @@ public sealed class GameDatabase : IGameLibrary
             var t = string.IsNullOrWhiteSpace(f.Text) ? null
                 : "%" + f.Text.Trim().Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_") + "%";
             cmd.Parameters.AddWithValue("$t", N(t));
+            cmd.Parameters.AddWithValue("$needs", f.NeedsSetupOnly ? 1 : 0);
+            cmd.Parameters.AddWithValue("$inlb", f.InLaunchBoxOnly ? 1 : 0);
+            cmd.Parameters.AddWithValue("$since", N(f.AddedWithinDays is { } days ? ToUtc(DateTimeOffset.UtcNow.AddDays(-days)) : null));
         }
 
         int total;
@@ -301,7 +327,11 @@ public sealed class GameDatabase : IGameLibrary
         }
 
         using var cmd = c.CreateCommand();
-        cmd.CommandText = $"SELECT {GameColumns} FROM games g " + where + " ORDER BY g.description COLLATE NOCASE, g.name LIMIT $limit";
+        // "Recently added" lists show the newest first.
+        var order = f.AddedWithinDays is not null || f.InLaunchBoxOnly
+            ? " ORDER BY 12 DESC, g.description COLLATE NOCASE, g.name"
+            : " ORDER BY g.description COLLATE NOCASE, g.name";
+        cmd.CommandText = $"SELECT {GameColumns} FROM games g " + where + order + " LIMIT $limit";
         Bind(cmd);
         cmd.Parameters.AddWithValue("$limit", limit);
         using var r = cmd.ExecuteReader();
@@ -313,7 +343,12 @@ public sealed class GameDatabase : IGameLibrary
     private static GameInfo ReadGame(SqliteDataReader r) => new(
         r.GetString(0), r.GetString(1), r.GetString(2), r.IsDBNull(3) ? null : r.GetString(3),
         r.GetInt32(4), r.GetString(5), r.GetString(6), (GameLighting)r.GetInt32(7), r.GetInt32(8) != 0,
-        r.GetInt32(9), r.GetString(10));
+        r.GetInt32(9), r.GetString(10), r.IsDBNull(11) ? null : ParseUtc(r.GetString(11)));
+
+    private const string UtcFormat = "yyyy-MM-ddTHH:mm:ssZ";
+    private static string ToUtc(DateTimeOffset d) => d.UtcDateTime.ToString(UtcFormat, CultureInfo.InvariantCulture);
+    private static DateTimeOffset? ParseUtc(string s) =>
+        DateTimeOffset.TryParseExact(s, UtcFormat, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var d) ? d : null;
 
     // ---- IGameLibrary ---------------------------------------------------------------------------
 
@@ -383,6 +418,166 @@ public sealed class GameDatabase : IGameLibrary
         }
         lock (_cacheLock) _lightCache[key] = profile;
         return profile;
+    }
+
+    // ---- LaunchBox ------------------------------------------------------------------------------
+
+    public sealed record LaunchBoxPlatformSummary(string LaunchBoxPlatform, string Platform, string How, int Games, int ByRom, int ByTitle, int New);
+
+    /// <summary>
+    /// Replaces the stored LaunchBox library: matches every game to an LED-Next platform and game,
+    /// then adds games the library doesn't have (they get the platform default until set up).
+    /// </summary>
+    /// <param name="overrides">Your platform corrections (LaunchBox name → LED-Next key).</param>
+    public List<LaunchBoxPlatformSummary> ImportLaunchBox(IReadOnlyList<Core.Import.LaunchBox.LaunchBoxGame> games,
+        IReadOnlyDictionary<string, string> overrides, string folder)
+    {
+        var platformKeys = GetPlatformSummaries().Select(p => p.Key).ToList();
+        var titleIndex = TitleIndex();
+
+        var platformFor = new Dictionary<string, (string Key, string How)>(StringComparer.OrdinalIgnoreCase);
+        var matches = new List<(Core.Import.LaunchBox.LaunchBoxMatch Match, string How)>();
+        foreach (var g in games)
+        {
+            if (!platformFor.TryGetValue(g.Platform, out var p))
+                platformFor[g.Platform] = p = Core.Import.LaunchBox.PlatformMatcher.Match(g.Platform, platformKeys, overrides);
+            matches.Add((Core.Import.LaunchBox.GameMatcher.Match(g, p.Key, this, titleIndex), p.How));
+        }
+
+        using (var c = Connect())
+        using (var tx = c.BeginTransaction())
+        {
+            Exec(c, "DELETE FROM launchbox_games;", tx);
+            using var cmd = c.CreateCommand();
+            cmd.Transaction = tx;
+            cmd.CommandText = "INSERT INTO launchbox_games VALUES($id, $t, $lp, $ap, $rom, $d, $p, $g, $m, $h)";
+            var id = cmd.Parameters.Add("$id", SqliteType.Text);
+            var t = cmd.Parameters.Add("$t", SqliteType.Text);
+            var lp = cmd.Parameters.Add("$lp", SqliteType.Text);
+            var ap = cmd.Parameters.Add("$ap", SqliteType.Text);
+            var rom = cmd.Parameters.Add("$rom", SqliteType.Text);
+            var d = cmd.Parameters.Add("$d", SqliteType.Text);
+            var pl = cmd.Parameters.Add("$p", SqliteType.Text);
+            var gm = cmd.Parameters.Add("$g", SqliteType.Text);
+            var m = cmd.Parameters.Add("$m", SqliteType.Text);
+            var h = cmd.Parameters.Add("$h", SqliteType.Text);
+            foreach (var (match, how) in matches)
+            {
+                var g = match.Game;
+                id.Value = g.Id; t.Value = g.Title; lp.Value = g.Platform; ap.Value = g.ApplicationPath; rom.Value = g.Rom;
+                d.Value = g.DateAdded is { } date ? ToUtc(date) : DBNull.Value;
+                pl.Value = match.LedPlatform; gm.Value = match.LedGame; m.Value = match.MatchedBy; h.Value = how;
+                cmd.ExecuteNonQuery();
+            }
+            using (var meta = c.CreateCommand())
+            {
+                meta.Transaction = tx;
+                meta.CommandText = "INSERT OR REPLACE INTO meta VALUES('launchbox_folder', $f), ('launchbox_read_at', $at)";
+                meta.Parameters.AddWithValue("$f", folder);
+                meta.Parameters.AddWithValue("$at", DateTime.Now.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture));
+                meta.ExecuteNonQuery();
+            }
+            tx.Commit();
+        }
+        MergeLaunchBoxGames();
+        return LaunchBoxSummaries();
+    }
+
+    /// <summary>Per platform: description (normalised) → game name, for matching LaunchBox titles.</summary>
+    private Dictionary<string, IReadOnlyDictionary<string, string>> TitleIndex()
+    {
+        var index = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
+        using var c = Connect();
+        using var cmd = c.CreateCommand();
+        cmd.CommandText = "SELECT platform, name, description FROM games WHERE parent IS NULL";
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
+        {
+            if (!index.TryGetValue(r.GetString(0), out var d)) index[r.GetString(0)] = d = new(StringComparer.Ordinal);
+            d.TryAdd(Core.Import.LaunchBox.PlatformMatcher.Normalize(r.GetString(2)), r.GetString(1));
+        }
+        return index.ToDictionary(k => k.Key, k => (IReadOnlyDictionary<string, string>)k.Value, StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Adds LaunchBox games (and platforms) the library doesn't have, so they can be found, filtered and set up.
+    /// Runs after a LaunchBox read and after every LEDBlinky import (which replaces the games table).
+    /// </summary>
+    private void MergeLaunchBoxGames()
+    {
+        var missing = new List<(string LbPlatform, string Platform, string Game, string Title)>();
+        using (var c = Connect())
+        using (var cmd = c.CreateCommand())
+        {
+            cmd.CommandText = """
+                SELECT lb.lb_platform, lb.platform, lb.game, MIN(lb.title) FROM launchbox_games lb
+                WHERE NOT EXISTS(SELECT 1 FROM games g WHERE g.platform = lb.platform AND g.name = lb.game)
+                GROUP BY lb.platform, lb.game
+                """;
+            using var r = cmd.ExecuteReader();
+            while (r.Read()) missing.Add((r.GetString(0), r.GetString(1), r.GetString(2), r.GetString(3)));
+        }
+        if (missing.Count == 0) return;
+
+        using (var c = Connect())
+        using (var tx = c.BeginTransaction())
+        {
+            bool hasMame = GetPlatform("MAME") is not null;
+            using var plat = c.CreateCommand();
+            plat.Transaction = tx;
+            plat.CommandText = "INSERT OR IGNORE INTO platforms VALUES($k, $n, $p, 0, '#FFFFFF')";
+            var k = plat.Parameters.Add("$k", SqliteType.Text);
+            var n = plat.Parameters.Add("$n", SqliteType.Text);
+            var pp = plat.Parameters.Add("$p", SqliteType.Text);
+            foreach (var p in missing.GroupBy(m => m.Platform, StringComparer.OrdinalIgnoreCase))
+            {
+                k.Value = p.Key; n.Value = p.First().LbPlatform; pp.Value = hasMame && !p.Key.Equals("MAME", StringComparison.OrdinalIgnoreCase) ? "MAME" : DBNull.Value;
+                plat.ExecuteNonQuery();
+            }
+            tx.Commit();
+        }
+        lock (_cacheLock) _platforms = null;
+
+        using (var c = Connect())
+        using (var tx = c.BeginTransaction())
+        {
+            using var cmd = c.CreateCommand();
+            cmd.Transaction = tx;
+            cmd.CommandText = """
+                INSERT OR IGNORE INTO games(platform, name, description, parent, players, info, sources, lighting, buttons, tags)
+                VALUES($p, $n, $d, NULL, 0, '', 'LaunchBox', $l, 0, '')
+                """;
+            var p = cmd.Parameters.Add("$p", SqliteType.Text);
+            var nm = cmd.Parameters.Add("$n", SqliteType.Text);
+            var d = cmd.Parameters.Add("$d", SqliteType.Text);
+            var l = cmd.Parameters.Add("$l", SqliteType.Integer);
+            var empty = new ControlMap();
+            var panel = new PanelLayout();
+            foreach (var m in missing)
+            {
+                // A MAME-based platform can still have game data (MAME's) for a game it doesn't list itself.
+                bool lit = GameLightResolver.Resolve(this, m.Platform, m.Game, empty, panel).GameSpecific;
+                p.Value = m.Platform; nm.Value = m.Game; d.Value = m.Title; l.Value = lit ? (int)GameLighting.Parent : 0;
+                cmd.ExecuteNonQuery();
+            }
+            tx.Commit();
+        }
+        AppLog.Info($"Added {missing.Count:N0} LaunchBox games that are not in the LEDBlinky data.");
+    }
+
+    public List<LaunchBoxPlatformSummary> LaunchBoxSummaries()
+    {
+        using var c = Connect();
+        using var cmd = c.CreateCommand();
+        cmd.CommandText = """
+            SELECT lb_platform, platform, MIN(platform_how), COUNT(*), SUM(matched_by = 'rom name'), SUM(matched_by = 'title'), SUM(matched_by = 'new')
+            FROM launchbox_games GROUP BY lb_platform ORDER BY lb_platform COLLATE NOCASE
+            """;
+        using var r = cmd.ExecuteReader();
+        var list = new List<LaunchBoxPlatformSummary>();
+        while (r.Read())
+            list.Add(new LaunchBoxPlatformSummary(r.GetString(0), r.GetString(1), r.GetString(2), r.GetInt32(3), r.GetInt32(4), r.GetInt32(5), r.GetInt32(6)));
+        return list;
     }
 
     // ---- Templates ------------------------------------------------------------------------------

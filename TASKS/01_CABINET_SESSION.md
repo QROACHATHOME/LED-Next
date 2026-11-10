@@ -1,5 +1,23 @@
 # Cabinet session brief (for Claude on the arcade machine)
 
+## Visit 3 (next visit) — LaunchBox data, templates, editing
+1. `git pull`, build, run (config upgrades to version 3, game library to schema 4; both logged).
+2. Games tab → **Import from LEDBlinky…** → `C:\LEDBlinky` (fills the button/control filters).
+3. **Read LaunchBox** → `D:\LaunchBox`. Check the LaunchBox tab: does each LaunchBox platform map to the
+   right LED-Next platform? Fix any that don't (that's saved) and note them in the results.
+4. Smart list **New in LaunchBox, needs setup (30 days)**: ask the user if the list matches games they
+   added recently. Note any game that is missing or matched to the wrong game.
+5. Smart list **6-button games** → Templates → **6-button fighter** → Apply to all matches. Hardware
+   mode on; preview a fighter: kicks (buttons 4-6) should be the bottom row. Then preview a trackball
+   game and a Neo Geo game (not covered in visit 2). Edit one game live and check the panel follows.
+6. For phase 4b (the plugin), record in the results: the file version of
+   `D:\LaunchBox\Core\Unbroken.LaunchBox.Plugins.dll`, and the .NET version in
+   `D:\LaunchBox\Core\*.runtimeconfig.json` (if present). Don't copy LaunchBox's DLLs into the repo.
+7. Copy LaunchBox samples to `import-samples/launchbox/` as its README says.
+8. Add a "Visit 3" section to `CABINET_RESULTS.md`; commit, ask before pushing.
+
+---
+
 ## Visit 2 (next visit) — check the game import
 Visit 1 is done (results in `TASKS/CABINET_RESULTS.md`; the driver works). For visit 2:
 1. `git pull`, build, run. The config upgrades itself to version 2 on start (logged).

@@ -70,7 +70,7 @@ public class TemplateAndSmartListDatabaseTests
         {
             var db = GameDatabase.Open(path);
             Assert.Contains(db.ListTemplates(), t => t.Name == "6-button fighter");
-            Assert.Equal("6-button games", db.ListSmartLists()[0].Name);
+            Assert.Contains(db.ListSmartLists(), l => l.Name == "6-button games");
 
             db.DeleteTemplate("6-button fighter");
             db.DeleteSmartList("6-button games");
@@ -125,7 +125,7 @@ public class TemplateAndSmartListDatabaseTests
             var g = db.GetGame("MAME", "old")!;
             Assert.Equal(0, g.Buttons);
             Assert.Equal("", g.Tags);
-            Assert.Equal("3", db.Meta("schema_version"));
+            Assert.Equal("4", db.Meta("schema_version"));
         }
         finally { Cleanup(path); }
     }

@@ -46,7 +46,7 @@ Games tab with platform filter, search and live preview, per-game and per-platfo
 named templates and smart lists (buttons, players, control type, hide clones). Remaining for phase 3:
 LaunchBox ↔ LEDBlinky platform-name mapping, control map editor.
 
-### Phase 4 — Front ends
+### Phase 4 — Front ends (4a done: LaunchBox library, platform mapping, recently added / needs setup)
 - `LedNext.Service` owns hardware; app and plugins are clients over a named pipe
 - LaunchBox / BigBox plugin: selection changed, game launched, game exited, attract mode
 

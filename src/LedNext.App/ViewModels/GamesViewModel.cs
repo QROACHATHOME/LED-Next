@@ -32,6 +32,7 @@ public sealed partial class GameRow(GameInfo game, string platformName) : Observ
         {
             var parts = new List<string> { Game.Name, platformName };
             if (Game.Parent is not null) parts.Add($"clone of {Game.Parent}");
+            if (Game.AddedToLaunchBox is { } added) parts.Add($"added {added.LocalDateTime:yyyy-MM-dd}");
             parts.Add(Game.Customized ? "customized" : Game.Lighting switch
             {
                 GameLighting.Own => "own lights",
@@ -130,8 +131,12 @@ public sealed partial class GamesViewModel : ObservableObject
             Palette.Add(new PaletteColor(name, rgb));
         Palette.Add(new PaletteColor("Dim", new LedBlinkyColors().Named["Black"]));
         Palette.Add(new PaletteColor("Off", null));
+        _selectedAdded = AddedChoices[0];
 
         RefreshLibrary();
+        RefreshLaunchBoxInfo();
+        // Pick up games added to LaunchBox since last time (quietly; skipped if no folder is set yet).
+        _ = ReadLaunchBoxFrom(session.Config.Games.LaunchBoxFolder, askIfMissing: false);
     }
 
     public bool IsAvailable => _session.Games is not null;
@@ -181,6 +186,26 @@ public sealed partial class GamesViewModel : ObservableObject
 
     [ObservableProperty] private bool _filtersExpanded;
 
+    public sealed record AddedChoice(int? Days, string Label);
+    public IReadOnlyList<AddedChoice> AddedChoices { get; } = new AddedChoice[]
+    {
+        new(null, "any time"), new(1, "today"), new(7, "last 7 days"), new(14, "last 14 days"),
+        new(30, "last 30 days"), new(90, "last 90 days"), new(365, "last year"),
+    };
+
+    [ObservableProperty] private AddedChoice? _selectedAdded;
+    partial void OnSelectedAddedChanged(AddedChoice? value) => Search();
+
+    /// <summary>Any number of days, typed; wins over the preset when filled in.</summary>
+    [ObservableProperty] private string _addedDaysText = "";
+    partial void OnAddedDaysTextChanged(string value) => DelayedSearch();
+
+    [ObservableProperty] private bool _inLaunchBoxOnly;
+    partial void OnInLaunchBoxOnlyChanged(bool value) => Search();
+
+    [ObservableProperty] private bool _needsSetupOnly;
+    partial void OnNeedsSetupOnlyChanged(bool value) => Search();
+
     public string FilterSummary => CurrentFilter().Describe();
 
     private void DelayedSearch()
@@ -205,6 +230,9 @@ public sealed partial class GamesViewModel : ObservableObject
         MinPlayers = ParseCount(MinPlayersText),
         MaxPlayers = ParseCount(MaxPlayersText),
         Control = ControlFilter == "any" ? null : ControlFilter,
+        AddedWithinDays = ParseCount(AddedDaysText) is { } typed and > 0 ? typed : SelectedAdded?.Days,
+        InLaunchBoxOnly = InLaunchBoxOnly,
+        NeedsSetupOnly = NeedsSetupOnly,
     };
 
     [ObservableProperty] private GameRow? _selectedGame;
@@ -220,7 +248,8 @@ public sealed partial class GamesViewModel : ObservableObject
     [ObservableProperty] private string? _previewFrom;
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(ImportCommand), nameof(PasteSelectedCommand), nameof(PasteAllMatchesCommand), nameof(RevertSelectedCommand),
+    [NotifyCanExecuteChangedFor(nameof(ImportCommand), nameof(ReadLaunchBoxCommand), nameof(ChooseLaunchBoxFolderCommand),
+        nameof(PasteSelectedCommand), nameof(PasteAllMatchesCommand), nameof(RevertSelectedCommand),
         nameof(ApplyTemplateToSelectedCommand), nameof(ApplyTemplateToAllCommand))]
     private bool _isBusy;
 
@@ -333,6 +362,7 @@ public sealed partial class GamesViewModel : ObservableObject
         if (info?.Parent is not null) sub.Add($"clone of {info.Parent}");
         if (info is { Players: > 0 }) sub.Add($"{info.Players} player{(info.Players == 1 ? "" : "s")}");
         if (!string.IsNullOrEmpty(info?.Info)) sub.Add(info.Info);
+        if (info?.AddedToLaunchBox is { } added) sub.Add($"added to LaunchBox {added.LocalDateTime:yyyy-MM-dd}");
         PreviewSubtitle = string.Join("  ·  ", sub);
         PreviewFrom = $"Lit from {lights.From}" + (info is null ? "" : $"  ·  data: {info.Sources}");
         IsCustomized = db.IsCustomized(platform, game);
@@ -656,6 +686,11 @@ public sealed partial class GamesViewModel : ObservableObject
         MinPlayersText = f.MinPlayers?.ToString() ?? "";
         MaxPlayersText = f.MaxPlayers?.ToString() ?? "";
         ControlFilter = f.Control ?? "any";
+        var preset = AddedChoices.FirstOrDefault(a => a.Days == f.AddedWithinDays);
+        SelectedAdded = preset ?? AddedChoices[0];
+        AddedDaysText = preset is null && f.AddedWithinDays is { } d ? d.ToString() : "";
+        InLaunchBoxOnly = f.InLaunchBoxOnly;
+        NeedsSetupOnly = f.NeedsSetupOnly;
         _suppressSearch = false;
         _searchDelay.Stop();
         Search();
@@ -792,6 +827,125 @@ public sealed partial class GamesViewModel : ObservableObject
         LoadTemplates();
     }
 
+    // ---- LaunchBox --------------------------------------------------------------------------
+
+    /// <summary>One LaunchBox platform and the LED-Next platform its games are matched to (changeable).</summary>
+    public sealed partial class LaunchBoxPlatformRow : ObservableObject
+    {
+        private readonly GamesViewModel _owner;
+        private bool _loading = true;
+
+        public LaunchBoxPlatformRow(GamesViewModel owner, LedNext.Data.GameDatabase.LaunchBoxPlatformSummary s, IReadOnlyList<string> choices)
+        {
+            _owner = owner;
+            LaunchBoxPlatform = s.LaunchBoxPlatform;
+            Choices = choices;
+            Details = $"{s.Games:N0} game{(s.Games == 1 ? "" : "s")} · {s.ByRom:N0} by ROM name, {s.ByTitle:N0} by title, {s.New:N0} new · platform {s.How}";
+            NeedsAttention = s.How == "new";
+            _ledPlatform = s.Platform;
+            _loading = false;
+        }
+
+        public string LaunchBoxPlatform { get; }
+        public string Details { get; }
+        public bool NeedsAttention { get; }
+        public IReadOnlyList<string> Choices { get; }
+
+        [ObservableProperty] private string _ledPlatform;
+        partial void OnLedPlatformChanged(string value)
+        {
+            if (!_loading) _owner.RemapPlatform(LaunchBoxPlatform, value);
+        }
+    }
+
+    public ObservableCollection<LaunchBoxPlatformRow> LaunchBoxPlatforms { get; } = new();
+    [ObservableProperty] private string _launchBoxInfo = "LaunchBox not read yet.";
+
+    private void RefreshLaunchBoxInfo()
+    {
+        var db = _session.Games;
+        if (db is null) return;
+        var summaries = db.LaunchBoxSummaries();
+        var choices = db.GetPlatformSummaries().Select(p => p.Key).ToList();
+        LaunchBoxPlatforms.Clear();
+        foreach (var s in summaries) LaunchBoxPlatforms.Add(new LaunchBoxPlatformRow(this, s, choices));
+        int games = summaries.Sum(s => s.Games);
+        LaunchBoxInfo = games == 0
+            ? "LaunchBox not read yet. Read it to find recently added games."
+            : $"LaunchBox: {games:N0} games on {summaries.Count} platforms, read {db.Meta("launchbox_read_at")}.";
+        LaunchBoxFolderTip = db.Meta("launchbox_folder") is { } f ? $"Read from {f}. Reads again at start-up." : "Reads LaunchBox's game list (never changed).";
+    }
+
+    [ObservableProperty] private string _launchBoxFolderTip = "Reads LaunchBox's game list (never changed).";
+
+    [RelayCommand(CanExecute = nameof(CanImport))]
+    private Task ReadLaunchBox() => ReadLaunchBoxFrom(_session.Config.Games.LaunchBoxFolder, askIfMissing: true);
+
+    [RelayCommand(CanExecute = nameof(CanImport))]
+    private Task ChooseLaunchBoxFolder() => ReadLaunchBoxFrom(null, askIfMissing: true);
+
+    /// <summary>Reads the LaunchBox library (read only) and matches it to the game library.</summary>
+    private async Task ReadLaunchBoxFrom(string? folder, bool askIfMissing)
+    {
+        var db = _session.Games;
+        if (db is null) return;
+        if (folder is null || !LedNext.Core.Import.LaunchBox.LaunchBoxLibrary.LooksLikeLaunchBox(folder))
+        {
+            if (!askIfMissing) return;
+            var dialog = new Microsoft.Win32.OpenFolderDialog
+            {
+                Title = "Choose the LaunchBox folder (it is only read, never changed)",
+                InitialDirectory = Directory.Exists(@"D:\LaunchBox") ? @"D:\LaunchBox" : "",
+            };
+            if (dialog.ShowDialog() != true) return;
+            folder = dialog.FolderName;
+            if (!LedNext.Core.Import.LaunchBox.LaunchBoxLibrary.LooksLikeLaunchBox(folder))
+            {
+                BusyText = $"{folder} has no Data\\Platforms folder; pick the LaunchBox folder itself.";
+                return;
+            }
+        }
+
+        var overrides = new Dictionary<string, string>(_session.Config.Games.LaunchBoxPlatformMap, StringComparer.OrdinalIgnoreCase);
+        IsBusy = true;
+        BusyText = "Reading LaunchBox…";
+        try
+        {
+            var warnings = new List<string>();
+            var games = await Task.Run(() =>
+            {
+                var list = LedNext.Core.Import.LaunchBox.LaunchBoxLibrary.Read(folder, warnings);
+                db.ImportLaunchBox(list, overrides, folder);
+                return list;
+            });
+            foreach (var w in warnings) AppLog.Warn(w);
+            _session.Config.Games.LaunchBoxFolder = folder;
+            _session.MarkDirty();
+            AppLog.Info($"Read {games.Count:N0} games from LaunchBox at {folder}.");
+            RefreshLibrary();
+            RefreshLaunchBoxInfo();
+            BusyText = warnings.Count == 0 ? null : $"LaunchBox read with {warnings.Count} warning(s); see the Log tab.";
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error($"Reading LaunchBox at {folder} failed", ex);
+            BusyText = $"Reading LaunchBox failed: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    /// <summary>Called when you change a LaunchBox platform's LED-Next platform; re-matches the games.</summary>
+    internal void RemapPlatform(string launchBoxPlatform, string ledPlatform)
+    {
+        _session.Config.Games.LaunchBoxPlatformMap[launchBoxPlatform] = ledPlatform;
+        _session.MarkDirty();
+        AppLog.Info($"LaunchBox platform '{launchBoxPlatform}' now uses LED-Next platform '{ledPlatform}'.");
+        _ = ReadLaunchBoxFrom(_session.Config.Games.LaunchBoxFolder, askIfMissing: false);
+    }
+
     // ---- Import -----------------------------------------------------------------------------
 
     private bool CanImport() => !IsBusy && _session.Games is not null;
@@ -836,6 +990,9 @@ public sealed partial class GamesViewModel : ObservableObject
             foreach (var n in result.Notes) { ImportReport.Add(n); AppLog.Info(n); }
             RefreshLibrary();
             BusyText = null;
+            IsBusy = false;
+            // Game names may have changed, so match LaunchBox again.
+            await ReadLaunchBoxFrom(_session.Config.Games.LaunchBoxFolder, askIfMissing: false);
         }
         catch (Exception ex)
         {
