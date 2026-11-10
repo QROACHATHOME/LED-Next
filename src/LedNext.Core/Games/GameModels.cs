@@ -30,7 +30,8 @@ public sealed record GameInfo(
     int Players,
     string Info,
     string Sources,
-    GameLighting Lighting);
+    GameLighting Lighting,
+    bool Customized = false);
 
 /// <summary>One logical control of a game (e.g. P1_BUTTON1) and how it is lit.</summary>
 /// <param name="Control">Normalised logical control name, see <see cref="ControlNames"/>.</param>
@@ -46,6 +47,8 @@ public sealed class LightProfile
     public List<ControlLight> Controls { get; init; } = new();
     /// <summary>File the profile came from, for display.</summary>
     public string Source { get; init; } = "";
+    /// <summary>The user's own edit, stored apart from imported data. Counts even when empty (all off).</summary>
+    public bool Customized { get; init; }
 
     public ControlLight? Find(string control) =>
         Controls.FirstOrDefault(c => string.Equals(c.Control, control, StringComparison.OrdinalIgnoreCase));

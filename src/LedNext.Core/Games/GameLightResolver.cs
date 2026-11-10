@@ -3,6 +3,8 @@ namespace LedNext.Core.Games;
 /// <summary>One lit control after inheritance, with the panel buttons it lights.</summary>
 /// <param name="Buttons">Empty when the control is not on this panel.</param>
 /// <param name="MapSource">How the buttons were found ("input code KEYCODE_C", "name").</param>
+/// <param name="FromPlatformAlwaysActive">Added because a platform default marks it always lit, not
+/// listed by the level the game's lights come from.</param>
 public sealed record ResolvedControl(
     string Control,
     string? Label,
@@ -10,7 +12,8 @@ public sealed record ResolvedControl(
     string? ColorName,
     bool AlwaysActive,
     IReadOnlyList<string> Buttons,
-    string MapSource);
+    string MapSource,
+    bool FromPlatformAlwaysActive = false);
 
 /// <summary>What the panel shows for one game.</summary>
 /// <param name="From">Which level supplied the lit controls, e.g. "game 1942", "parent 005", "MAME default".</param>
@@ -44,11 +47,12 @@ public static class GameLightResolver
     {
         var levels = BuildChain(library, platform, game, out var defaultActive);
 
-        int activeIndex = levels.FindIndex(l => l.Profile.Controls.Count > 0);
+        // A customized profile counts even when empty: the user turned everything off on purpose.
+        int activeIndex = levels.FindIndex(l => l.Profile.Controls.Count > 0 || l.Profile.Customized);
         var controls = new List<ResolvedControl>();
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        void Add(ControlLight c, int fromIndex, bool sharedButtonsOnly = false)
+        void Add(ControlLight c, int fromIndex, bool sharedButtonsOnly = false, bool platformAlwaysActive = false)
         {
             if (!seen.Add(c.Control)) return;
             Rgb? color = c.Color;
@@ -70,7 +74,7 @@ public static class GameLightResolver
                 buttons = shared;
             }
             controls.Add(new ResolvedControl(c.Control, label, color ?? defaultActive, color is null ? "default" : colorName,
-                c.AlwaysActive, buttons, source));
+                c.AlwaysActive, buttons, source, platformAlwaysActive));
         }
 
         string from = "nothing (no lighting data)";
@@ -83,7 +87,7 @@ public static class GameLightResolver
         {
             if (!levels[i].IsPlatformDefault) continue;
             foreach (var c in levels[i].Profile.Controls)
-                if (c.AlwaysActive) Add(c, i, sharedButtonsOnly: ControlNames.PlayerOf(c.Control) == 0);
+                if (c.AlwaysActive) Add(c, i, sharedButtonsOnly: ControlNames.PlayerOf(c.Control) == 0, platformAlwaysActive: i != activeIndex);
         }
 
         // A game's own controls come first, so they win if two controls share a button.
@@ -111,7 +115,7 @@ public static class GameLightResolver
         foreach (var p in platforms)
         {
             var lights = library.GetLights(p.Key, null);
-            if (lights is not null) levels.Add(new Level(lights, $"{p.Name} default", true));
+            if (lights is not null) levels.Add(new Level(lights, $"{p.Name} default{Custom(lights)}", true));
         }
         return levels;
     }
@@ -126,11 +130,13 @@ public static class GameLightResolver
             if (lights is not null)
             {
                 string what = depth == 0 ? "game" : "parent";
-                levels.Add(new Level(lights, own ? $"{what} {name}" : $"{what} {name} (MAME data)", false));
+                levels.Add(new Level(lights, (own ? $"{what} {name}" : $"{what} {name} (MAME data)") + Custom(lights), false));
             }
             name = library.GetGame(platform, name)?.Parent;
         }
     }
+
+    private static string Custom(LightProfile p) => p.Customized ? " (customized)" : "";
 
     private static List<PlatformInfo> PlatformChain(IGameLibrary library, string platform)
     {

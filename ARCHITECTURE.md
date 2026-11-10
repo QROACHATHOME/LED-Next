@@ -56,8 +56,16 @@ LEDBlinky folder ──► LedBlinkyImporter ──► InMemoryGameLibrary ─�
   The map depends on the wiring: re-import after re-wiring.
 - **Colours**: LEDBlinky intensities are 0–48; they are scaled to 0–255 on import so brightness
   and gamma apply as usual. Names come from `Color-RGB.ini` (built-in copy if missing).
-- An import replaces the whole library. User edits (next phase 3 step) will be stored separately
-  so a re-import keeps them.
+- An import replaces the imported tables only. **User edits** live in `user_profiles` /
+  `user_lights` (schema 2) and are never touched by an import. A customized profile is a full
+  replacement for that level (a game, or a platform default), so it wins over the imported data at
+  that level and still inherits like any other (a customized platform default reaches every game
+  without its own lights). An empty customized profile means "all off", not "inherit".
+- **Editing** (`GameLightEditor`): the first edit copies what the panel shows now (`Materialize`,
+  leaving out controls that only come from the platform's always-lit set), then applies the change.
+  Clicking a panel button edits the control that lights it, else the control its name or the
+  control map points to (`ControlForButton`: `P1_B3` → `P1_BUTTON3`; with MAME's built-in keys
+  `P1_B8` → `P1_BUTTON7`; mahjong/UI keys that share a button are never picked).
 
 ## Lighting engine (`LedEngine`)
 

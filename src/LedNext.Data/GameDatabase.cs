@@ -12,12 +12,17 @@ public sealed record PlatformSummary(string Key, string Name, int Games, int Lit
 /// (pooled) connection, so the importer can write on a background thread while the UI reads.
 /// </summary>
 /// <remarks>
-/// Schema version 1 holds imported data only; an import replaces everything. User edits (phase 3,
-/// next step) will go in their own tables so a re-import never loses them.
+/// Imported data (platforms, games, lights) is replaced as a whole by each import. The user's edits
+/// live in user_profiles / user_lights (schema 2), which an import never touches; a customized
+/// profile replaces the imported one at the same level (game or platform default).
 /// </remarks>
 public sealed class GameDatabase : IGameLibrary
 {
-    public const int SchemaVersion = 1;
+    public const int SchemaVersion = 2;
+    private const string GameColumns = """
+        g.platform, g.name, g.description, g.parent, g.players, g.info, g.sources, g.lighting,
+        EXISTS(SELECT 1 FROM user_profiles u WHERE u.platform = g.platform AND u.game = g.name)
+        """;
     private readonly string _connectionString;
     private readonly object _cacheLock = new();
     private Dictionary<string, LightProfile?> _lightCache = new(StringComparer.OrdinalIgnoreCase);
@@ -51,7 +56,14 @@ public sealed class GameDatabase : IGameLibrary
                 platform TEXT NOT NULL COLLATE NOCASE, game TEXT NOT NULL COLLATE NOCASE, seq INTEGER NOT NULL,
                 control TEXT NOT NULL, color TEXT, color_name TEXT, label TEXT, always_active INTEGER NOT NULL,
                 source TEXT NOT NULL, PRIMARY KEY(platform, game, seq));
-            INSERT OR IGNORE INTO meta(key, value) VALUES('schema_version', '1');
+            CREATE TABLE IF NOT EXISTS user_profiles(
+                platform TEXT NOT NULL COLLATE NOCASE, game TEXT NOT NULL COLLATE NOCASE,
+                updated_at TEXT NOT NULL, PRIMARY KEY(platform, game));
+            CREATE TABLE IF NOT EXISTS user_lights(
+                platform TEXT NOT NULL COLLATE NOCASE, game TEXT NOT NULL COLLATE NOCASE, seq INTEGER NOT NULL,
+                control TEXT NOT NULL, color TEXT, color_name TEXT, label TEXT, always_active INTEGER NOT NULL,
+                PRIMARY KEY(platform, game, seq));
+            INSERT OR REPLACE INTO meta(key, value) VALUES('schema_version', '2');
             """);
         return db;
     }
@@ -201,17 +213,20 @@ public sealed class GameDatabase : IGameLibrary
 
     /// <summary>Games whose name or description contains <paramref name="text"/>, sorted by description.</summary>
     /// <returns>Up to <paramref name="limit"/> games and the total number of matches.</returns>
-    public (List<GameInfo> Games, int Total) Search(string? platform, string? text, bool litOnly, int limit = 500)
+    public (List<GameInfo> Games, int Total) Search(string? platform, string? text, bool litOnly, int limit = 500, bool customizedOnly = false)
     {
         using var c = Connect();
-        const string where = """
-            WHERE ($p IS NULL OR platform = $p) AND ($lit = 0 OR lighting > 0)
-              AND ($t IS NULL OR name LIKE $t ESCAPE '\' OR description LIKE $t ESCAPE '\')
+        const string custom = "EXISTS(SELECT 1 FROM user_profiles u WHERE u.platform = g.platform AND u.game = g.name)";
+        const string where = $"""
+            WHERE ($p IS NULL OR g.platform = $p) AND ($lit = 0 OR g.lighting > 0 OR {custom})
+              AND ($custom = 0 OR {custom})
+              AND ($t IS NULL OR g.name LIKE $t ESCAPE '\' OR g.description LIKE $t ESCAPE '\')
             """;
         void Bind(SqliteCommand cmd)
         {
             cmd.Parameters.AddWithValue("$p", (object?)platform ?? DBNull.Value);
             cmd.Parameters.AddWithValue("$lit", litOnly ? 1 : 0);
+            cmd.Parameters.AddWithValue("$custom", customizedOnly ? 1 : 0);
             var t = string.IsNullOrWhiteSpace(text) ? null
                 : "%" + text.Trim().Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_") + "%";
             cmd.Parameters.AddWithValue("$t", (object?)t ?? DBNull.Value);
@@ -220,13 +235,13 @@ public sealed class GameDatabase : IGameLibrary
         int total;
         using (var count = c.CreateCommand())
         {
-            count.CommandText = "SELECT COUNT(*) FROM games " + where;
+            count.CommandText = "SELECT COUNT(*) FROM games g " + where;
             Bind(count);
             total = Convert.ToInt32(count.ExecuteScalar(), CultureInfo.InvariantCulture);
         }
 
         using var cmd = c.CreateCommand();
-        cmd.CommandText = "SELECT * FROM games " + where + " ORDER BY description COLLATE NOCASE, name LIMIT $limit";
+        cmd.CommandText = $"SELECT {GameColumns} FROM games g " + where + " ORDER BY g.description COLLATE NOCASE, g.name LIMIT $limit";
         Bind(cmd);
         cmd.Parameters.AddWithValue("$limit", limit);
         using var r = cmd.ExecuteReader();
@@ -237,7 +252,7 @@ public sealed class GameDatabase : IGameLibrary
 
     private static GameInfo ReadGame(SqliteDataReader r) => new(
         r.GetString(0), r.GetString(1), r.GetString(2), r.IsDBNull(3) ? null : r.GetString(3),
-        r.GetInt32(4), r.GetString(5), r.GetString(6), (GameLighting)r.GetInt32(7));
+        r.GetInt32(4), r.GetString(5), r.GetString(6), (GameLighting)r.GetInt32(7), r.GetInt32(8) != 0);
 
     // ---- IGameLibrary ---------------------------------------------------------------------------
 
@@ -265,7 +280,7 @@ public sealed class GameDatabase : IGameLibrary
     {
         using var c = Connect();
         using var cmd = c.CreateCommand();
-        cmd.CommandText = "SELECT * FROM games WHERE platform = $p AND name = $n";
+        cmd.CommandText = $"SELECT {GameColumns} FROM games g WHERE g.platform = $p AND g.name = $n";
         cmd.Parameters.AddWithValue("$p", platform);
         cmd.Parameters.AddWithValue("$n", name);
         using var r = cmd.ExecuteReader();
@@ -280,12 +295,21 @@ public sealed class GameDatabase : IGameLibrary
 
         LightProfile? profile = null;
         using (var c = Connect())
-        using (var cmd = c.CreateCommand())
         {
-            cmd.CommandText = """
-                SELECT control, color, color_name, label, always_active, source FROM lights
-                WHERE platform = $p AND game = $g ORDER BY seq
-                """;
+            bool customized;
+            using (var check = c.CreateCommand())
+            {
+                check.CommandText = "SELECT 1 FROM user_profiles WHERE platform = $p AND game = $g";
+                check.Parameters.AddWithValue("$p", platform);
+                check.Parameters.AddWithValue("$g", game ?? "");
+                customized = check.ExecuteScalar() is not null;
+            }
+            if (customized) profile = new LightProfile { Source = "LED-Next", Customized = true };
+
+            using var cmd = c.CreateCommand();
+            cmd.CommandText = customized
+                ? "SELECT control, color, color_name, label, always_active, 'LED-Next' FROM user_lights WHERE platform = $p AND game = $g ORDER BY seq"
+                : "SELECT control, color, color_name, label, always_active, source FROM lights WHERE platform = $p AND game = $g ORDER BY seq";
             cmd.Parameters.AddWithValue("$p", platform);
             cmd.Parameters.AddWithValue("$g", game ?? "");
             using var r = cmd.ExecuteReader();
@@ -298,5 +322,87 @@ public sealed class GameDatabase : IGameLibrary
         }
         lock (_cacheLock) _lightCache[key] = profile;
         return profile;
+    }
+
+    // ---- User edits -----------------------------------------------------------------------------
+
+    /// <summary>
+    /// Stores the user's lights for a game (or the platform default when <paramref name="game"/> is
+    /// null). Replaces any earlier edit; imported data is kept and comes back on <see cref="RevertUserLights"/>.
+    /// </summary>
+    public void SaveUserLights(string platform, string? game, LightProfile profile)
+    {
+        using var c = Connect();
+        using var tx = c.BeginTransaction();
+        DeleteUser(c, tx, platform, game);
+        using (var head = c.CreateCommand())
+        {
+            head.Transaction = tx;
+            head.CommandText = "INSERT INTO user_profiles VALUES($p, $g, $t)";
+            head.Parameters.AddWithValue("$p", platform);
+            head.Parameters.AddWithValue("$g", game ?? "");
+            head.Parameters.AddWithValue("$t", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
+            head.ExecuteNonQuery();
+        }
+        using (var cmd = c.CreateCommand())
+        {
+            cmd.Transaction = tx;
+            cmd.CommandText = "INSERT INTO user_lights VALUES($p, $g, $seq, $c, $col, $cn, $lab, $a)";
+            cmd.Parameters.AddWithValue("$p", platform);
+            cmd.Parameters.AddWithValue("$g", game ?? "");
+            var seq = cmd.Parameters.Add("$seq", SqliteType.Integer);
+            var ctl = cmd.Parameters.Add("$c", SqliteType.Text);
+            var col = cmd.Parameters.Add("$col", SqliteType.Text);
+            var cn = cmd.Parameters.Add("$cn", SqliteType.Text);
+            var lab = cmd.Parameters.Add("$lab", SqliteType.Text);
+            var a = cmd.Parameters.Add("$a", SqliteType.Integer);
+            for (int i = 0; i < profile.Controls.Count; i++)
+            {
+                var cl = profile.Controls[i];
+                seq.Value = i; ctl.Value = cl.Control;
+                col.Value = cl.Color is { } rgb ? rgb.ToHex() : DBNull.Value;
+                cn.Value = (object?)cl.ColorName ?? DBNull.Value;
+                lab.Value = (object?)cl.Label ?? DBNull.Value;
+                a.Value = cl.AlwaysActive ? 1 : 0;
+                cmd.ExecuteNonQuery();
+            }
+        }
+        tx.Commit();
+        Invalidate(platform, game);
+    }
+
+    /// <summary>Drops the user's edit, so the imported lights (or inheritance) apply again.</summary>
+    public void RevertUserLights(string platform, string? game)
+    {
+        using var c = Connect();
+        using var tx = c.BeginTransaction();
+        DeleteUser(c, tx, platform, game);
+        tx.Commit();
+        Invalidate(platform, game);
+    }
+
+    public bool IsCustomized(string platform, string? game) => GetLights(platform, game)?.Customized == true;
+
+    public int CustomizedCount()
+    {
+        using var c = Connect();
+        using var cmd = c.CreateCommand();
+        cmd.CommandText = "SELECT COUNT(*) FROM user_profiles";
+        return Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture);
+    }
+
+    private static void DeleteUser(SqliteConnection c, SqliteTransaction tx, string platform, string? game)
+    {
+        using var cmd = c.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = "DELETE FROM user_lights WHERE platform = $p AND game = $g; DELETE FROM user_profiles WHERE platform = $p AND game = $g;";
+        cmd.Parameters.AddWithValue("$p", platform);
+        cmd.Parameters.AddWithValue("$g", game ?? "");
+        cmd.ExecuteNonQuery();
+    }
+
+    private void Invalidate(string platform, string? game)
+    {
+        lock (_cacheLock) _lightCache.Remove(InMemoryGameLibrary.Key(platform, game));
     }
 }

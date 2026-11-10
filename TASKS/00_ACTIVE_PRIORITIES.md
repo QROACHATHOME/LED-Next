@@ -23,7 +23,10 @@
 - [x] Decided: always-active UI controls (`UI_SELECT`…) light only shared (player 0) buttons. LEDBlinky lit
       P3 button 3 green in every game (it sends Enter); that was a bug, and it now follows the game.
 - [ ] Next visit: preview a trackball game and a Neo Geo game specifically (not covered in visit 2)
-- [ ] Editing: per-game / per-platform colour overrides stored apart from imported data
+- [x] Editing: per-game / per-platform colour overrides stored apart from imported data
+      (Games tab: click a button, pick a colour / Off / #hex, edit "Does"; Revert to imported;
+      "Only customized" filter). Kept on re-import. Not part of Ctrl+Z (Revert is the way back).
+- [ ] Next visit: edit a game in Hardware mode and check the real panel follows it live
 - [ ] Control templates (e.g. "6-button fighter") and bulk assign; smart lists
 - [ ] Control map editor (today it is rebuilt on import; re-import after re-wiring)
 - [ ] Platform name mapping LaunchBox ↔ LEDBlinky (`Sega Genesis` ↔ `Sega_Genesis`, `Arcade` → MAME)
