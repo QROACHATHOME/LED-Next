@@ -145,11 +145,30 @@ public static class PluginHost
         return string.IsNullOrWhiteSpace(platform) ? (null, null, null) : (null, platform, "platform:" + platform);
     }
 
+    private static string? _lastLoggedWheelKey;
+
     /// <summary>Sends what <see cref="ReadSelection"/> found, if anything.</summary>
     public static void SendSelection((IGame? Game, string? Platform, string? Key) selection, string via)
     {
+        if (selection.Game is null) LogWheel(selection.Key);
+        else lock (SelectionLock) _lastLoggedWheelKey = null; // log the wheel again after a game list
         if (selection.Game is not null) SendSelection(selection.Game, via);
         else if (selection.Platform is not null) SendPlatformSelection(selection.Platform, via);
+    }
+
+    /// <summary>
+    /// Logs each change on the wheel (no game selected): the platform name LaunchBox reports, or that it
+    /// reports nothing (e.g. a platform category?). Only on change, so scrolling games adds nothing.
+    /// </summary>
+    private static void LogWheel(string? key)
+    {
+        var k = key ?? "(nothing)";
+        lock (SelectionLock)
+        {
+            if (k == _lastLoggedWheelKey) return;
+            _lastLoggedWheelKey = k;
+        }
+        Log(key is null ? "Wheel: no game and no platform selected." : $"Wheel: {key}");
     }
 
     /// <summary>Reads the selection and sends it (for the SelectionChanged system event).</summary>

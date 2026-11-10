@@ -1177,3 +1177,102 @@
 17:06:02.715 [Info] Front end disconnected (0 connected).
 17:06:02.715 [Info] Light source: Off
 17:06:02.716 [Info] BigBox closed: all lights off.
+17:09:14.660 [Info] Read 41,633 games from LaunchBox at D:\LaunchBox.
+17:09:23.931 [Info] Light source: Game: 005
+17:09:26.574 [Info] Light source: Game: 10-Yard Fight (Japan)
+17:09:29.455 [Info] Light source: Game: 10-Yard Fight (World, set 1)
+17:09:29.501 [Info] Light source: Game: 10-Yard Fight (World, set 1)
+17:09:30.916 [Info] Light source: Game: 10-Yard Fight (World, set 1)
+17:09:31.460 [Info] Light source: Game: 10-Yard Fight (World, set 1)
+17:09:31.740 [Info] Light source: Game: 10-Yard Fight (World, set 1)
+17:09:31.988 [Info] Light source: Game: 10-Yard Fight (Japan)
+17:09:32.716 [Info] Light source: Game: 10-Yard Fight (World, set 1)
+17:09:33.979 [Info] Light source: Game: 10-Yard Fight (World, set 1)
+17:09:37.146 [Info] Light source: Game: 1942 (PlayChoice-10)
+17:09:38.474 [Info] Light source: Game: 1942 (Revision B)
+17:09:39.857 [Info] Light source: Game: 1943: The Battle of Midway Mark II (US)
+17:09:41.159 [Info] Light source: Game: 19xxd
+17:09:42.744 [Info] Light source: Game: 2020 Super Baseball (set 1)
+17:09:55.568 [Info] Read 41,633 games from LaunchBox at D:\LaunchBox.
+17:15:05.706 [Info] Output thread stopped.
+17:15:06.120 [Info] LED-Next stopped.
+17:15:42.657 [Info] LED-Next starting (64-bit). Config: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\cabinet.json
+17:15:42.700 [Info] Loaded C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\PacDrive64.dll
+17:15:42.729 [Info] PacDrive SDK reports 2 Ultimarc device(s).
+17:15:42.730 [Info]   device 0: VID D209 PID 1401 type 5 version 25
+17:15:42.735 [Info]   device 1: VID D209 PID 1402 type 5 version 25
+17:15:42.736 [Info] PacLED64: 2 board(s): PacLED64#1, PacLED64#2
+17:15:42.737 [Info] Output thread started.
+17:15:42.761 [Info] Game library: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\games.db (75,273 games)
+17:15:43.166 [Info] Started minimized (by a front-end plugin).
+17:15:43.297 [Info] Listening for front ends on pipe 'LedNext.FrontEnd'.
+17:15:44.727 [Info] Front end connected (1 connected).
+17:15:44.736 [Info] Front end: BigBox started
+17:15:44.767 [Warn] BigBox: no LED-Next platform for 'Taito B System'; lights unchanged.
+17:15:48.461 [Info] Read 41,633 games from LaunchBox at D:\LaunchBox.
+17:15:52.010 [Info] BigBox: 'Hit the Ice' → ARCADE_CLONES/hiticerb (LaunchBox id).
+17:15:52.011 [Info] Light source: BigBox (browsing): Hit the Ice
+17:15:52.217 [Info] Timing 'Hit the Ice': pipe 0 ms, wait 0 ms, lookup 7 ms, boards 206 ms (write 206 ms); total 214 ms.
+17:15:56.586 [Info] BigBox: 'Hit the Ice' → ARCADE_CLONES/hiticej (LaunchBox id).
+17:15:56.586 [Info] Light source: BigBox (browsing): Hit the Ice
+17:15:56.586 [Info] Timing 'Hit the Ice': pipe 0 ms, wait 0 ms, lookup 2 ms, boards 0 ms (write 0 ms); total 2 ms.
+17:15:59.440 [Info] BigBox: 'Master of Weapon' → ARCADE_CLONES/masterwj (LaunchBox id).
+17:15:59.441 [Info] Light source: BigBox (browsing): Master of Weapon
+17:15:59.647 [Info] Timing 'Master of Weapon': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 206 ms (write 206 ms); total 208 ms.
+17:16:01.893 [Info] BigBox: 'Master of Weapon' → ARCADE_CLONES/masterwu (LaunchBox id).
+17:16:01.893 [Info] Light source: BigBox (browsing): Master of Weapon
+17:16:01.894 [Info] Timing 'Master of Weapon': pipe 1 ms, wait 0 ms, lookup 2 ms, boards 0 ms (write 0 ms); total 3 ms.
+17:16:05.080 [Info] BigBox: 'Nastar Warrior' → ARCADE_CLONES/nastarw (LaunchBox id).
+17:16:05.080 [Info] Light source: BigBox (browsing): Nastar Warrior
+17:16:05.287 [Info] Timing 'Nastar Warrior': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 207 ms (write 206 ms); total 208 ms.
+17:16:07.169 [Info] BigBox: 'Puzzle Bobble' → ARCADE_CLONES/pbobble (LaunchBox id).
+17:16:07.169 [Info] Light source: BigBox (browsing): Puzzle Bobble
+17:16:07.375 [Info] Timing 'Puzzle Bobble': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 206 ms (write 206 ms); total 207 ms.
+17:16:09.013 [Info] BigBox: 'Rambo III' → ARCADE_CLONES/rambo3u (LaunchBox id).
+17:16:09.013 [Info] Light source: BigBox (browsing): Rambo III
+17:16:09.013 [Info] Timing 'Rambo III': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 0 ms (write 0 ms); total 1 ms.
+17:16:10.954 [Info] BigBox: 'Rambo III' → ARCADE_CLONES/rambo3p (LaunchBox id).
+17:16:10.954 [Info] Light source: BigBox (browsing): Rambo III
+17:16:10.954 [Info] Timing 'Rambo III': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 0 ms (write 0 ms); total 2 ms.
+17:16:12.862 [Info] BigBox: 'Rastan Saga 2' → ARCADE_CLONES/rastsag2 (LaunchBox id).
+17:16:12.862 [Info] Light source: BigBox (browsing): Rastan Saga 2
+17:16:13.069 [Info] Timing 'Rastan Saga 2': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 206 ms (write 206 ms); total 207 ms.
+17:16:14.612 [Info] BigBox: 'Silent Dragon' → ARCADE_CLONES/silentdu (LaunchBox id).
+17:16:14.612 [Info] Light source: BigBox (browsing): Silent Dragon
+17:16:14.819 [Info] Timing 'Silent Dragon': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 206 ms (write 206 ms); total 207 ms.
+17:16:16.983 [Info] BigBox: 'Silent Dragon' → ARCADE_CLONES/silentdj (LaunchBox id).
+17:16:16.983 [Info] Light source: BigBox (browsing): Silent Dragon
+17:16:16.983 [Info] Timing 'Silent Dragon': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 0 ms (write 0 ms); total 1 ms.
+17:16:18.381 [Warn] BigBox: no LED-Next platform for 'Taito B System'; lights unchanged.
+17:16:19.870 [Warn] BigBox: no LED-Next platform for 'Taito Air System'; lights unchanged.
+17:16:23.873 [Warn] BigBox: no LED-Next platform for 'Samurai Showdown Collection'; lights unchanged.
+17:16:26.448 [Info] BigBox: platform 'Arcade Duck' → Arcade_Duck (LaunchBox games); MAME default.
+17:16:26.448 [Info] Light source: BigBox (platform): Arcade Duck
+17:16:26.655 [Info] Timing 'platform Arcade Duck': pipe 0 ms, wait 0 ms, lookup 16 ms, boards 206 ms (write 206 ms); total 223 ms.
+17:16:27.695 [Warn] BigBox: no LED-Next platform for 'American Laser'; lights unchanged.
+17:16:29.173 [Warn] BigBox: no LED-Next platform for 'Atari'; lights unchanged.
+17:16:31.804 [Info] BigBox: platform 'Arcade PC' → Arcade_PC (LaunchBox games); MAME default.
+17:16:31.805 [Info] Light source: BigBox (platform): Arcade PC
+17:16:31.805 [Info] Timing 'platform Arcade PC': pipe 0 ms, wait 0 ms, lookup 17 ms, boards 0 ms (write 0 ms); total 18 ms.
+17:16:33.016 [Info] BigBox: platform 'Arcade Duck' → Arcade_Duck (LaunchBox games); MAME default.
+17:16:33.017 [Info] Light source: BigBox (platform): Arcade Duck
+17:16:33.017 [Info] Timing 'platform Arcade Duck': pipe 0 ms, wait 0 ms, lookup 17 ms, boards 0 ms (write 0 ms); total 17 ms.
+17:16:35.459 [Info] BigBox: platform 'Arcade' → MAME (LaunchBox games); MAME default.
+17:16:35.459 [Info] Light source: BigBox (platform): Arcade
+17:16:35.459 [Info] Timing 'platform Arcade': pipe 0 ms, wait 0 ms, lookup 17 ms, boards 0 ms (write 0 ms); total 17 ms.
+17:16:38.140 [Info] BigBox: 'Super Tank' → MAME/supertnk (LaunchBox id).
+17:16:38.141 [Info] Light source: BigBox (browsing): Super Tank
+17:16:38.141 [Info] Timing 'Super Tank': pipe 0 ms, wait 0 ms, lookup 2 ms, boards 0 ms (write 0 ms); total 3 ms.
+17:16:40.001 [Info] BigBox: 'Super Tank Attack' → MAME/stankatk (LaunchBox id).
+17:16:40.001 [Info] Light source: BigBox (browsing): Super Tank Attack
+17:16:40.002 [Info] Timing 'Super Tank Attack': pipe 0 ms, wait 0 ms, lookup 3 ms, boards 0 ms (write 0 ms); total 3 ms.
+17:16:42.008 [Info] BigBox: 'Super Ten V8.3X' → ADULT_GAMES/usg83x (LaunchBox id).
+17:16:42.009 [Info] Light source: BigBox (browsing): Super Ten V8.3X
+17:16:42.009 [Info] Timing 'Super Ten V8.3X': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 0 ms (write 0 ms); total 1 ms.
+17:16:42.670 [Info] BigBox: platform 'Arcade' → MAME (LaunchBox games); MAME default.
+17:16:42.670 [Info] Light source: BigBox (platform): Arcade
+17:16:42.670 [Info] Timing 'platform Arcade': pipe 1 ms, wait 0 ms, lookup 17 ms, boards 0 ms (write 0 ms); total 18 ms.
+17:17:03.008 [Info] Front end: BigBox closing
+17:17:03.008 [Info] Front end disconnected (0 connected).
+17:17:03.008 [Info] Light source: Off
+17:17:03.008 [Info] BigBox closed: all lights off.

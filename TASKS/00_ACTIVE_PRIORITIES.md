@@ -93,7 +93,9 @@
 - [x] BigBox platform wheel lights the highlighted platform's default lights (plugin sends the selected
       platform when no game is selected). Playlists / categories (no platform) keep the current lights
 - [x] Visit 6: BigBox's platform wheel lights each platform (IGS PC, Laser Disc, Atomiswave, Naomi, Neo Geo
-      MVS…; user: looked right), no flicker between games in a list, back to the wheel shows the platform
+      MVS…; user: looked right), no flicker between games in a list, back to the wheel shows the platform.
+      The **Arcade category** reports "Arcade" and lights the MAME default (user confirmed); the plugin logs
+      each wheel change ("Wheel: …")
 - [x] The plugin's `started` message is kept while LED-Next starts; the client connects as soon as it listens
       (visit 6: connected ~1 s after LED-Next listened, before any scrolling)
 - [ ] Attract mode / idle lighting in the front end (with animations, phase 5)

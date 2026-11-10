@@ -347,3 +347,14 @@ All mappings looked right; nothing was changed by hand. Notable:
 ## Files brought back
 - [x] `cabinet/led-next.log` updated
 - [x] `tools/pacled64-timing.ps1` (the board timing test)
+
+## Addendum: the Arcade category on the BigBox wheel (same day)
+- Added a plugin log line for each wheel change with no game selected ("Wheel: platform:<name>", or "no game
+  and no platform selected"). Re-installed (user's OK).
+- On the **Arcade platform category**, `GetSelectedPlatform()` reports **"Arcade"**, so LED-Next lights it
+  through the existing platform lookup: "platform 'Arcade' → MAME (LaunchBox games); MAME default".
+  **User: lit, and it was the category.** No LED-Next change needed. (BigBox reports a category the same way as
+  a platform of that name; the plugin can't tell them apart, and doesn't need to here.)
+- Other entries on that wheel level: Taito B System, Taito Air System, Samurai Showdown Collection, American
+  Laser, Atari (playlists, lights unchanged), Arcade Duck and Arcade PC (MAME default).
+- Board #1 still on its slow hub: 206 ms when the lights change.
