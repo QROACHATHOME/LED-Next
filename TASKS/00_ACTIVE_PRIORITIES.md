@@ -93,6 +93,7 @@
       TeknoParrot → Model 2 / MAME, Arcade → AAE…). Verified at the panel
 - [x] Extra colors.ini (Games → "Extra colors.ini…", config v4): lights MAME games LEDBlinky leaves unlit;
       23 more at the cabinet from a downloaded file
+- [x] Minimize to the system tray (tray icon: open / exit; the plugin's `--minimized` starts in the tray)
 - [ ] ~15 games not matched because LEDBlinky's title differs ("Virtua Fighter 2.1"…); a manual link or
       looser title rule could cover them
 - [ ] BigBox playlists on the wheel (most of the cabinet's wheel: Cinematronics, Gaelco, Taito B System…)

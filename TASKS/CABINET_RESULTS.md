@@ -405,3 +405,13 @@ All mappings looked right; nothing was changed by hand. Notable:
 - First try: the button stayed greyed out (not refreshed when the start-up LaunchBox read finished); fixed.
 - At the cabinet the user chose a downloaded `Colors.ini`: "23 MAME games lit from it; 1,399 already lit by
   LEDBlinky were left as they are". 116 tests pass.
+
+---
+
+# Visit 6d: minimize to the system tray (2026-11-10)
+- New `src/LedNext.App/TrayIcon.cs` (Windows Forms `NotifyIcon`; `UseWindowsForms` on in the app project, with the
+  global `System.Windows.Forms` / `System.Drawing` usings removed so WPF names stay unambiguous). Icon drawn in code.
+- Minimizing hides the window to the tray (lights keep running, preview paused). Double-click / "Open LED-Next"
+  restores it (maximized if it was); "Exit" closes it. `--minimized` (the LaunchBox plugin) starts in the tray.
+  The window's ✕ still exits. No setting to keep it on the taskbar.
+- **User: works.** 116 tests pass.

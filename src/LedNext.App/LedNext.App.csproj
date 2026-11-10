@@ -4,6 +4,8 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
+    <!-- Only for the tray icon (NotifyIcon in TrayIcon.cs); WPF has none. -->
+    <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>LedNext.App</RootNamespace>
     <AssemblyName>LED-Next</AssemblyName>
     <!-- x64 to load PacDrive64.dll. Use x86 if only PacDrive32.dll is available. -->
@@ -14,6 +16,12 @@
     <ProjectReference Include="..\LedNext.Core\LedNext.Core.csproj" />
     <ProjectReference Include="..\LedNext.Hardware\LedNext.Hardware.csproj" />
     <ProjectReference Include="..\LedNext.Data\LedNext.Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Keep WPF's names (Application, MessageBox, Button…) unambiguous: no global Windows Forms usings. -->
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
   </ItemGroup>
 
   <ItemGroup>

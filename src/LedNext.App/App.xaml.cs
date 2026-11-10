@@ -40,24 +40,36 @@ public partial class App : Application
         _session = new AppSession();
         var vm = new MainViewModel(_session);
         var window = new MainWindow(System.IO.Path.Combine(_session.ConfigDirectory, "window.json")) { DataContext = vm };
-        window.StateChanged += (_, _) => vm.PreviewVisible = window.WindowState != WindowState.Minimized;
+        _restoreState = window.WindowState;
+        // Minimizing hides the window to the tray icon; the lights keep running, the on-screen preview pauses.
+        window.StateChanged += (_, _) =>
+        {
+            vm.PreviewVisible = window.WindowState != WindowState.Minimized;
+            if (window.WindowState == WindowState.Minimized) window.Hide();
+            else _restoreState = window.WindowState;
+        };
+        _tray = new TrayIcon(open: () => BringToFront(window), exit: () => window.Close());
         if (minimized)
         {
             window.WindowState = WindowState.Minimized;
             vm.PreviewVisible = false;
-            AppLog.Info("Started minimized (by a front-end plugin).");
+            AppLog.Info("Started minimized to the tray (by a front-end plugin).");
         }
         window.Show();
+        if (minimized) window.Hide();
 
         _frontEnd = new FrontEndController(_session, vm);
         _frontEnd.ShowRequested += () => BringToFront(window);
         _frontEnd.Start();
     }
 
-    private static void BringToFront(Window window)
+    private TrayIcon? _tray;
+    private WindowState _restoreState = WindowState.Normal;
+
+    private void BringToFront(Window window)
     {
-        if (window.WindowState == WindowState.Minimized) window.WindowState = WindowState.Normal;
         window.Show();
+        if (window.WindowState == WindowState.Minimized) window.WindowState = _restoreState;
         window.Activate();
         // Activate alone may only flash the taskbar button when another app has the focus.
         window.Topmost = true;
@@ -67,6 +79,7 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        _tray?.Dispose();
         _frontEnd?.Dispose();
         _session?.Dispose();
         if (_singleInstance is not null)
