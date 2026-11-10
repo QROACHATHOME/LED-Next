@@ -1,0 +1,236 @@
+<UserControl x:Class="LedNext.App.Views.PanelView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Focusable="True" FocusVisualStyle="{x:Null}"
+             PreviewKeyDown="OnPreviewKeyDown"
+             PreviewMouseLeftButtonDown="OnPreviewMouseDown">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+
+        <Style x:Key="ChannelButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Height" Value="52" />
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+        <Style x:Key="WizardButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Focusable" Value="False" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="300" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Panel canvas -->
+        <Viewbox Stretch="Uniform" Margin="20">
+            <Border Width="{Binding Width}" Height="{Binding Height}" CornerRadius="24"
+                    Background="#26272D" BorderBrush="#3A3C45" BorderThickness="2"
+                    MouseLeftButtonDown="OnPanelBackgroundClick">
+                <Grid>
+                    <Image Source="{Binding Background}" Stretch="Fill" Opacity="{Binding BackgroundOpacity}" IsHitTestVisible="False" />
+                    <ItemsControl ItemsSource="{Binding Buttons}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ContentPresenter">
+                                <Setter Property="Canvas.Left" Value="{Binding Left}" />
+                                <Setter Property="Canvas.Top" Value="{Binding Top}" />
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Thumb Width="{Binding Size}" Height="{Binding Size}" Cursor="Hand"
+                                       DragStarted="OnDragStarted" DragDelta="OnDragDelta" DragCompleted="OnDragCompleted"
+                                       ToolTip="{Binding WiringInfo}">
+                                    <Thumb.Template>
+                                        <ControlTemplate TargetType="Thumb">
+                                            <Grid>
+                                                <!-- joystick: square gate/base plate behind the ball-top -->
+                                                <Rectangle x:Name="Gate" Margin="-16" RadiusX="10" RadiusY="10" Visibility="Collapsed"
+                                                           Fill="#1C1D22" Stroke="#4A4D56" StrokeThickness="2" />
+                                                <!-- soft glow in the LED colour -->
+                                                <Ellipse Margin="-8" IsHitTestVisible="False" Opacity="0.55">
+                                                    <Ellipse.Fill>
+                                                        <SolidColorBrush Color="{Binding Fill}" />
+                                                    </Ellipse.Fill>
+                                                    <Ellipse.Effect>
+                                                        <BlurEffect Radius="14" />
+                                                    </Ellipse.Effect>
+                                                </Ellipse>
+                                                <!-- the control itself: circle for buttons, rounded square for coin -->
+                                                <Rectangle x:Name="Ring" Stroke="#55585F" StrokeThickness="3"
+                                                           RadiusX="{Binding ShapeRadius}" RadiusY="{Binding ShapeRadius}">
+                                                    <Rectangle.Fill>
+                                                        <SolidColorBrush Color="{Binding Fill}" />
+                                                    </Rectangle.Fill>
+                                                </Rectangle>
+                                                <!-- trackball / joystick: glossy highlight so they read as balls -->
+                                                <Ellipse x:Name="Gloss" Visibility="Collapsed" IsHitTestVisible="False"
+                                                         HorizontalAlignment="Left" VerticalAlignment="Top" Opacity="0.35"
+                                                         Width="{Binding GlossSize}" Height="{Binding GlossSize}" Margin="{Binding GlossMargin}">
+                                                    <Ellipse.Fill>
+                                                        <RadialGradientBrush>
+                                                            <GradientStop Color="White" Offset="0" />
+                                                            <GradientStop Color="#00FFFFFF" Offset="1" />
+                                                        </RadialGradientBrush>
+                                                    </Ellipse.Fill>
+                                                </Ellipse>
+                                                <TextBlock Text="{Binding Label}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                           FontWeight="SemiBold" FontSize="15" Foreground="White">
+                                                    <TextBlock.Effect>
+                                                        <DropShadowEffect ShadowDepth="0" BlurRadius="4" Color="Black" Opacity="0.9" />
+                                                    </TextBlock.Effect>
+                                                </TextBlock>
+                                                <TextBlock x:Name="IdText" Text="{Binding Id}" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                                                           Margin="-40,0,-40,-20" TextAlignment="Center" FontSize="11" Foreground="#A0A3AD">
+                                                    <TextBlock.Effect>
+                                                        <DropShadowEffect ShadowDepth="0" BlurRadius="3" Color="Black" Opacity="0.9" />
+                                                    </TextBlock.Effect>
+                                                </TextBlock>
+                                            </Grid>
+                                            <ControlTemplate.Triggers>
+                                                <DataTrigger Binding="{Binding Kind}" Value="Joystick">
+                                                    <Setter TargetName="Gate" Property="Visibility" Value="Visible" />
+                                                    <Setter TargetName="Gloss" Property="Visibility" Value="Visible" />
+                                                    <Setter TargetName="IdText" Property="Margin" Value="-40,0,-40,-36" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Kind}" Value="Trackball">
+                                                    <Setter TargetName="Gloss" Property="Visibility" Value="Visible" />
+                                                    <Setter TargetName="Ring" Property="StrokeThickness" Value="5" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsFullyWired}" Value="False">
+                                                    <Setter TargetName="Ring" Property="Stroke" Value="{StaticResource AppWarn}" />
+                                                    <Setter TargetName="Ring" Property="StrokeDashArray" Value="2 1.5" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                    <Setter TargetName="Ring" Property="Stroke" Value="{StaticResource AppAccent}" />
+                                                    <Setter TargetName="Ring" Property="StrokeThickness" Value="5" />
+                                                    <Setter TargetName="Ring" Property="StrokeDashArray" Value="{x:Null}" />
+                                                </DataTrigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
+            </Border>
+        </Viewbox>
+
+        <!-- Right column -->
+        <Border Grid.Column="1" Background="{StaticResource AppSurface}" BorderBrush="{StaticResource AppBorder}" BorderThickness="1,0,0,0">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="14">
+                <Grid>
+                    <!-- ===== Normal editing ===== -->
+                    <StackPanel Visibility="{Binding Wizard.IsSetup, Converter={StaticResource BoolToVis}}">
+                        <WrapPanel>
+                            <Button Content="Add" Command="{Binding AddButtonCommand}" />
+                            <Button Content="Duplicate" Command="{Binding DuplicateCommand}" ToolTip="Ctrl+D" />
+                            <Button Content="Delete" Command="{Binding DeleteSelectedCommand}" ToolTip="Delete key" />
+                            <Button Content="Identify" Command="{Binding IdentifySelectedCommand}" ToolTip="Flash this button on the real panel" />
+                        </WrapPanel>
+
+                        <TextBlock TextWrapping="Wrap" Foreground="{StaticResource AppTextDim}" Margin="0,10,0,0"
+                                   Text="Drag buttons to move them, or use the arrow keys (Shift = 10×). Ctrl+C / Ctrl+V copy and paste. A dashed orange ring means the button isn't fully wired." />
+
+                        <StackPanel DataContext="{Binding Selected}" Margin="0,4,0,0">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+
+                            <TextBlock Text="ID (used by wiring and game profiles)" Style="{StaticResource SectionLabel}" />
+                            <TextBox Text="{Binding Id, UpdateSourceTrigger=LostFocus}" />
+
+                            <TextBlock Text="Label" Style="{StaticResource SectionLabel}" />
+                            <TextBox Text="{Binding Label, UpdateSourceTrigger=PropertyChanged}" />
+
+                            <TextBlock Text="Player (0 = shared)" Style="{StaticResource SectionLabel}" />
+                            <ComboBox ItemsSource="{Binding DataContext.Players, RelativeSource={RelativeSource AncestorType=UserControl}}" SelectedItem="{Binding Player}" />
+
+                            <TextBlock Text="Kind" Style="{StaticResource SectionLabel}" />
+                            <ComboBox ItemsSource="{Binding DataContext.Kinds, RelativeSource={RelativeSource AncestorType=UserControl}}" SelectedItem="{Binding Kind}" />
+
+                            <TextBlock Text="{Binding Size, StringFormat=Size: {0:0}}" Style="{StaticResource SectionLabel}" />
+                            <Slider Minimum="16" Maximum="140" Value="{Binding Size}" />
+
+                            <TextBlock Text="Wiring" Style="{StaticResource SectionLabel}" />
+                            <TextBlock Text="{Binding WiringInfo}" FontFamily="Consolas" />
+                        </StackPanel>
+
+                        <Rectangle Height="1" Fill="{StaticResource AppBorder}" Margin="0,16,0,4" />
+                        <TextBlock Text="PANEL PHOTO" Style="{StaticResource SectionLabel}" />
+                        <TextBlock TextWrapping="Wrap" Foreground="{StaticResource AppTextDim}"
+                                   Text="Take a photo of your control panel straight on, then drag the buttons onto it." />
+                        <WrapPanel Margin="0,6,0,0">
+                            <Button Content="Set photo…" Command="{Binding SetBackgroundCommand}" />
+                            <Button Content="Remove" Command="{Binding ClearBackgroundCommand}"
+                                    Visibility="{Binding HasBackground, Converter={StaticResource BoolToVis}}" />
+                        </WrapPanel>
+                        <StackPanel Visibility="{Binding HasBackground, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Text="{Binding BackgroundOpacity, StringFormat=Photo opacity: {0:P0}}" Style="{StaticResource SectionLabel}" />
+                            <Slider Minimum="0.05" Maximum="1" Value="{Binding BackgroundOpacity}" />
+                        </StackPanel>
+
+                        <Rectangle Height="1" Fill="{StaticResource AppBorder}" Margin="0,16,0,4" />
+                        <TextBlock Text="WIRING WIZARD" Style="{StaticResource SectionLabel}" />
+                        <TextBlock TextWrapping="Wrap" Foreground="{StaticResource AppTextDim}"
+                                   Text="Lights one pin at a time on the real boards. For each one, click the button that lit up and press the colour you see. Run it in Hardware mode at the cabinet." />
+                        <TextBlock Text="Boards" Style="{StaticResource SectionLabel}" />
+                        <ComboBox ItemsSource="{Binding Wizard.BoardChoices}" SelectedItem="{Binding Wizard.SelectedBoard}" />
+                        <CheckBox Content="Start from empty wiring on these boards" IsChecked="{Binding Wizard.ClearFirst}" Margin="0,8,0,0" />
+                        <Button Content="Start wiring wizard" Command="{Binding Wizard.StartCommand}" HorizontalAlignment="Left" Margin="0,10,0,0" Padding="14,6" />
+                    </StackPanel>
+
+                    <!-- ===== Wizard running ===== -->
+                    <StackPanel DataContext="{Binding Wizard}" Visibility="{Binding IsActive, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="WIRING WIZARD" Style="{StaticResource SectionLabel}" Margin="0,0,0,4" />
+                        <TextBlock Text="{Binding StepTitle}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <ProgressBar Value="{Binding Progress}" Height="6" Margin="0,8,0,8" Background="{StaticResource AppSurfaceRaised}"
+                                     Foreground="{StaticResource AppAccent}" BorderThickness="0" />
+                        <TextBlock Text="{Binding CurrentInfo}" Foreground="{StaticResource AppTextDim}" TextWrapping="Wrap" />
+
+                        <TextBlock TextWrapping="Wrap" Margin="0,14,0,0" LineHeight="20">
+                            <Run Text="1. Find the LED that just lit up." /><LineBreak />
+                            <Run Text="2. Click that button on the panel." /><LineBreak />
+                            <Run Text="3. Press the colour you see." />
+                        </TextBlock>
+
+                        <TextBlock Text="{Binding SelectionInfo}" FontWeight="SemiBold" Margin="0,12,0,6" />
+
+                        <UniformGrid Columns="3">
+                            <Button Content="R" Command="{Binding AssignCommand}" CommandParameter="R" Style="{StaticResource ChannelButton}" Background="#B03A3A" ToolTip="R key" />
+                            <Button Content="G" Command="{Binding AssignCommand}" CommandParameter="G" Style="{StaticResource ChannelButton}" Background="#2F8F45" ToolTip="G key" />
+                            <Button Content="B" Command="{Binding AssignCommand}" CommandParameter="B" Style="{StaticResource ChannelButton}" Background="#3460B8" ToolTip="B key" />
+                        </UniformGrid>
+
+                        <TextBlock Text="{Binding SuggestionText}" Foreground="{StaticResource AppAccent}" Margin="0,8,0,0" />
+                        <TextBlock Text="{Binding Hint}" Foreground="{StaticResource AppWarn}" TextWrapping="Wrap" Margin="0,4,0,0" />
+
+                        <WrapPanel Margin="0,12,0,0">
+                            <Button Content="Back" Command="{Binding BackCommand}" Style="{StaticResource WizardButton}" ToolTip="Backspace" />
+                            <Button Content="Skip pin" Command="{Binding SkipCommand}" Style="{StaticResource WizardButton}" ToolTip="Space — nothing lit, or the pin is unused" />
+                            <Button Content="Finish" Command="{Binding FinishCommand}" Style="{StaticResource WizardButton}" ToolTip="Esc" />
+                        </WrapPanel>
+
+                        <TextBlock TextWrapping="Wrap" Foreground="{StaticResource AppTextDim}" FontSize="11" Margin="0,14,0,0"
+                                   Text="Keys: R / G / B assign · Enter = suggestion · Space = skip · Backspace = back · Esc = finish. The selected button stays selected, so a whole RGB button is usually: click, Enter, Enter, Enter." />
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</UserControl>

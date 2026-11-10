@@ -1,0 +1,31 @@
+namespace LedNext.Core;
+
+public enum HardwareMode { Simulator, Hardware }
+
+public sealed class OutputSettings
+{
+    /// <summary>0..1, applied to button colours (not to raw pin tests).</summary>
+    public double Brightness { get; set; } = 1.0;
+    /// <summary>1.0 = linear. ~2.2 makes fades look more even on most LEDs.</summary>
+    public double Gamma { get; set; } = 1.0;
+    public int RefreshHz { get; set; } = 30;
+}
+
+public sealed class HardwareSettings
+{
+    public HardwareMode Mode { get; set; } = HardwareMode.Simulator;
+    /// <summary>Full path to PacDrive64.dll / PacDrive32.dll. Empty = look next to the exe.</summary>
+    public string? PacDriveDllPath { get; set; }
+}
+
+/// <summary>Everything about the physical cabinet: panel layout, wiring and output settings.</summary>
+public sealed class CabinetConfig
+{
+    public const int CurrentVersion = 1;
+
+    public int Version { get; set; } = CurrentVersion;
+    public PanelLayout Panel { get; set; } = new();
+    public WiringMap Wiring { get; set; } = new();
+    public OutputSettings Output { get; set; } = new();
+    public HardwareSettings Hardware { get; set; } = new();
+}

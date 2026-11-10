@@ -1,0 +1,79 @@
+﻿<Window x:Class="LedNext.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:LedNext.App.Views"
+        Title="LED-Next" Height="860" Width="1440" MinWidth="1000" MinHeight="600"
+        Background="{StaticResource AppBackground}" Foreground="{StaticResource AppText}" WindowStartupLocation="CenterScreen">
+    <Window.InputBindings>
+        <KeyBinding Key="Z" Modifiers="Ctrl" Command="{Binding UndoCommand}" />
+        <KeyBinding Key="Y" Modifiers="Ctrl" Command="{Binding RedoCommand}" />
+        <KeyBinding Key="Z" Modifiers="Ctrl+Shift" Command="{Binding RedoCommand}" />
+        <KeyBinding Key="S" Modifiers="Ctrl" Command="{Binding SaveCommand}" />
+    </Window.InputBindings>
+    <DockPanel>
+        <!-- Toolbar -->
+        <Border DockPanel.Dock="Top" Background="{StaticResource AppSurface}" BorderBrush="{StaticResource AppBorder}" BorderThickness="0,0,0,1" Padding="10,6">
+            <WrapPanel VerticalAlignment="Center">
+                <TextBlock Text="LED-Next" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,18,0" />
+
+                <Button Content="Undo" Command="{Binding UndoCommand}" ToolTip="Ctrl+Z" />
+                <Button Content="Redo" Command="{Binding RedoCommand}" ToolTip="Ctrl+Y" />
+                <Rectangle Width="1" Fill="{StaticResource AppBorder}" Margin="12,2" />
+
+                <CheckBox Content="Hardware mode" IsChecked="{Binding IsHardwareMode}" Margin="0,0,6,0"
+                          ToolTip="Off = simulator (no boards needed). On = drive the real PacLED64 boards." />
+                <Button Content="Rescan boards" Command="{Binding RescanCommand}" />
+
+                <Rectangle Width="1" Fill="{StaticResource AppBorder}" Margin="12,2" />
+                <TextBlock Text="Test:" Foreground="{StaticResource AppTextDim}" VerticalAlignment="Center" Margin="0,0,4,0" />
+                <Button Content="Off" Command="{Binding OffCommand}" />
+                <Button Content="White" Command="{Binding WhiteCommand}" />
+                <Button Content="Chase" Command="{Binding ChaseCommand}" ToolTip="One button at a time, in panel order" />
+                <Button Content="RGB cycle" Command="{Binding RgbCycleCommand}" ToolTip="All red, green, blue, white — catches swapped channels" />
+                <Button Content="Rainbow" Command="{Binding RainbowCommand}" />
+                <Button Content="Pin walk" Command="{Binding PinWalkCommand}" ToolTip="Each board pin in turn, ignoring wiring — for finding how the panel is wired" />
+
+                <Rectangle Width="1" Fill="{StaticResource AppBorder}" Margin="12,2" />
+                <TextBlock Text="Brightness" Foreground="{StaticResource AppTextDim}" VerticalAlignment="Center" />
+                <Slider Width="110" Minimum="0" Maximum="100" Value="{Binding Brightness}" VerticalAlignment="Center" Margin="6,0" IsSnapToTickEnabled="True" TickFrequency="5" />
+                <TextBlock Text="{Binding Brightness, StringFormat={}{0:0}%}" Width="38" VerticalAlignment="Center" />
+                <TextBlock Text="Gamma" Foreground="{StaticResource AppTextDim}" VerticalAlignment="Center" Margin="8,0,0,0" />
+                <Slider Width="90" Minimum="0.5" Maximum="3" Value="{Binding Gamma}" VerticalAlignment="Center" Margin="6,0" IsSnapToTickEnabled="True" TickFrequency="0.1" />
+                <TextBlock Text="{Binding Gamma, StringFormat={}{0:0.0}}" Width="26" VerticalAlignment="Center" />
+
+                <Rectangle Width="1" Fill="{StaticResource AppBorder}" Margin="12,2" />
+                <Button Content="Save" Command="{Binding SaveCommand}" ToolTip="Changes are also saved automatically" />
+            </WrapPanel>
+        </Border>
+
+        <!-- Status bar -->
+        <Border DockPanel.Dock="Bottom" Background="{StaticResource AppSurface}" BorderBrush="{StaticResource AppBorder}" BorderThickness="0,1,0,0" Padding="10,4">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Right" Text="{Binding ConfigPath}" Foreground="{StaticResource AppTextDim}" />
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding BoardsSummary}" />
+                    <TextBlock Text="  ·  " Foreground="{StaticResource AppTextDim}" />
+                    <TextBlock Text="{Binding SourceName}" FontWeight="SemiBold" />
+                    <TextBlock Text="  " />
+                    <TextBlock Text="{Binding FrameStatus}" Foreground="{StaticResource AppTextDim}" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <TabControl>
+            <TabItem Header="Panel">
+                <views:PanelView DataContext="{Binding Panel}" />
+            </TabItem>
+            <TabItem Header="Wiring">
+                <views:WiringView DataContext="{Binding Wiring}" />
+            </TabItem>
+            <TabItem Header="Boards">
+                <views:BoardsView DataContext="{Binding Boards}" />
+            </TabItem>
+            <TabItem Header="Log">
+                <ListBox ItemsSource="{Binding LogLines}" Background="{StaticResource AppBackground}" Foreground="{StaticResource AppText}"
+                         BorderThickness="0" FontFamily="Consolas" FontSize="12" Padding="8" />
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</Window>
