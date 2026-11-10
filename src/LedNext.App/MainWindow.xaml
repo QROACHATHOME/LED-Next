@@ -64,6 +64,9 @@
             <TabItem Header="Panel">
                 <views:PanelView DataContext="{Binding Panel}" />
             </TabItem>
+            <TabItem Header="Games">
+                <views:GamesView DataContext="{Binding Games}" />
+            </TabItem>
             <TabItem Header="Wiring">
                 <views:WiringView DataContext="{Binding Wiring}" />
             </TabItem>

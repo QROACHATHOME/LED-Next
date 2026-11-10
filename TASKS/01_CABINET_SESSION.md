@@ -1,5 +1,22 @@
 # Cabinet session brief (for Claude on the arcade machine)
 
+## Visit 2 (next visit) — check the game import
+Visit 1 is done (results in `TASKS/CABINET_RESULTS.md`; the driver works). For visit 2:
+1. `git pull`, build, run. The config upgrades itself to version 2 on start (logged).
+2. Games tab → **Import from LEDBlinky…** → `C:\LEDBlinky`. Read the Import report tab: it should
+   say MAME's `cfg/default.cfg` was found (`D:\CoinOPS Collections\emulators\Mame02XX`).
+3. Hardware mode on. Preview a handful of games the user knows (a 2-button, a 6-button, a
+   trackball game, a 4-player game, a Neo Geo game) and ask the user whether the real panel
+   matches what LEDBlinky lights. Note especially whether P3 button 3 lighting green
+   (`UI_SELECT`, it sends Enter) matches LEDBlinky.
+4. Copy MAME's `cfg/default.cfg` to `import-samples/mame/default.cfg` (read-only copy).
+5. Add a "Visit 2" section to `CABINET_RESULTS.md` with what matched and what didn't; commit,
+   ask before pushing.
+
+The rest of this file is the visit 1 brief, kept for reference.
+
+---
+
 You are continuing LED-Next on the **arcade machine**. Development so far happened on another PC
 with **no LED hardware**, in simulator mode only. Your job in this session is to get the app working
 against the real boards, capture the real panel layout and wiring, and record everything in

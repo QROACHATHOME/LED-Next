@@ -4,13 +4,14 @@
 
 | Project | Depends on | Role |
 |---|---|---|
-| `src/LedNext.Core` | nothing | Data model (panel, wiring, config), JSON store, lighting engine, test patterns, board interfaces, logging |
+| `src/LedNext.Core` | nothing | Data model (panel, wiring, config), JSON store, lighting engine, test patterns, board interfaces, logging, game model + light resolver (`Games/`), LEDBlinky importer (`Import/LedBlinky/`) |
+| `src/LedNext.Data` | Core, Microsoft.Data.Sqlite | The game library in SQLite (`GameDatabase`, implements `IGameLibrary`) |
 | `src/LedNext.Hardware` | Core | Board drivers: Ultimarc PacLED64 (via PacDrive SDK DLL) and a simulator |
-| `src/LedNext.App` | Core, Hardware | WPF desktop app: panel designer, Nodify wiring graph, board test view |
-| `tests/LedNext.Tests` | Core | xUnit tests for model, wiring rules and engine mapping |
+| `src/LedNext.App` | Core, Data, Hardware | WPF desktop app: panel designer, games browser, Nodify wiring graph, board test view |
+| `tests/LedNext.Tests` | Core, Data | xUnit tests; the importer tests run on the real files in `import-samples/` and `cabinet/` |
 
 Planned (later phases): `LedNext.Service` (background host that owns the hardware),
-`LedNext.LaunchBox` (thin plugin talking to the service over a named pipe), `LedNext.Import.LedBlinky`.
+`LedNext.LaunchBox` (thin plugin talking to the service over a named pipe).
 
 ## The three layers of data
 
@@ -18,10 +19,45 @@ Planned (later phases): `LedNext.Service` (background host that owns the hardwar
    (`P1_B1`, `P2_START`…). Button IDs are the names game profiles will refer to.
 2. **Wiring** (`WiringMap`) — which board pin drives each button's R, G and B channel.
    Rules: a pin is driven by at most one channel, a channel drives at most one pin.
-3. **Game profiles** — phase 3. Global → platform → control template → game override.
+3. **Game lights** (phase 3) — per game, which *logical* controls are lit and in what colour
+   (`P1_BUTTON1` Red, `P1_START` White…), plus the **control map** that ties logical controls to
+   panel buttons (`P1_BUTTON7` → `P1_B8`).
 
-Panel + wiring + settings are stored together in `config/cabinet.json` next to the exe
-(portable, like LEDBlinky). Game data will live in SQLite.
+Panel + wiring + control map + settings are stored together in `config/cabinet.json` next to the
+exe (portable, like LEDBlinky). Game data lives in `config/games.db` (SQLite).
+
+## Games (phase 3)
+
+```
+LEDBlinky folder ──► LedBlinkyImporter ──► InMemoryGameLibrary ──► GameDatabase (games.db)
+                         │                                              │ IGameLibrary
+                         └──► ControlMap (cabinet.json)                 ▼
+                                                         GameLightResolver.Resolve(platform, game)
+                                                                        │ ResolvedLights
+                                                                        ▼
+                                                          GameLights (ILightSource) ──► engine
+```
+
+- **Logical controls** (`ControlNames`): LEDBlinky/MAME names, normalised. `START1` → `P1_START`,
+  the four `P1_JOYSTICK_*` directions → `P1_JOYSTICK`, `P1_TRACKBALL_X…` → `P1_TRACKBALL`.
+  `CONTROL_*` entries are descriptions ("8-Way Joystick"), not lit controls.
+- **Inheritance** (`GameLightResolver`): game → parent ROM (clones) → MAME's data for MAME-based
+  platforms (Neo Geo…) → platform default → parent platform default (usually MAME). The first level
+  that lists any controls decides *which* controls are lit; unlisted controls are off, as in
+  LEDBlinky. A control without a colour takes it from further up the chain, else the platform's
+  default-active colour. Always-active controls of platform defaults (`UI_SELECT`…) are added to
+  every game.
+- **Control map** (`ControlMap`, built by `ControlMapBuilder`): matches LEDBlinky. A digital
+  control's MAME input codes (from LEDBlinky's MAME defaults, or MAME's `cfg/default.cfg` when
+  LEDBlinky's MAME folder has one) are matched against the codes LEDBlinky recorded for each LED
+  port in `LEDBlinkyInputMap.xml`; the port is followed through LED-Next's wiring to a button.
+  Anything unmatched falls back to the naming convention (`P1_BUTTON3` → `P1_B3`,
+  `P1_TRACKBALL` → the Trackball-kind control). Joysticks/analog controls match by name only.
+  The map depends on the wiring: re-import after re-wiring.
+- **Colours**: LEDBlinky intensities are 0–48; they are scaled to 0–255 on import so brightness
+  and gamma apply as usual. Names come from `Color-RGB.ini` (built-in copy if missing).
+- An import replaces the whole library. User edits (next phase 3 step) will be stored separately
+  so a re-import keeps them.
 
 ## Lighting engine (`LedEngine`)
 

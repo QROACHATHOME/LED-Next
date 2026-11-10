@@ -12,6 +12,22 @@
 - [x] Replace the default 4-player layout with the real panel layout and wiring (`cabinet/cabinet.json`)
 - [ ] Restore/clamp the main window position (it can open partly off-screen; see CABINET_RESULTS §5)
 
+## Phase 3 — Game database
+- [x] Game model, logical control names, inheritance resolver (game → parent → platform → MAME)
+- [x] LEDBlinky importer: LEDBlinkyControls.xml, Colors.ini, Controls.ini, minimized MAME xml,
+      Color-RGB.ini, settings.ini, input map → control map (tested on the real LEDBlinky 8.3 files)
+- [x] SQLite library (`config/games.db`), search
+- [x] Games tab: import, platform filter, search, live preview on the panel and the boards
+- [ ] **Verify at the cabinet**: import from `C:\LEDBlinky`, preview a few games, compare with what
+      LEDBlinky lights. Check MAME's `cfg/default.cfg` is found (import report says so).
+- [ ] Decide: `UI_SELECT` (always lit, green) maps to P3 button 3 because that button sends Enter.
+      LEDBlinky probably does the same; confirm at the cabinet, else drop always-active UI controls.
+- [ ] Editing: per-game / per-platform colour overrides stored apart from imported data
+- [ ] Control templates (e.g. "6-button fighter") and bulk assign; smart lists
+- [ ] Control map editor (today it is rebuilt on import; re-import after re-wiring)
+- [ ] Platform name mapping LaunchBox ↔ LEDBlinky (`Sega Genesis` ↔ `Sega_Genesis`, `Arcade` → MAME)
+- [ ] Animations (`*.lwax`) — phase 5
+
 ## At the arcade machine — suggested order
 
 ### 1. Get the boards talking (the driver has never run on real hardware)
@@ -41,11 +57,15 @@
    light one at a time in the expected order.
 10. Exit the app: all LEDs should go off.
 
-## Gather for Phase 3 (from the arcade machine)
-- The LEDBlinky install folder: controls/colors XML, `Colors.ini`, input map XML, animation files
-- LaunchBox version (decides the plugin's target framework)
+## Gather for Phase 3 (from the arcade machine) — done 2026-11-10
+- LEDBlinky 8.3 files are in `import-samples/ledblinky/`; LaunchBox is 14.1
+- Still useful next visit: MAME's `cfg/default.cfg` from `D:\CoinOPS Collections\emulators\Mame02XX`
+  (copy into `import-samples/mame/`) so the control map can be tested with the real key assignments
 
 ## Known limitations
 - Panel designer: single selection only (no multi-select / group move yet).
 - Graph node positions in the Wiring tab are not part of undo.
 - The ComboBoxes use the default light Windows style.
+- Game lights: front-end (`frontEnd`) sections, per-emulator input codes, `.lwax` animations and
+  LEDBlinky output options (`LightPlayerStartCoin`…) are not imported yet. Non-PacLED64 controllers
+  in the input map are skipped.

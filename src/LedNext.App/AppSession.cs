@@ -2,6 +2,7 @@ using System.IO;
 using System.Windows.Threading;
 using LedNext.Core;
 using LedNext.Core.Lighting;
+using LedNext.Data;
 using LedNext.Hardware;
 
 namespace LedNext.App;
@@ -24,6 +25,16 @@ public sealed class AppSession : IDisposable
         Engine.ReplaceProvider(BoardProviders.Create(Config));
         Engine.Start();
 
+        try
+        {
+            Games = GameDatabase.Open(Path.Combine(ConfigDirectory, "games.db"));
+            AppLog.Info($"Game library: {Games.Path} ({Games.GameCount():N0} games)");
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("Could not open the game library; the Games tab is disabled", ex);
+        }
+
         _saveTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _saveTimer.Tick += (_, _) => SaveNow();
     }
@@ -31,6 +42,8 @@ public sealed class AppSession : IDisposable
     public string ConfigPath { get; }
     public CabinetConfig Config { get; }
     public LedEngine Engine { get; }
+    /// <summary>The game library (config/games.db), or null if it could not be opened.</summary>
+    public GameDatabase? Games { get; }
 
     /// <summary>Raised after buttons are added, removed or renamed, or wiring changes.</summary>
     public event Action? StructureChanged;

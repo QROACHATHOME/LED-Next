@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\LedNext.Core\LedNext.Core.csproj" />
+    <ProjectReference Include="..\..\src\LedNext.Data\LedNext.Data.csproj" />
   </ItemGroup>
 
 </Project>

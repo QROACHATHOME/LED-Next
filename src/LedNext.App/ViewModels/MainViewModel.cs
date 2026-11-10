@@ -23,6 +23,7 @@ public sealed partial class MainViewModel : ObservableObject
         Panel = new PanelViewModel(session, this);
         Wiring = new WiringViewModel(session);
         Boards = new BoardsViewModel(session, this);
+        Games = new GamesViewModel(session, this);
 
         AppLog.Logged += OnLogged;
         session.StructureChanged += OnStructureChanged;
@@ -46,6 +47,7 @@ public sealed partial class MainViewModel : ObservableObject
     }
 
     public PanelViewModel Panel { get; }
+    public GamesViewModel Games { get; }
     public WiringViewModel Wiring { get; }
     public BoardsViewModel Boards { get; }
     public ObservableCollection<string> LogLines { get; } = new();

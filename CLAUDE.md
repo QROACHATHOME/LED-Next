@@ -27,6 +27,7 @@ starting work. Never commit `PacDrive*.dll` (Ultimarc's file; git-ignored).
 ## Hard rules
 - C# 12 / .NET 8, WPF for the UI. Do not switch UI frameworks without being asked.
 - `LedNext.Core` has **no** WPF and **no** native/hardware dependencies. It must stay unit-testable.
+  SQLite lives in `LedNext.Data`; parsing/importing and game-light resolution stay in Core.
 - Hardware I/O happens **only on the engine output thread** (inside `LedEngine`'s output lock).
   Board discovery goes through `LedEngine.ReplaceBoards` so it never races a write.
 - Pins are **1-based** everywhere in config, UI and logs (they match the board's silkscreen).
@@ -41,6 +42,9 @@ starting work. Never commit `PacDrive*.dll` (Ultimarc's file; git-ignored).
   "Verify on the arcade machine"). These were written from memory of the SDK and have not been
   run against real boards yet.
 - Nodify graph bindings (anchors, pending connections) — check after any Nodify upgrade.
+- The LEDBlinky control map (`ControlMapBuilder`) and MAME `cfg/default.cfg` reading: tested on the
+  real LEDBlinky files, but MAME's own `default.cfg` has not been seen yet. Compare the Games tab
+  with what LEDBlinky lights before trusting it.
 
 ## Expected working style
 - Say which subsystem you are changing.

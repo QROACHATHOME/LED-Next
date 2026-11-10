@@ -12,7 +12,7 @@ thousands of games.
 
 ## Phases
 
-### Phase 1 — Hardware core (current)
+### Phase 1 — Hardware core (done; verified on the cabinet 2026-11-10)
 - PacLED64 driver, multiple boards per PC, stable board keys
 - Simulator mode
 - Panel designer: drag buttons, edit label/player/kind/size, add/delete
@@ -34,10 +34,15 @@ thousands of games.
 - Button shapes, joystick/trackball/spinner glyphs, multi-select
 - Import/export panel + wiring files
 
-### Phase 3 — Game database
+### Phase 3 — Game database (current)
 - SQLite store, inheritance (global → platform → control template → game)
 - Import from LEDBlinky (controls/colors data, color definitions, input map, animations)
 - Bulk assign, smart lists, fast search, live preview while browsing
+
+Done so far: SQLite library, inheritance game → parent ROM → platform default → MAME default,
+LEDBlinky import (everything above except animations), control map from the LEDBlinky input map,
+Games tab with platform filter, search and live preview. Next: editing and overrides, control
+templates, bulk assign, smart lists.
 
 ### Phase 4 — Front ends
 - `LedNext.Service` owns hardware; app and plugins are clients over a named pipe

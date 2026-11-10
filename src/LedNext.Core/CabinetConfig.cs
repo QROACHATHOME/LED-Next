@@ -21,11 +21,24 @@ public sealed class HardwareSettings
 /// <summary>Everything about the physical cabinet: panel layout, wiring and output settings.</summary>
 public sealed class CabinetConfig
 {
-    public const int CurrentVersion = 1;
+    /// <summary>
+    /// 1 = phase 1. 2 = adds <see cref="ControlMap"/> and <see cref="Games"/> (both default to empty,
+    /// so a version 1 file loads unchanged).
+    /// </summary>
+    public const int CurrentVersion = 2;
 
     public int Version { get; set; } = CurrentVersion;
     public PanelLayout Panel { get; set; } = new();
     public WiringMap Wiring { get; set; } = new();
+    /// <summary>Which panel buttons light for each logical game control (P1_BUTTON1…).</summary>
+    public LedNext.Core.Games.ControlMap ControlMap { get; set; } = new();
     public OutputSettings Output { get; set; } = new();
     public HardwareSettings Hardware { get; set; } = new();
+    public GameSettings Games { get; set; } = new();
+}
+
+public sealed class GameSettings
+{
+    /// <summary>LEDBlinky install folder last imported from (read only, never written to).</summary>
+    public string? LedBlinkyFolder { get; set; }
 }

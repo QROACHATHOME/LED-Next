@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\LedNext.Core\LedNext.Core.csproj" />
     <ProjectReference Include="..\LedNext.Hardware\LedNext.Hardware.csproj" />
+    <ProjectReference Include="..\LedNext.Data\LedNext.Data.csproj" />
   </ItemGroup>
 
   <ItemGroup>
