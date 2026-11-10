@@ -2,25 +2,29 @@
 
   <!--
     LaunchBox / BigBox plugin: reports game selected / launched / exited to the LED-Next app over a
-    named pipe. LaunchBox 14.1 runs on .NET 10; a net8.0 plugin loads there and builds with the .NET 8 SDK.
+    named pipe. LaunchBox 14.1 runs on .NET 10.
 
     Building:
     - On the cabinet, it builds against LaunchBox's real Unbroken.LaunchBox.Plugins.dll
-      ($(LaunchBoxDir)\Core\…, default D:\LaunchBox; override with -p:LaunchBoxDir=…).
-    - Elsewhere it builds against tools\LaunchBoxPluginStubs, a compile-only stand-in.
+      ($(LaunchBoxDir)\Core\…, default D:\LaunchBox; override with -p:LaunchBoxDir=…). That DLL references
+      System.Runtime 10.0, so a net8.0 project can't compile against it (CS1705): the plugin then targets
+      net10.0-windows and needs the .NET 10 SDK (installed on the cabinet, visit 5). The app stays .NET 8.
+    - Elsewhere it builds against tools\LaunchBoxPluginStubs, a compile-only stand-in, for net8.0-windows
+      (no .NET 10 SDK needed).
     Neither copy of that DLL is ever output or committed (Private=false): LaunchBox provides its own.
     Install with tools\install-launchbox-plugin.ps1 (copies to <LaunchBox>\Plugins\LED-Next only).
   -->
   <PropertyGroup>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <LaunchBoxDir Condition="'$(LaunchBoxDir)' == ''">D:\LaunchBox</LaunchBoxDir>
+    <LaunchBoxPluginsDll>$(LaunchBoxDir)\Core\Unbroken.LaunchBox.Plugins.dll</LaunchBoxPluginsDll>
+    <UsingRealLaunchBoxApi Condition="Exists('$(LaunchBoxPluginsDll)')">true</UsingRealLaunchBoxApi>
+    <TargetFramework Condition="'$(UsingRealLaunchBoxApi)' == 'true'">net10.0-windows</TargetFramework>
+    <TargetFramework Condition="'$(UsingRealLaunchBoxApi)' != 'true'">net8.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>LedNext.LaunchBox</RootNamespace>
     <AssemblyName>LedNext.LaunchBox</AssemblyName>
-    <LaunchBoxDir Condition="'$(LaunchBoxDir)' == ''">D:\LaunchBox</LaunchBoxDir>
-    <LaunchBoxPluginsDll>$(LaunchBoxDir)\Core\Unbroken.LaunchBox.Plugins.dll</LaunchBoxPluginsDll>
-    <UsingRealLaunchBoxApi Condition="Exists('$(LaunchBoxPluginsDll)')">true</UsingRealLaunchBoxApi>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(UsingRealLaunchBoxApi)' == 'true'">

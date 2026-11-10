@@ -44,7 +44,8 @@ $project = Join-Path $repo "src\LedNext.LaunchBox\LedNext.LaunchBox.csproj"
 & dotnet build $project -c Release -nologo -v q "-p:LaunchBoxDir=$LaunchBox"
 if ($LASTEXITCODE -ne 0) { throw "Build failed. If the errors are about LaunchBox types, the real plugin API differs from tools\LaunchBoxPluginStubs: fix the plugin (and the stand-in) to match." }
 
-$out = Join-Path $repo "src\LedNext.LaunchBox\bin\Release\net8.0-windows"
+# Built against the real API the plugin targets net10.0-windows (LaunchBox's DLL needs System.Runtime 10).
+$out = Join-Path $repo "src\LedNext.LaunchBox\bin\Release\net10.0-windows"
 $info = Get-Content (Join-Path $out "LedNext.LaunchBox.buildinfo") -ErrorAction SilentlyContinue
 if ($info -ne "api=true") { throw "The build used the compile-only stand-in, not LaunchBox's API ($info). Not installing." }
 if (Test-Path (Join-Path $out "Unbroken.LaunchBox.Plugins.dll")) { throw "Unbroken.LaunchBox.Plugins.dll ended up in the output; it must come from LaunchBox. Not installing." }

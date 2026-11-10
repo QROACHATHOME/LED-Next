@@ -32,7 +32,7 @@ public sealed class LedNextThemeElement : UserControl, IBigBoxThemeElementPlugin
     {
         try
         {
-            if (game?.Id is { } id && ThemeElementSeen.Mark(id)) PluginHost.Send(FrontEndEvents.Select, game);
+            if (game?.Id is not null) PluginHost.SendSelection(game, "theme element");
         }
         catch (Exception ex)
         {

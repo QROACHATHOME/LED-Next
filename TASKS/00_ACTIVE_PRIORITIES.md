@@ -75,9 +75,13 @@
       launching, selection poll, BigBox theme element), install script. Checked end to end with a fake
       LaunchBox host calling the real plugin DLL (it started LED-Next, lit by LaunchBox id, launch/exit,
       closing → off); 107 tests
-- [ ] **Visit 5**: build the plugin against the real `Unbroken.LaunchBox.Plugins.dll` (fix any API
-      differences), install, and check live lighting in LaunchBox and BigBox (see the cabinet brief)
-- [ ] BigBox selection: confirm which works there (StateManager poll or the theme element in a view)
+- [x] **Visit 5** (2026-11-10): plugin built against the real 14.1.0.5 DLL (targets `net10.0-windows` there,
+      needs the .NET 10 SDK; `net8.0-windows` with the stand-in), installed, and live lighting **works in
+      LaunchBox and BigBox**: selection, launch, exit, close → off, all games matched by LaunchBox id
+- [x] BigBox selection: the `SelectionChanged` system event + `GetAllSelectedGames()` work in BigBox; the theme
+      element is not needed (kept as an option)
+- [ ] Slight selection lag in LaunchBox (instant in BigBox): log timing from "select" received to the boards
+- [ ] Plugin's `started` message is lost when LED-Next is still starting; connect/retry once LED-Next listens
 - [ ] Attract mode / idle lighting in the front end (with animations, phase 5)
 - [ ] Animations (`*.lwax`) — phase 5
 

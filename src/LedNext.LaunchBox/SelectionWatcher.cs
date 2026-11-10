@@ -45,8 +45,7 @@ public sealed class SelectionWatcher
             var id = game?.Id;
             if (id is null || id == _lastId) return;
             _lastId = id;
-            ThemeElementSeen.Mark(id);
-            PluginHost.Send(FrontEndEvents.Select, game);
+            PluginHost.SendSelection(game!, "watcher");
         }
         catch (Exception ex)
         {
@@ -57,19 +56,3 @@ public sealed class SelectionWatcher
     }
 }
 
-/// <summary>Avoids sending the same selection twice when both the watcher and a theme element report it.</summary>
-internal static class ThemeElementSeen
-{
-    private static string? _lastId;
-    private static DateTime _at;
-
-    /// <returns>False if this game was just reported (within 300 ms).</returns>
-    public static bool Mark(string id)
-    {
-        var now = DateTime.UtcNow;
-        bool fresh = id != _lastId || now - _at > TimeSpan.FromMilliseconds(300);
-        _lastId = id;
-        _at = now;
-        return fresh;
-    }
-}

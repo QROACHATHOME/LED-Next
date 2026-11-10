@@ -514,3 +514,323 @@
 14:05:29.365 [Info] Output thread started.
 14:05:29.390 [Info] Game library: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\games.db (75,273 games)
 14:05:34.740 [Info] Read 41,633 games from LaunchBox at D:\LaunchBox.
+14:09:07.130 [Info] Output thread stopped.
+14:09:07.544 [Info] LED-Next stopped.
+16:05:03.960 [Info] LED-Next starting (64-bit). Config: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\cabinet.json
+16:05:04.000 [Info] Loaded C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\PacDrive64.dll
+16:05:04.117 [Info] PacDrive SDK reports 2 Ultimarc device(s).
+16:05:04.118 [Info]   device 0: VID D209 PID 1401 type 5 version 25
+16:05:04.123 [Info]   device 1: VID D209 PID 1402 type 5 version 25
+16:05:04.124 [Info] PacLED64: 2 board(s): PacLED64#1, PacLED64#2
+16:05:04.125 [Info] Output thread started.
+16:05:04.149 [Info] Game library: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\games.db (75,273 games)
+16:05:05.058 [Info] Listening for front ends on pipe 'LedNext.FrontEnd'.
+16:05:09.792 [Info] Read 41,633 games from LaunchBox at D:\LaunchBox.
+16:05:23.136 [Info] Output thread stopped.
+16:05:23.549 [Info] LED-Next stopped.
+16:05:36.100 [Info] LED-Next starting (64-bit). Config: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\cabinet.json
+16:05:36.185 [Info] Loaded C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\PacDrive64.dll
+16:05:36.305 [Info] PacDrive SDK reports 2 Ultimarc device(s).
+16:05:36.307 [Info]   device 0: VID D209 PID 1401 type 5 version 25
+16:05:36.317 [Info]   device 1: VID D209 PID 1402 type 5 version 25
+16:05:36.319 [Info] PacLED64: 2 board(s): PacLED64#1, PacLED64#2
+16:05:36.320 [Info] Output thread started.
+16:05:36.378 [Info] Game library: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\games.db (75,273 games)
+16:05:36.752 [Info] Started minimized (by a front-end plugin).
+16:05:36.873 [Info] Listening for front ends on pipe 'LedNext.FrontEnd'.
+16:05:41.709 [Info] Read 41,633 games from LaunchBox at D:\LaunchBox.
+16:06:13.463 [Info] Front end connected (1 connected).
+16:06:13.476 [Info] Light source: LaunchBox (browsing): Razing Storm
+16:06:13.476 [Info] LaunchBox: 'Razing Storm' → Namco_System_357/RazingStorm (LaunchBox id).
+16:06:15.689 [Info] Light source: LaunchBox (browsing): Tekken 6: Bloodline Rebellion
+16:06:15.689 [Info] LaunchBox: 'Tekken 6: Bloodline Rebellion' → Namco_System_357/Tekken6BR (LaunchBox id).
+16:06:17.734 [Info] Light source: LaunchBox (browsing): Taiko no Tatsujin: Murasaki Version
+16:06:17.734 [Info] LaunchBox: 'Taiko no Tatsujin: Murasaki Version' → Namco_System_357/taikomurasaki (LaunchBox id).
+16:06:19.163 [Info] Light source: LaunchBox (browsing): Taiko no Tatsujin: Green Version
+16:06:19.164 [Info] LaunchBox: 'Taiko no Tatsujin: Green Version' → Namco_System_357/taikogreen (LaunchBox id).
+16:06:23.502 [Info] Light source: LaunchBox (browsing): Heavy Barrel
+16:06:23.502 [Info] LaunchBox: 'Heavy Barrel' → MAME/hbarrel (LaunchBox id).
+16:06:25.944 [Info] Light source: LaunchBox (browsing): Euro League
+16:06:25.945 [Info] LaunchBox: 'Euro League' → MAME/eurogael (LaunchBox id).
+16:06:28.250 [Info] Light source: LaunchBox (browsing): Penguin Adventure
+16:06:28.250 [Info] LaunchBox: 'Penguin Adventure' → MAME/pengadvb2 (LaunchBox id).
+16:06:31.770 [Info] Light source: LaunchBox (browsing): Ray Storm
+16:06:31.770 [Info] LaunchBox: 'Ray Storm' → MAME/raystorm (LaunchBox id).
+16:06:34.536 [Info] Light source: LaunchBox (browsing): Mr. Driller
+16:06:34.536 [Info] LaunchBox: 'Mr. Driller' → MAME/mrdrillr (LaunchBox id).
+16:06:36.263 [Info] Light source: LaunchBox (browsing): Ray Storm
+16:06:36.263 [Info] LaunchBox: 'Ray Storm' → MAME/raystorm (LaunchBox id).
+16:06:38.852 [Info] Light source: LaunchBox (browsing): Parodius Da!: Shinwa kara Owarai e
+16:06:38.853 [Info] LaunchBox: 'Parodius Da!: Shinwa kara Owarai e' → MAME/parodius (LaunchBox id).
+16:06:40.515 [Info] Light source: LaunchBox (browsing): Gogetsuji Legends
+16:06:40.515 [Info] LaunchBox: 'Gogetsuji Legends' → MAME/plegends (LaunchBox id).
+16:06:41.684 [Info] Light source: LaunchBox (browsing): Princess Clara Daisakusen
+16:06:41.684 [Info] LaunchBox: 'Princess Clara Daisakusen' → MAME/prikura (LaunchBox id).
+16:06:44.106 [Info] Light source: LaunchBox (browsing): Mazinger Z
+16:06:44.106 [Info] LaunchBox: 'Mazinger Z' → MAME/mazinger (LaunchBox id).
+16:06:50.224 [Info] Light source: LaunchBox (browsing): Guardian
+16:06:50.224 [Info] LaunchBox: 'Guardian' → MAME/grdian (LaunchBox id).
+16:06:51.335 [Info] Light source: LaunchBox (browsing): Guardians of the 'Hood
+16:06:51.335 [Info] LaunchBox: 'Guardians of the 'Hood' → MAME/guardian (LaunchBox id).
+16:06:58.900 [Info] Light source: LaunchBox (browsing): Asura Blade: Sword of Dynasty
+16:06:58.900 [Info] LaunchBox: 'Asura Blade: Sword of Dynasty' → MAME/asurabld (LaunchBox id).
+16:07:00.763 [Info] Light source: LaunchBox (browsing): Food Fight
+16:07:00.763 [Info] LaunchBox: 'Food Fight' → MAME/foodf2 (LaunchBox id).
+16:07:04.268 [Info] Light source: LaunchBox (browsing): Silent Dragon
+16:07:04.268 [Info] LaunchBox: 'Silent Dragon' → MAME/silentd (LaunchBox id).
+16:07:08.624 [Info] Light source: LaunchBox (browsing): Mocap Boxing
+16:07:08.625 [Info] LaunchBox: 'Mocap Boxing' → MAME/mocapb (LaunchBox id).
+16:07:10.404 [Info] Light source: LaunchBox (browsing): Tsurugi
+16:07:10.404 [Info] LaunchBox: 'Tsurugi' → MAME/tsurugi (LaunchBox id).
+16:07:12.822 [Info] Light source: LaunchBox (browsing): Mocap Boxing
+16:07:12.823 [Info] LaunchBox: 'Mocap Boxing' → MAME/mocapb (LaunchBox id).
+16:07:24.534 [Info] Light source: LaunchBox (browsing): Jitsuroku Maru-chi Mahjong
+16:07:24.535 [Info] LaunchBox: 'Jitsuroku Maru-chi Mahjong' → ADULT_GAMES/jituroku (LaunchBox id).
+16:07:25.550 [Info] Light source: LaunchBox (browsing): Taisen Hot Gimmick Kairakuten
+16:07:25.550 [Info] LaunchBox: 'Taisen Hot Gimmick Kairakuten' → ADULT_GAMES/hgkairak (LaunchBox id).
+16:07:26.733 [Info] Light source: LaunchBox (browsing): Super Ten V8.3X
+16:07:26.733 [Info] LaunchBox: 'Super Ten V8.3X' → ADULT_GAMES/usg83x (LaunchBox id).
+16:07:31.338 [Info] Light source: LaunchBox (browsing): Super Poker
+16:07:31.339 [Info] LaunchBox: 'Super Poker' → ARCADE_CLONES/spk205us (LaunchBox id).
+16:07:33.728 [Info] Light source: LaunchBox (browsing): Cycle Warriors
+16:07:33.728 [Info] LaunchBox: 'Cycle Warriors' → ARCADE_CLONES/cyclwarrb (LaunchBox id).
+16:07:44.103 [Info] Light source: LaunchBox (browsing): S.T.U.N. Runner
+16:07:44.103 [Info] LaunchBox: 'S.T.U.N. Runner' → ARCADE_CLONES/stunrun (LaunchBox id).
+16:07:45.708 [Info] Light source: LaunchBox (browsing): Dance Freaks
+16:07:45.708 [Info] LaunchBox: 'Dance Freaks' → ARCADE_CLONES/dncfrks (LaunchBox id).
+16:07:46.885 [Info] Light source: LaunchBox (browsing): Virtua Striker 2 '99 v1.5
+16:07:46.885 [Info] LaunchBox: 'Virtua Striker 2 '99 v1.5' → ARCADE_CLONES/vs29915 (LaunchBox id).
+16:07:52.106 [Info] Light source: LaunchBox (browsing): Subway Surfers
+16:07:52.106 [Info] LaunchBox: 'Subway Surfers' → Arcade_PC/SubwaySurfers (LaunchBox id).
+16:07:53.105 [Info] Light source: LaunchBox (browsing): Skull Of Shadow
+16:07:53.105 [Info] LaunchBox: 'Skull Of Shadow' → Arcade_PC/Skull of Shadow Launcher (LaunchBox id).
+16:07:54.224 [Info] Light source: LaunchBox (browsing): Burning Striker
+16:07:54.225 [Info] LaunchBox: 'Burning Striker' → Arcade_PC/ewcs (LaunchBox id).
+16:07:56.103 [Info] Light source: LaunchBox (browsing): Teratoma
+16:07:56.103 [Info] LaunchBox: 'Teratoma' → Arcade_PC/Play Teratoma (LaunchBox id).
+16:07:57.456 [Info] Light source: LaunchBox (browsing): Left 4 Dead: Survivors
+16:07:57.457 [Info] LaunchBox: 'Left 4 Dead: Survivors' → Arcade_PC/left4dead2 (LaunchBox id).
+16:07:58.271 [Info] Light source: LaunchBox (browsing): Dino Invasion
+16:07:58.271 [Info] LaunchBox: 'Dino Invasion' → Arcade_PC/Dino invasion arcade (LaunchBox id).
+16:07:59.863 [Info] Light source: LaunchBox (browsing): The Swarm
+16:07:59.863 [Info] LaunchBox: 'The Swarm' → Arcade_PC/Play The Swarm (LaunchBox id).
+16:09:22.027 [Info] Light source: LaunchBox (browsing): Medaru No Gunman
+16:09:22.028 [Info] LaunchBox: 'Medaru No Gunman' → TEKNO_PARROT/MedaruNoGunman (LaunchBox id).
+16:09:23.882 [Info] Light source: LaunchBox (browsing): Powerball
+16:09:23.883 [Info] LaunchBox: 'Powerball' → MAME/pwball (LaunchBox id).
+16:09:25.834 [Info] Front end: LaunchBox launch: Powerball (Arcade)
+16:09:25.837 [Info] Light source: LaunchBox (playing): Powerball
+16:09:25.837 [Info] LaunchBox: playing 'Powerball' → MAME/pwball (LaunchBox id); MAME default.
+16:09:53.471 [Info] Front end: LaunchBox exit
+16:09:53.473 [Info] Light source: LaunchBox (browsing): Powerball
+16:09:53.473 [Info] LaunchBox: 'Powerball' → MAME/pwball (LaunchBox id).
+16:09:59.046 [Info] Light source: LaunchBox (browsing): Mushihime-Sama Futari Black Label: Another Ver
+16:09:59.046 [Info] LaunchBox: 'Mushihime-Sama Futari Black Label: Another Ver' → Cave/futaribl (LaunchBox id).
+16:10:01.541 [Info] Light source: LaunchBox (browsing): DoDonPachi Dai-Ou-Jou Tamashii
+16:10:01.542 [Info] LaunchBox: 'DoDonPachi Dai-Ou-Jou Tamashii' → Cave/ddpdojt (LaunchBox id).
+16:10:04.390 [Info] Light source: LaunchBox (browsing): Medaru No Gunman
+16:10:04.391 [Info] LaunchBox: 'Medaru No Gunman' → TEKNO_PARROT/MedaruNoGunman (LaunchBox id).
+16:10:07.747 [Info] Light source: LaunchBox (browsing): Pop'n Music Animelo
+16:10:07.747 [Info] LaunchBox: 'Pop'n Music Animelo' → MAME/popnanm (LaunchBox id).
+16:10:08.820 [Info] Light source: LaunchBox (browsing): Power Kick
+16:10:08.820 [Info] LaunchBox: 'Power Kick' → MAME/pwrkick (LaunchBox id).
+16:10:09.779 [Info] Light source: LaunchBox (browsing): Speed Driver Evolution
+16:10:09.779 [Info] LaunchBox: 'Speed Driver Evolution' → IGS_PC/Speed Driver (TeknoRaven SD1) (LaunchBox id).
+16:10:11.893 [Info] Light source: LaunchBox (browsing): Euro League
+16:10:11.894 [Info] LaunchBox: 'Euro League' → MAME/eurogael (LaunchBox id).
+16:10:12.794 [Info] Light source: LaunchBox (browsing): Smashing Drive
+16:10:12.794 [Info] LaunchBox: 'Smashing Drive' → TEKNO_PARROT/teknog4_smashdrv (LaunchBox id).
+16:10:13.951 [Info] Light source: LaunchBox (browsing): Gaelco Football
+16:10:13.951 [Info] LaunchBox: 'Gaelco Football' → TEKNO_PARROT/teknog4_gfootbal (LaunchBox id).
+16:10:45.285 [Info] Front end: LaunchBox closing
+16:10:45.285 [Info] Front end disconnected (0 connected).
+16:10:45.285 [Info] Light source: Off
+16:10:45.285 [Info] LaunchBox closed: all lights off.
+16:13:11.141 [Info] Output thread stopped.
+16:13:11.554 [Info] LED-Next stopped.
+16:13:24.163 [Info] LED-Next starting (64-bit). Config: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\cabinet.json
+16:13:24.204 [Info] Loaded C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\PacDrive64.dll
+16:13:24.233 [Info] PacDrive SDK reports 2 Ultimarc device(s).
+16:13:24.234 [Info]   device 0: VID D209 PID 1401 type 5 version 25
+16:13:24.240 [Info]   device 1: VID D209 PID 1402 type 5 version 25
+16:13:24.241 [Info] PacLED64: 2 board(s): PacLED64#1, PacLED64#2
+16:13:24.241 [Info] Output thread started.
+16:13:24.267 [Info] Game library: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\games.db (75,273 games)
+16:13:24.665 [Info] Started minimized (by a front-end plugin).
+16:13:24.793 [Info] Listening for front ends on pipe 'LedNext.FrontEnd'.
+16:13:30.120 [Info] Read 41,633 games from LaunchBox at D:\LaunchBox.
+16:13:50.047 [Info] Front end connected (1 connected).
+16:13:50.057 [Info] Light source: BigBox (browsing): Dance Dance Revolution Solo 2000
+16:13:50.057 [Info] BigBox: 'Dance Dance Revolution Solo 2000' → ARCADE_CLONES/ddrs2kj (LaunchBox id).
+16:13:52.175 [Info] Light source: BigBox (browsing): Dance Dance Revolution Strawberry Shortcake
+16:13:52.175 [Info] BigBox: 'Dance Dance Revolution Strawberry Shortcake' → ARCADE_CLONES/ddrstraw (LaunchBox id).
+16:13:55.536 [Info] Light source: BigBox (browsing): Dance Maniax
+16:13:55.536 [Info] BigBox: 'Dance Maniax' → ARCADE_CLONES/dmx (LaunchBox id).
+16:13:58.673 [Info] Light source: BigBox (browsing): Dancing Stage
+16:13:58.674 [Info] BigBox: 'Dancing Stage' → ARCADE_CLONES/dstagea (LaunchBox id).
+16:14:02.354 [Info] Light source: BigBox (browsing): Dancing Stage: Internet Ranking Ver
+16:14:02.355 [Info] BigBox: 'Dancing Stage: Internet Ranking Ver' → ARCADE_CLONES/dstage (LaunchBox id).
+16:14:04.811 [Info] Light source: BigBox (browsing): Dangerous Dungeons
+16:14:04.811 [Info] BigBox: 'Dangerous Dungeons' → MAME/ddungeon (LaunchBox id).
+16:14:06.593 [Info] Light source: BigBox (browsing): Dangerous Seed
+16:14:06.593 [Info] BigBox: 'Dangerous Seed' → MAME/dangseed (LaunchBox id).
+16:14:08.643 [Info] Light source: BigBox (browsing): Dangun Feveron
+16:14:08.643 [Info] BigBox: 'Dangun Feveron' → ARCADE_CLONES/dfeveron (LaunchBox id).
+16:14:11.342 [Info] Light source: BigBox (browsing): Dangerous Seed
+16:14:11.342 [Info] BigBox: 'Dangerous Seed' → MAME/dangseed (LaunchBox id).
+16:14:13.217 [Info] Light source: BigBox (browsing): Dangun Feveron
+16:14:13.218 [Info] BigBox: 'Dangun Feveron' → ARCADE_CLONES/dfeveron (LaunchBox id).
+16:14:16.484 [Info] Light source: BigBox (browsing): Danny Sullivan's Indy Heat
+16:14:16.484 [Info] BigBox: 'Danny Sullivan's Indy Heat' → MAME/indyheat (LaunchBox id).
+16:14:18.250 [Info] Light source: BigBox (browsing): Darius
+16:14:18.250 [Info] BigBox: 'Darius' → ARCADE_CLONES/dariusu (LaunchBox id).
+16:14:19.763 [Info] Light source: BigBox (browsing): Darius
+16:14:19.764 [Info] BigBox: 'Darius' → MAME/darius (LaunchBox id).
+16:14:21.465 [Info] Light source: BigBox (browsing): Darius
+16:14:21.465 [Info] BigBox: 'Darius' → ARCADE_CLONES/dariuso (LaunchBox id).
+16:14:23.862 [Info] Light source: BigBox (browsing): Darius
+16:14:23.862 [Info] BigBox: 'Darius' → MAME/darius (LaunchBox id).
+16:14:26.317 [Info] Light source: BigBox (browsing): Darius
+16:14:26.317 [Info] BigBox: 'Darius' → ARCADE_CLONES/dariusu (LaunchBox id).
+16:14:30.825 [Info] Light source: BigBox (browsing): Danny Sullivan's Indy Heat
+16:14:30.826 [Info] BigBox: 'Danny Sullivan's Indy Heat' → MAME/indyheat (LaunchBox id).
+16:14:32.672 [Info] Light source: BigBox (browsing): Darius
+16:14:32.672 [Info] BigBox: 'Darius' → ARCADE_CLONES/dariusu (LaunchBox id).
+16:14:34.348 [Info] Light source: BigBox (browsing): Danny Sullivan's Indy Heat
+16:14:34.348 [Info] BigBox: 'Danny Sullivan's Indy Heat' → MAME/indyheat (LaunchBox id).
+16:14:36.231 [Info] Light source: BigBox (browsing): Darius
+16:14:36.231 [Info] BigBox: 'Darius' → ARCADE_CLONES/dariusu (LaunchBox id).
+16:14:38.663 [Info] Light source: BigBox (browsing): Danny Sullivan's Indy Heat
+16:14:38.663 [Info] BigBox: 'Danny Sullivan's Indy Heat' → MAME/indyheat (LaunchBox id).
+16:14:41.659 [Info] Light source: BigBox (browsing): Darius
+16:14:41.660 [Info] BigBox: 'Darius' → ARCADE_CLONES/dariusu (LaunchBox id).
+16:14:43.886 [Info] Light source: BigBox (browsing): Darius
+16:14:43.886 [Info] BigBox: 'Darius' → MAME/darius (LaunchBox id).
+16:14:46.058 [Info] Light source: BigBox (browsing): Darius
+16:14:46.058 [Info] BigBox: 'Darius' → ARCADE_CLONES/dariuso (LaunchBox id).
+16:14:47.668 [Info] Light source: BigBox (browsing): Darius
+16:14:47.668 [Info] BigBox: 'Darius' → ARCADE_CLONES/dariusj (LaunchBox id).
+16:14:49.126 [Info] Light source: BigBox (browsing): Darius Extra Version
+16:14:49.127 [Info] BigBox: 'Darius Extra Version' → ARCADE_CLONES/dariuse (LaunchBox id).
+16:14:50.779 [Info] Light source: BigBox (browsing): Darius Gaiden: Silver Hawk
+16:14:50.779 [Info] BigBox: 'Darius Gaiden: Silver Hawk' → MAME/dariusg (LaunchBox id).
+16:14:53.529 [Info] Light source: BigBox (browsing): Darius Extra Version
+16:14:53.529 [Info] BigBox: 'Darius Extra Version' → ARCADE_CLONES/dariuse (LaunchBox id).
+16:14:56.533 [Info] Light source: BigBox (browsing): Darius Gaiden: Silver Hawk
+16:14:56.534 [Info] BigBox: 'Darius Gaiden: Silver Hawk' → ARCADE_CLONES/dariusgj (LaunchBox id).
+16:15:00.862 [Info] Light source: BigBox (browsing): Darius Gaiden: Silver Hawk
+16:15:00.862 [Info] BigBox: 'Darius Gaiden: Silver Hawk' → ARCADE_CLONES/dariusgu (LaunchBox id).
+16:15:07.452 [Info] Light source: BigBox (browsing): Darius Gaiden: Silver Hawk Extra Version
+16:15:07.452 [Info] BigBox: 'Darius Gaiden: Silver Hawk Extra Version' → MAME/dariusgx (LaunchBox id).
+16:15:11.727 [Info] Light source: BigBox (browsing): Darius II
+16:15:11.728 [Info] BigBox: 'Darius II' → ARCADE_CLONES/darius2do (LaunchBox id).
+16:15:14.749 [Info] Light source: BigBox (browsing): Darius Gaiden: Silver Hawk Extra Version
+16:15:14.750 [Info] BigBox: 'Darius Gaiden: Silver Hawk Extra Version' → MAME/dariusgx (LaunchBox id).
+16:15:16.404 [Info] Light source: BigBox (browsing): Darius II
+16:15:16.404 [Info] BigBox: 'Darius II' → ARCADE_CLONES/darius2do (LaunchBox id).
+16:15:27.353 [Info] Light source: BigBox (browsing): Darius II
+16:15:27.353 [Info] BigBox: 'Darius II' → ARCADE_CLONES/darius2d (LaunchBox id).
+16:15:29.999 [Info] Light source: BigBox (browsing): Darius II
+16:15:30.000 [Info] BigBox: 'Darius II' → MAME/darius2 (LaunchBox id).
+16:15:31.974 [Info] Light source: BigBox (browsing): Dariusburst: Another Chronicle EX
+16:15:31.975 [Info] BigBox: 'Dariusburst: Another Chronicle EX' → TEKNO_PARROT/DariusBurst (LaunchBox id).
+16:15:33.757 [Info] Light source: BigBox (browsing): Dark Adventure
+16:15:33.757 [Info] BigBox: 'Dark Adventure' → ARCADE_CLONES/darkadv (LaunchBox id).
+16:15:36.871 [Info] Light source: BigBox (browsing): Dariusburst: Another Chronicle EX
+16:15:36.872 [Info] BigBox: 'Dariusburst: Another Chronicle EX' → TEKNO_PARROT/DariusBurst (LaunchBox id).
+16:15:38.997 [Info] Light source: BigBox (browsing): Dark Adventure
+16:15:38.997 [Info] BigBox: 'Dark Adventure' → ARCADE_CLONES/darkadv (LaunchBox id).
+16:15:43.142 [Info] Light source: BigBox (browsing): Dark Horse Legend
+16:15:43.142 [Info] BigBox: 'Dark Horse Legend' → MAME/darkhleg (LaunchBox id).
+16:15:44.983 [Info] Light source: BigBox (browsing): Dark Planet
+16:15:44.983 [Info] BigBox: 'Dark Planet' → MAME/darkplnt (LaunchBox id).
+16:15:49.247 [Info] Light source: BigBox (browsing): Darth Vader
+16:15:49.248 [Info] BigBox: 'Darth Vader' → ARCADE_CLONES/darthvdr (LaunchBox id).
+16:15:54.561 [Info] Light source: BigBox (browsing): T-MEK
+16:15:54.562 [Info] BigBox: 'T-MEK' → ARCADE_CLONES/tmek45 (LaunchBox id).
+16:16:01.112 [Info] Light source: BigBox (browsing): Tecmo World Cup '90
+16:16:01.112 [Info] BigBox: 'Tecmo World Cup '90' → ARCADE_CLONES/twcup90b (LaunchBox id).
+16:16:04.343 [Info] Light source: BigBox (browsing): Tecmo World Cup '90
+16:16:04.343 [Info] BigBox: 'Tecmo World Cup '90' → MAME/twcup90 (LaunchBox id).
+16:16:06.840 [Info] Light source: BigBox (browsing): Tecmo World Cup '90
+16:16:06.840 [Info] BigBox: 'Tecmo World Cup '90' → ARCADE_CLONES/twcup90a (LaunchBox id).
+16:16:08.248 [Info] Light source: BigBox (browsing): Tecmo World Cup
+16:16:08.248 [Info] BigBox: 'Tecmo World Cup' → MAME/mp_twcup (LaunchBox id).
+16:16:10.802 [Info] Light source: BigBox (browsing): Tecmo Knight
+16:16:10.802 [Info] BigBox: 'Tecmo Knight' → ARCADE_CLONES/tknight (LaunchBox id).
+16:16:15.690 [Info] Light source: BigBox (browsing): Teenage Mutant Hero Turtles
+16:16:15.690 [Info] BigBox: 'Teenage Mutant Hero Turtles' → ARCADE_CLONES/tmht2p (LaunchBox id).
+16:16:22.994 [Info] Light source: BigBox (browsing): Teenage Mutant Hero Turtles
+16:16:22.995 [Info] BigBox: 'Teenage Mutant Hero Turtles' → ARCADE_CLONES/tmhtb (LaunchBox id).
+16:16:26.533 [Info] Light source: BigBox (browsing): Teenage Mutant Hero Turtles
+16:16:26.533 [Info] BigBox: 'Teenage Mutant Hero Turtles' → ARCADE_CLONES/tmht2p (LaunchBox id).
+16:16:28.923 [Info] Light source: BigBox (browsing): Teenage Mutant Hero Turtles: Turtles in Time
+16:16:28.923 [Info] BigBox: 'Teenage Mutant Hero Turtles: Turtles in Time' → ARCADE_CLONES/tmht24pe (LaunchBox id).
+16:16:31.139 [Info] Light source: BigBox (browsing): Teenage Mutant Hero Turtles: Turtles in Time
+16:16:31.140 [Info] BigBox: 'Teenage Mutant Hero Turtles: Turtles in Time' → ARCADE_CLONES/tmht22pe (LaunchBox id).
+16:16:34.185 [Info] Light source: BigBox (browsing): Teenage Mutant Ninja Turtles
+16:16:34.185 [Info] BigBox: 'Teenage Mutant Ninja Turtles' → ARCADE_CLONES/tmntub (LaunchBox id).
+16:16:36.894 [Info] Light source: BigBox (browsing): Teenage Mutant Ninja Turtles
+16:16:36.895 [Info] BigBox: 'Teenage Mutant Ninja Turtles' → ARCADE_CLONES/tmntu (LaunchBox id).
+16:16:39.040 [Info] Light source: BigBox (browsing): Teenage Mutant Ninja Turtles
+16:16:39.040 [Info] BigBox: 'Teenage Mutant Ninja Turtles' → ARCADE_CLONES/tmnta (LaunchBox id).
+16:16:51.676 [Info] Light source: BigBox (browsing): Initial D4
+16:16:51.676 [Info] BigBox: 'Initial D4' → TEKNO_PARROT/ID4ExpElf2 (LaunchBox id).
+16:16:54.023 [Info] Light source: BigBox (browsing): Initial D Arcade Stage 5
+16:16:54.023 [Info] BigBox: 'Initial D Arcade Stage 5' → TEKNO_PARROT/ID5Elf2 (LaunchBox id).
+16:16:56.797 [Info] Light source: BigBox (browsing): Rambo
+16:16:56.797 [Info] BigBox: 'Rambo' → TEKNO_PARROT/RamboElf2 (LaunchBox id).
+16:17:00.958 [Info] Light source: BigBox (browsing): Virtua Fighter esports
+16:17:00.958 [Info] BigBox: 'Virtua Fighter esports' → TEKNO_PARROT/VF5Esports (LaunchBox id).
+16:17:15.991 [Info] Light source: BigBox (browsing): 2 Spicy
+16:17:15.991 [Info] BigBox: '2 Spicy' → TEKNO_PARROT/2SpicyElf2 (LaunchBox id).
+16:17:18.262 [Info] Light source: BigBox (browsing): Virtua Fighter 5C
+16:17:18.263 [Info] BigBox: 'Virtua Fighter 5C' → TEKNO_PARROT/VF5CElf2 (LaunchBox id).
+16:17:20.788 [Info] Light source: BigBox (browsing): Virtua Fighter 5 R
+16:17:20.789 [Info] BigBox: 'Virtua Fighter 5 R' → TEKNO_PARROT/VF5R (LaunchBox id).
+16:17:25.073 [Info] Light source: BigBox (browsing): Virtua Fighter esports
+16:17:25.074 [Info] BigBox: 'Virtua Fighter esports' → TEKNO_PARROT/VF5Esports (LaunchBox id).
+16:17:26.850 [Info] Light source: BigBox (browsing): 2 Spicy
+16:17:26.850 [Info] BigBox: '2 Spicy' → TEKNO_PARROT/2SpicyElf2 (LaunchBox id).
+16:17:28.470 [Info] Light source: BigBox (browsing): After Burner Climax
+16:17:28.470 [Info] BigBox: 'After Burner Climax' → TEKNO_PARROT/abcELF2 (LaunchBox id).
+16:17:30.477 [Info] Light source: BigBox (browsing): Ghost Squad Evolution
+16:17:30.477 [Info] BigBox: 'Ghost Squad Evolution' → Sega_Chihiro/GSEVOELF2 (LaunchBox id).
+16:17:34.535 [Info] Light source: BigBox (browsing): Harley-Davidson: King of the Road
+16:17:34.535 [Info] BigBox: 'Harley-Davidson: King of the Road' → TEKNO_PARROT/Harley (LaunchBox id).
+16:17:36.510 [Info] Light source: BigBox (browsing): Hummer
+16:17:36.510 [Info] BigBox: 'Hummer' → TEKNO_PARROT/Hummer (LaunchBox id).
+16:17:38.723 [Info] Light source: BigBox (browsing): Hummer Extreme Edition
+16:17:38.723 [Info] BigBox: 'Hummer Extreme Edition' → TEKNO_PARROT/hummerextreme (LaunchBox id).
+16:17:42.691 [Info] Light source: BigBox (browsing): Initial D Arcade Stage 5
+16:17:42.691 [Info] BigBox: 'Initial D Arcade Stage 5' → TEKNO_PARROT/ID5Elf2 (LaunchBox id).
+16:17:56.952 [Info] Light source: BigBox (browsing): Punk Shot
+16:17:56.952 [Info] BigBox: 'Punk Shot' → MAME/punkshot (LaunchBox id).
+16:18:00.592 [Info] Light source: BigBox (browsing): Puyo Puyo eSports
+16:18:00.592 [Info] BigBox: 'Puyo Puyo eSports' → TEKNO_PARROT/PuyoPuyoEsports (LaunchBox id).
+16:18:04.208 [Info] Light source: BigBox (browsing): Quartet
+16:18:04.209 [Info] BigBox: 'Quartet' → MAME/quartet (LaunchBox id).
+16:18:08.742 [Info] Light source: BigBox (browsing): Rabbids Hollywood
+16:18:08.742 [Info] BigBox: 'Rabbids Hollywood' → TEKNO_PARROT/RabbidsHollywood (LaunchBox id).
+16:18:12.601 [Info] Light source: BigBox (browsing): Raccoon Rampage
+16:18:12.601 [Info] BigBox: 'Raccoon Rampage' → TEKNO_PARROT/RaccoonRampage (LaunchBox id).
+16:18:15.029 [Info] Light source: BigBox (browsing): Ray Crisis
+16:18:15.030 [Info] BigBox: 'Ray Crisis' → MAME/raycris (LaunchBox id).
+16:18:19.311 [Info] Light source: BigBox (browsing): Rim Rockin' Basketball
+16:18:19.311 [Info] BigBox: 'Rim Rockin' Basketball' → MAME/rimrockn (LaunchBox id).
+16:18:47.020 [Info] Front end: BigBox launch: Rim Rockin' Basketball (Arcade)
+16:18:47.023 [Info] Light source: BigBox (playing): Rim Rockin' Basketball
+16:18:47.023 [Info] BigBox: playing 'Rim Rockin' Basketball' → MAME/rimrockn (LaunchBox id); game rimrockn.
+16:19:04.499 [Info] Front end: BigBox exit
+16:19:04.501 [Info] Light source: BigBox (browsing): Rim Rockin' Basketball
+16:19:04.501 [Info] BigBox: 'Rim Rockin' Basketball' → MAME/rimrockn (LaunchBox id).
+16:19:40.580 [Info] Light source: BigBox (browsing): Smash Court Tennis Pro Tournament
+16:19:40.581 [Info] BigBox: 'Smash Court Tennis Pro Tournament' → Namco_System_246_-_256/Smash Court (LaunchBox id).
+16:20:11.671 [Info] Light source: BigBox (browsing): Teenage Mutant Ninja Turtles
+16:20:11.671 [Info] BigBox: 'Teenage Mutant Ninja Turtles' → MAME/pc_tmnt (LaunchBox id).
+16:20:43.875 [Info] Light source: BigBox (browsing): Battle Circuit
+16:20:43.875 [Info] BigBox: 'Battle Circuit' → MAME/batcir (LaunchBox id).
+16:21:11.773 [Info] Front end: BigBox closing
+16:21:11.773 [Info] Light source: Off
+16:21:11.774 [Info] BigBox closed: all lights off.
+16:21:12.833 [Info] Front end disconnected (0 connected).

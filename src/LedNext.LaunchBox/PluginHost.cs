@@ -80,6 +80,47 @@ public static class PluginHost
         }
     }
 
+    private static readonly object SelectionLock = new();
+    private static string? _lastSelectedId;
+    private static readonly HashSet<string> SelectionSources = new();
+
+    /// <summary>
+    /// Sends "select" unless this game was the last one sent. The watcher, the SelectionChanged event and a
+    /// BigBox theme element can all report the same change; the first one wins. The first selection from
+    /// each source is logged, to show which hooks LaunchBox / BigBox actually call.
+    /// </summary>
+    public static void SendSelection(IGame game, string via)
+    {
+        try
+        {
+            lock (SelectionLock)
+            {
+                if (SelectionSources.Add(via)) Log($"First selection via {via}: {game.Title} ({game.Platform})");
+                if (game.Id == _lastSelectedId) return;
+                _lastSelectedId = game.Id;
+            }
+            Send(FrontEndEvents.Select, game);
+        }
+        catch (Exception ex)
+        {
+            Log($"Selection via {via} failed: {ex.Message}");
+        }
+    }
+
+    /// <summary>Reads LaunchBox's selected game and sends it (for the SelectionChanged system event).</summary>
+    public static void SendSelectedGame(string via)
+    {
+        try
+        {
+            var games = Unbroken.LaunchBox.Plugins.PluginHelper.StateManager?.GetAllSelectedGames();
+            if (games is { Length: > 0 } && games[0]?.Id is not null) SendSelection(games[0], via);
+        }
+        catch (Exception ex)
+        {
+            Log($"Reading the selected game ({via}) failed: {ex.Message}");
+        }
+    }
+
     public static void StartSelectionWatcher()
     {
         try

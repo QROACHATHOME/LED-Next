@@ -47,9 +47,10 @@ starting work. Never commit `PacDrive*.dll` (Ultimarc's file; git-ignored).
   "Verify on the arcade machine"). These were written from memory of the SDK and have not been
   run against real boards yet.
 - Nodify graph bindings (anchors, pending connections) — check after any Nodify upgrade.
-- The LaunchBox plugin's API use (`tools/LaunchBoxPluginStubs` is a stand-in written from LaunchBox's
-  plugin docs, not from the real 14.1 DLL). Selection in BigBox needs the theme element or the
-  `StateManager` poll to work there; check at the cabinet.
+- The LaunchBox plugin: `tools/LaunchBoxPluginStubs` was checked against the real 14.1.0.5 DLL and
+  live lighting works in LaunchBox and BigBox (visit 5). LaunchBox runs on .NET 10, so against the real
+  DLL the plugin targets `net10.0-windows` (needs the .NET 10 SDK on the cabinet); with the stand-in it
+  stays `net8.0-windows`. Re-check the stand-in after a LaunchBox upgrade.
 - The LEDBlinky control map (`ControlMapBuilder`) and MAME `cfg/default.cfg` reading: tested on the
   real LEDBlinky files and the cabinet's real `default.cfg` (`import-samples/mame/cfg/`), and matched
   LEDBlinky at the cabinet for 34 games (visit 2). Tests must pass `mameFolder` explicitly so they

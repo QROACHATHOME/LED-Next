@@ -21,6 +21,9 @@ public sealed class LedNextSystemEvents : ISystemEventsPlugin
                     PluginHost.Send(FrontEndEvents.Started);
                     PluginHost.StartSelectionWatcher();
                     break;
+                case "SelectionChanged": // in LaunchBox 14.1's SystemEventTypes; not in the plugin docs
+                    PluginHost.SendSelectedGame("event");
+                    break;
                 case "LaunchBoxShutdownBeginning":
                 case "BigBoxShutdownBeginning":
                     PluginHost.Shutdown();
@@ -37,10 +40,11 @@ public sealed class LedNextSystemEvents : ISystemEventsPlugin
 /// <summary>Game launched / exited: the panel shows the running game, then the selection again.</summary>
 public sealed class LedNextGameLaunching : IGameLaunchingPlugin
 {
-    public void OnBeforeGameLaunching(IGame game, IAdditionalApplication app, IEmulator emulator) =>
+    // LaunchBox 14.1 marks game, app and emulator as nullable here (and app/emulator below).
+    public void OnBeforeGameLaunching(IGame? game, IAdditionalApplication? app, IEmulator? emulator) =>
         PluginHost.Send(FrontEndEvents.Launch, game);
 
-    public void OnAfterGameLaunched(IGame game, IAdditionalApplication app, IEmulator emulator) { }
+    public void OnAfterGameLaunched(IGame game, IAdditionalApplication? app, IEmulator? emulator) { }
 
     public void OnGameExited() => PluginHost.Send(FrontEndEvents.Exit);
 }

@@ -235,3 +235,65 @@ All mappings looked right; nothing was changed by hand. Notable:
 
 ## Files brought back
 - [x] `cabinet/led-next.log` updated
+
+---
+
+# Visit 5: live lighting from LaunchBox / BigBox (2026-11-10)
+
+## Setup
+- Pulled `9bdad71`. LED-Next built and 107 tests pass. Hardware mode, both boards found.
+- **The plugin did not build against the real DLL at first:** `CS1705`, because `Unbroken.LaunchBox.Plugins.dll`
+  14.1.0.5 references System.Runtime 10.0. Fix: installed the **.NET 10 SDK (10.0.404)** next to 8.0.427. Now
+  `LedNext.LaunchBox.csproj` targets `net10.0-windows` when it finds the real DLL and `net8.0-windows` with the
+  stand-in (on the dev PC, no .NET 10 needed). The install script reads `bin\Release\net10.0-windows`. The LED-Next
+  app stays on .NET 8. There is no global.json, so `dotnet` now defaults to SDK 10 here; the app still builds and
+  its tests still pass.
+
+## Real plugin API (14.1.0.5, read by reflection)
+- `ISystemEventsPlugin`, `IGameLaunchingPlugin`, `IBigBoxThemeElementPlugin`, `PluginHelper.StateManager`: names and
+  members as the stand-in had them.
+- `SystemEventTypes`, `FilterType` and `IStateManager` are in **`Unbroken.LaunchBox.Plugins.Data`**, not the root
+  namespace.
+- Nullable: `OnBeforeGameLaunching(IGame? game, IAdditionalApplication? app, IEmulator? emulator)`,
+  `OnAfterGameLaunched(IGame game, IAdditionalApplication? app, IEmulator? emulator)`.
+- `SystemEventTypes` has more than the docs list: BigBoxThemeChanged, BigBoxLocked/Unlocked, GameStarting,
+  GameExited, **SelectionChanged**, MameGameSessionStarted/Ended, MameCoinInserted, MamePlayerStarted.
+- `IStateManager`: IsBigBoxLocked, IsBigBoxInAttractMode, IsBigBox, IsPremium, BigBoxCurrentTheme,
+  GetAllSelectedGames(), GetSelectedPlatform(). No interface named "Selection".
+- `FilterType`: Genre, PlatformOrCategoryOrPlaylist, Developer, Publisher, Rating, PlayMode, Region, Series, Status,
+  Source, MaxPlayers, RecentlyPlayed, Favorites, Local, Cloud, None.
+
+## Plugin changes
+- `tools/LaunchBoxPluginStubs/Stubs.cs` rewritten to match (namespaces, all event names, nullability).
+- Plugin handles the **`SelectionChanged`** system event (reads `GetAllSelectedGames()`).
+- `PluginHost.SendSelection`: the event, the 150 ms poll and the theme element share one send, de-duplicated by game
+  id. The first selection from each source is logged ("First selection via …").
+- Build against the real DLL: 0 warnings, 0 errors.
+
+## Installed
+- `tools\install-launchbox-plugin.ps1` (with the user's OK): only `D:\LaunchBox\Plugins\LED-Next\` (LedNext.LaunchBox
+  and LedNext.FrontEnd dll/pdb, `LedNext.LaunchBox.json`). No LaunchBox DLL copied.
+
+## LaunchBox — works
+- LED-Next started minimized by the plugin, found both boards, "Front end connected".
+- Panel followed the selection: 49 changes (Namco System 357, MAME, Cave, TeknoParrot, PC, …), **all matched by
+  LaunchBox id**. Launch (Powerball) kept its lights (MAME default), exit went back to the selection, closing
+  LaunchBox → all off.
+- `SelectionChanged` fires first; the poll saw the same game ~125 ms later and sent nothing.
+- User: **slight lag, no slowdown in LaunchBox.** Plugin → LED-Next is ~15 ms in the logs, so the lag is either
+  LaunchBox raising the event late or LED-Next between "select" and the boards (not timed in the log).
+
+## BigBox — works, no theme change needed
+- `SelectionChanged` and `GetAllSelectedGames()` work in BigBox too, so the theme element is **not needed**
+  (theme not touched). 83 selection changes, all by LaunchBox id. Launch (Rim Rockin' Basketball, game `rimrockn`),
+  exit back to the selection, closing BigBox → all off.
+- User: **instant, no slowdown.**
+
+## Open
+- LED-Next only connected on the first selection (~26–38 s after it started), so the plugin's `started` message
+  was sent before LED-Next listened and was dropped. Harmless now (nothing depends on it), but the client could
+  retry/connect when LED-Next comes up.
+- The LaunchBox lag: add timing (select received → written to boards) to find where it is.
+
+## Files brought back
+- [x] `cabinet/led-next.log` updated
