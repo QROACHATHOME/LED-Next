@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<dat>
+  <meta>
+    <description name="Used by LEDBlinky for Pixelcade configuration."/>
+    <version name="1.0"/>
+    <time name="1/11/2026 22:00:00"/>
+    <generatedBy name="LEDBlinky"/>
+  </meta>
+  <widgetTypes nointerrupt="1">
+    <widgetType id="001" name="Pixelcade Attract Mode" endpoint="/attract"/>
+    <widgetType id="002" name="Clock" endpoint="/clock"/>
+    <widgetType id="003" name="Weather" endpoint="/weather"/>
+    <widgetType id="004" name="News" endpoint="/news"/>
+    <widgetType id="005" name="Stocks &amp; Crypto" endpoint="/stocks"/>
+    <widgetType id="006" name="Sports Scoreboard" endpoint="/sports"/>
+    <widgetType id="007" name="NFL Scores" endpoint="/sports/nfl"/>
+    <widgetType id="008" name="NBA Scores" endpoint="/sports/nba"/>
+    <widgetType id="009" name="MLB Scores" endpoint="/sports/mlb"/>
+    <widgetType id="010" name="NHL Scores" endpoint="/sports/nhl"/>
+    <widgetType id="011" name="Spotify Now Playing" endpoint="/spotify"/>
+    <widgetType id="012" name="Last.fm Now Playing" endpoint="/lastfm"/>
+    <widgetType id="013" name="YouTube Stats" endpoint="/youtube"/>
+    <widgetType id="014" name="Google Calendar" endpoint="/calendar"/>
+    <widgetType id="015" name="Plex Now Playing" endpoint="/plex"/>
+    <widgetType id="016" name="Netflix Activity" endpoint="/netflix"/>
+    <widgetType id="017" name="Traffic Dashboard" endpoint="/commute"/>
+    <widgetType id="018" name="Yahoo Fantasy Sports" endpoint="/yahoofantasy"/>
+    <widgetType id="019" name="Horoscope" endpoint="/horoscope"/>
+    <widgetType id="020" name="World Clock" endpoint="/worldclock"/>
+  </widgetTypes>
+</dat>

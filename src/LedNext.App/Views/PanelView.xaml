@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Focusable="True" FocusVisualStyle="{x:Null}"
              PreviewKeyDown="OnPreviewKeyDown"
-             PreviewMouseLeftButtonDown="OnPreviewMouseDown">
+             PreviewMouseLeftButtonDown="OnPreviewMouseDown"
+             PreviewMouseLeftButtonUp="OnPreviewMouseUp">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
 

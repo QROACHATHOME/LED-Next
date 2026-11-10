@@ -40,20 +40,27 @@ internal static class PacDriveNative
     public static string ExpectedPath =>
         _configuredPath ?? Path.Combine(AppContext.BaseDirectory, DefaultFileName);
 
+    private static IntPtr _handle;
+
+    // Called once per imported function, so the loaded handle is cached (and logged once).
     private static IntPtr Resolve(string name, Assembly assembly, DllImportSearchPath? searchPath)
     {
         if (name != Lib) return IntPtr.Zero;
-        var path = ExpectedPath;
-        if (NativeLibrary.TryLoad(path, out var handle))
+        lock (Gate)
         {
-            AppLog.Info($"Loaded {path}");
-            return handle;
-        }
-        // Fall back to the normal search order (PATH etc.).
-        if (NativeLibrary.TryLoad(DefaultFileName, assembly, searchPath, out handle))
-        {
-            AppLog.Info($"Loaded {DefaultFileName} from the system search path");
-            return handle;
+            if (_handle != IntPtr.Zero) return _handle;
+            var path = ExpectedPath;
+            if (NativeLibrary.TryLoad(path, out _handle))
+            {
+                AppLog.Info($"Loaded {path}");
+                return _handle;
+            }
+            // Fall back to the normal search order (PATH etc.).
+            if (NativeLibrary.TryLoad(DefaultFileName, assembly, searchPath, out _handle))
+            {
+                AppLog.Info($"Loaded {DefaultFileName} from the system search path");
+                return _handle;
+            }
         }
         throw new DllNotFoundException(
             $"{DefaultFileName} not found. Download Ultimarc's PacDrive SDK and copy {DefaultFileName} to {AppContext.BaseDirectory}, " +

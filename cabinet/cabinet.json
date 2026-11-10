@@ -1,0 +1,795 @@
+{
+  "version": 1,
+  "panel": {
+    "width": 1600,
+    "height": 640,
+    "backgroundImage": null,
+    "backgroundOpacity": 0.6,
+    "buttons": [
+      {
+        "id": "P1_B1",
+        "label": "1",
+        "player": 1,
+        "kind": "Button",
+        "x": 560,
+        "y": 300,
+        "size": 56
+      },
+      {
+        "id": "P1_B2",
+        "label": "2",
+        "player": 1,
+        "kind": "Button",
+        "x": 632,
+        "y": 300,
+        "size": 56
+      },
+      {
+        "id": "P1_B3",
+        "label": "3",
+        "player": 1,
+        "kind": "Button",
+        "x": 704,
+        "y": 300,
+        "size": 56
+      },
+      {
+        "id": "P1_B4",
+        "label": "4",
+        "player": 1,
+        "kind": "Button",
+        "x": 560,
+        "y": 386,
+        "size": 56
+      },
+      {
+        "id": "P1_B5",
+        "label": "5",
+        "player": 1,
+        "kind": "Button",
+        "x": 633,
+        "y": 381,
+        "size": 56
+      },
+      {
+        "id": "P1_B6",
+        "label": "6",
+        "player": 1,
+        "kind": "Button",
+        "x": 707,
+        "y": 377,
+        "size": 56
+      },
+      {
+        "id": "P1_B7",
+        "label": "7",
+        "player": 1,
+        "kind": "Button",
+        "x": 533,
+        "y": 227,
+        "size": 56
+      },
+      {
+        "id": "P1_B8",
+        "label": "8",
+        "player": 1,
+        "kind": "Button",
+        "x": 559,
+        "y": 455,
+        "size": 56
+      },
+      {
+        "id": "P1_START",
+        "label": "1P",
+        "player": 1,
+        "kind": "Start",
+        "x": 490,
+        "y": 120,
+        "size": 44
+      },
+      {
+        "id": "P1_COIN",
+        "label": "Coin",
+        "player": 1,
+        "kind": "Coin",
+        "x": 550,
+        "y": 120,
+        "size": 44
+      },
+      {
+        "id": "P2_B1",
+        "label": "1",
+        "player": 2,
+        "kind": "Button",
+        "x": 990,
+        "y": 300,
+        "size": 56
+      },
+      {
+        "id": "P2_B2",
+        "label": "2",
+        "player": 2,
+        "kind": "Button",
+        "x": 1062,
+        "y": 300,
+        "size": 56
+      },
+      {
+        "id": "P2_B3",
+        "label": "3",
+        "player": 2,
+        "kind": "Button",
+        "x": 1134,
+        "y": 300,
+        "size": 56
+      },
+      {
+        "id": "P2_B4",
+        "label": "4",
+        "player": 2,
+        "kind": "Button",
+        "x": 1001,
+        "y": 375,
+        "size": 56
+      },
+      {
+        "id": "P2_B5",
+        "label": "5",
+        "player": 2,
+        "kind": "Button",
+        "x": 1070,
+        "y": 376,
+        "size": 56
+      },
+      {
+        "id": "P2_B6",
+        "label": "6",
+        "player": 2,
+        "kind": "Button",
+        "x": 1148,
+        "y": 375,
+        "size": 56
+      },
+      {
+        "id": "P2_B7",
+        "label": "7",
+        "player": 2,
+        "kind": "Button",
+        "x": 978,
+        "y": 224,
+        "size": 56
+      },
+      {
+        "id": "P2_B8",
+        "label": "8",
+        "player": 2,
+        "kind": "Button",
+        "x": 1003,
+        "y": 455,
+        "size": 56
+      },
+      {
+        "id": "P2_START",
+        "label": "2P",
+        "player": 2,
+        "kind": "Start",
+        "x": 920,
+        "y": 120,
+        "size": 44
+      },
+      {
+        "id": "P2_COIN",
+        "label": "Coin",
+        "player": 2,
+        "kind": "Coin",
+        "x": 980,
+        "y": 120,
+        "size": 44
+      },
+      {
+        "id": "P3_B1",
+        "label": "1",
+        "player": 3,
+        "kind": "Button",
+        "x": 200,
+        "y": 300,
+        "size": 56
+      },
+      {
+        "id": "P3_B2",
+        "label": "2",
+        "player": 3,
+        "kind": "Button",
+        "x": 272,
+        "y": 300,
+        "size": 56
+      },
+      {
+        "id": "P3_B3",
+        "label": "3",
+        "player": 3,
+        "kind": "Button",
+        "x": 202,
+        "y": 384,
+        "size": 56
+      },
+      {
+        "id": "P3_B4",
+        "label": "4",
+        "player": 3,
+        "kind": "Button",
+        "x": 280,
+        "y": 384,
+        "size": 56
+      },
+      {
+        "id": "P3_START",
+        "label": "3P",
+        "player": 3,
+        "kind": "Start",
+        "x": 130,
+        "y": 120,
+        "size": 44
+      },
+      {
+        "id": "P3_COIN",
+        "label": "Coin",
+        "player": 3,
+        "kind": "Coin",
+        "x": 190,
+        "y": 120,
+        "size": 44
+      },
+      {
+        "id": "P4_B1",
+        "label": "1",
+        "player": 4,
+        "kind": "Button",
+        "x": 1400,
+        "y": 300,
+        "size": 56
+      },
+      {
+        "id": "P4_B2",
+        "label": "2",
+        "player": 4,
+        "kind": "Button",
+        "x": 1472,
+        "y": 300,
+        "size": 56
+      },
+      {
+        "id": "P4_B3",
+        "label": "3",
+        "player": 4,
+        "kind": "Button",
+        "x": 1408,
+        "y": 381,
+        "size": 56
+      },
+      {
+        "id": "P4_B4",
+        "label": "4",
+        "player": 4,
+        "kind": "Button",
+        "x": 1479,
+        "y": 382,
+        "size": 56
+      },
+      {
+        "id": "P4_START",
+        "label": "4P",
+        "player": 4,
+        "kind": "Start",
+        "x": 1330,
+        "y": 120,
+        "size": 44
+      },
+      {
+        "id": "P4_COIN",
+        "label": "Coin",
+        "player": 4,
+        "kind": "Coin",
+        "x": 1390,
+        "y": 120,
+        "size": 44
+      },
+      {
+        "id": "TRACKBALL",
+        "label": "",
+        "player": 0,
+        "kind": "Trackball",
+        "x": 805,
+        "y": 238,
+        "size": 100
+      }
+    ]
+  },
+  "wiring": {
+    "boards": [
+      {
+        "key": "PacLED64#1",
+        "model": "PacLED64",
+        "name": "PacLED64 #1",
+        "pinCount": 64,
+        "graphX": 1150,
+        "graphY": 0
+      },
+      {
+        "key": "PacLED64#2",
+        "model": "PacLED64",
+        "name": "PacLED64 #2",
+        "pinCount": 64,
+        "graphX": 1770,
+        "graphY": 0
+      }
+    ],
+    "bindings": [
+      {
+        "buttonId": "P3_B3",
+        "channel": "R",
+        "boardKey": "PacLED64#1",
+        "pin": 1
+      },
+      {
+        "buttonId": "P3_B3",
+        "channel": "G",
+        "boardKey": "PacLED64#1",
+        "pin": 2
+      },
+      {
+        "buttonId": "P3_B3",
+        "channel": "B",
+        "boardKey": "PacLED64#1",
+        "pin": 3
+      },
+      {
+        "buttonId": "P3_B4",
+        "channel": "R",
+        "boardKey": "PacLED64#1",
+        "pin": 4
+      },
+      {
+        "buttonId": "P3_B4",
+        "channel": "G",
+        "boardKey": "PacLED64#1",
+        "pin": 5
+      },
+      {
+        "buttonId": "P3_B4",
+        "channel": "B",
+        "boardKey": "PacLED64#1",
+        "pin": 6
+      },
+      {
+        "buttonId": "P3_B1",
+        "channel": "R",
+        "boardKey": "PacLED64#1",
+        "pin": 7
+      },
+      {
+        "buttonId": "P3_B1",
+        "channel": "G",
+        "boardKey": "PacLED64#1",
+        "pin": 8
+      },
+      {
+        "buttonId": "P3_B1",
+        "channel": "B",
+        "boardKey": "PacLED64#1",
+        "pin": 9
+      },
+      {
+        "buttonId": "P3_B2",
+        "channel": "R",
+        "boardKey": "PacLED64#1",
+        "pin": 10
+      },
+      {
+        "buttonId": "P3_B2",
+        "channel": "G",
+        "boardKey": "PacLED64#1",
+        "pin": 11
+      },
+      {
+        "buttonId": "P3_B2",
+        "channel": "B",
+        "boardKey": "PacLED64#1",
+        "pin": 12
+      },
+      {
+        "buttonId": "P1_B1",
+        "channel": "R",
+        "boardKey": "PacLED64#1",
+        "pin": 13
+      },
+      {
+        "buttonId": "P1_B1",
+        "channel": "G",
+        "boardKey": "PacLED64#1",
+        "pin": 14
+      },
+      {
+        "buttonId": "P1_B1",
+        "channel": "B",
+        "boardKey": "PacLED64#1",
+        "pin": 15
+      },
+      {
+        "buttonId": "P1_B8",
+        "channel": "R",
+        "boardKey": "PacLED64#1",
+        "pin": 16
+      },
+      {
+        "buttonId": "P1_B8",
+        "channel": "G",
+        "boardKey": "PacLED64#1",
+        "pin": 17
+      },
+      {
+        "buttonId": "P1_B8",
+        "channel": "B",
+        "boardKey": "PacLED64#1",
+        "pin": 18
+      },
+      {
+        "buttonId": "P1_B4",
+        "channel": "R",
+        "boardKey": "PacLED64#1",
+        "pin": 19
+      },
+      {
+        "buttonId": "P1_B4",
+        "channel": "G",
+        "boardKey": "PacLED64#1",
+        "pin": 20
+      },
+      {
+        "buttonId": "P1_B4",
+        "channel": "B",
+        "boardKey": "PacLED64#1",
+        "pin": 21
+      },
+      {
+        "buttonId": "P1_B5",
+        "channel": "R",
+        "boardKey": "PacLED64#1",
+        "pin": 22
+      },
+      {
+        "buttonId": "P1_B5",
+        "channel": "G",
+        "boardKey": "PacLED64#1",
+        "pin": 23
+      },
+      {
+        "buttonId": "P1_B5",
+        "channel": "B",
+        "boardKey": "PacLED64#1",
+        "pin": 24
+      },
+      {
+        "buttonId": "P1_B6",
+        "channel": "R",
+        "boardKey": "PacLED64#1",
+        "pin": 25
+      },
+      {
+        "buttonId": "P1_B6",
+        "channel": "G",
+        "boardKey": "PacLED64#1",
+        "pin": 26
+      },
+      {
+        "buttonId": "P1_B6",
+        "channel": "B",
+        "boardKey": "PacLED64#1",
+        "pin": 27
+      },
+      {
+        "buttonId": "P1_B3",
+        "channel": "R",
+        "boardKey": "PacLED64#1",
+        "pin": 28
+      },
+      {
+        "buttonId": "P1_B3",
+        "channel": "G",
+        "boardKey": "PacLED64#1",
+        "pin": 29
+      },
+      {
+        "buttonId": "P1_B3",
+        "channel": "B",
+        "boardKey": "PacLED64#1",
+        "pin": 30
+      },
+      {
+        "buttonId": "P1_B7",
+        "channel": "R",
+        "boardKey": "PacLED64#1",
+        "pin": 31
+      },
+      {
+        "buttonId": "P1_B7",
+        "channel": "G",
+        "boardKey": "PacLED64#1",
+        "pin": 32
+      },
+      {
+        "buttonId": "P1_B7",
+        "channel": "B",
+        "boardKey": "PacLED64#1",
+        "pin": 33
+      },
+      {
+        "buttonId": "P1_B2",
+        "channel": "R",
+        "boardKey": "PacLED64#1",
+        "pin": 34
+      },
+      {
+        "buttonId": "P1_B2",
+        "channel": "G",
+        "boardKey": "PacLED64#1",
+        "pin": 35
+      },
+      {
+        "buttonId": "P1_B2",
+        "channel": "B",
+        "boardKey": "PacLED64#1",
+        "pin": 36
+      },
+      {
+        "buttonId": "TRACKBALL",
+        "channel": "R",
+        "boardKey": "PacLED64#2",
+        "pin": 1
+      },
+      {
+        "buttonId": "TRACKBALL",
+        "channel": "G",
+        "boardKey": "PacLED64#2",
+        "pin": 2
+      },
+      {
+        "buttonId": "TRACKBALL",
+        "channel": "B",
+        "boardKey": "PacLED64#2",
+        "pin": 3
+      },
+      {
+        "buttonId": "P2_B7",
+        "channel": "R",
+        "boardKey": "PacLED64#2",
+        "pin": 4
+      },
+      {
+        "buttonId": "P2_B7",
+        "channel": "G",
+        "boardKey": "PacLED64#2",
+        "pin": 5
+      },
+      {
+        "buttonId": "P2_B7",
+        "channel": "B",
+        "boardKey": "PacLED64#2",
+        "pin": 6
+      },
+      {
+        "buttonId": "P2_B1",
+        "channel": "R",
+        "boardKey": "PacLED64#2",
+        "pin": 7
+      },
+      {
+        "buttonId": "P2_B1",
+        "channel": "G",
+        "boardKey": "PacLED64#2",
+        "pin": 8
+      },
+      {
+        "buttonId": "P2_B1",
+        "channel": "B",
+        "boardKey": "PacLED64#2",
+        "pin": 9
+      },
+      {
+        "buttonId": "P2_B2",
+        "channel": "R",
+        "boardKey": "PacLED64#2",
+        "pin": 10
+      },
+      {
+        "buttonId": "P2_B2",
+        "channel": "G",
+        "boardKey": "PacLED64#2",
+        "pin": 11
+      },
+      {
+        "buttonId": "P2_B2",
+        "channel": "B",
+        "boardKey": "PacLED64#2",
+        "pin": 12
+      },
+      {
+        "buttonId": "P4_B4",
+        "channel": "R",
+        "boardKey": "PacLED64#2",
+        "pin": 31
+      },
+      {
+        "buttonId": "P4_B4",
+        "channel": "G",
+        "boardKey": "PacLED64#2",
+        "pin": 32
+      },
+      {
+        "buttonId": "P4_B4",
+        "channel": "B",
+        "boardKey": "PacLED64#2",
+        "pin": 33
+      },
+      {
+        "buttonId": "P4_B3",
+        "channel": "R",
+        "boardKey": "PacLED64#2",
+        "pin": 34
+      },
+      {
+        "buttonId": "P4_B3",
+        "channel": "G",
+        "boardKey": "PacLED64#2",
+        "pin": 35
+      },
+      {
+        "buttonId": "P4_B3",
+        "channel": "B",
+        "boardKey": "PacLED64#2",
+        "pin": 36
+      },
+      {
+        "buttonId": "P4_B2",
+        "channel": "R",
+        "boardKey": "PacLED64#2",
+        "pin": 37
+      },
+      {
+        "buttonId": "P4_B2",
+        "channel": "G",
+        "boardKey": "PacLED64#2",
+        "pin": 38
+      },
+      {
+        "buttonId": "P4_B2",
+        "channel": "B",
+        "boardKey": "PacLED64#2",
+        "pin": 39
+      },
+      {
+        "buttonId": "P4_B1",
+        "channel": "R",
+        "boardKey": "PacLED64#2",
+        "pin": 40
+      },
+      {
+        "buttonId": "P4_B1",
+        "channel": "G",
+        "boardKey": "PacLED64#2",
+        "pin": 41
+      },
+      {
+        "buttonId": "P4_B1",
+        "channel": "B",
+        "boardKey": "PacLED64#2",
+        "pin": 42
+      },
+      {
+        "buttonId": "P2_B3",
+        "channel": "R",
+        "boardKey": "PacLED64#2",
+        "pin": 46
+      },
+      {
+        "buttonId": "P2_B3",
+        "channel": "G",
+        "boardKey": "PacLED64#2",
+        "pin": 47
+      },
+      {
+        "buttonId": "P2_B3",
+        "channel": "B",
+        "boardKey": "PacLED64#2",
+        "pin": 48
+      },
+      {
+        "buttonId": "P2_B8",
+        "channel": "R",
+        "boardKey": "PacLED64#2",
+        "pin": 49
+      },
+      {
+        "buttonId": "P2_B8",
+        "channel": "G",
+        "boardKey": "PacLED64#2",
+        "pin": 50
+      },
+      {
+        "buttonId": "P2_B8",
+        "channel": "B",
+        "boardKey": "PacLED64#2",
+        "pin": 51
+      },
+      {
+        "buttonId": "P2_B4",
+        "channel": "R",
+        "boardKey": "PacLED64#2",
+        "pin": 52
+      },
+      {
+        "buttonId": "P2_B4",
+        "channel": "G",
+        "boardKey": "PacLED64#2",
+        "pin": 53
+      },
+      {
+        "buttonId": "P2_B4",
+        "channel": "B",
+        "boardKey": "PacLED64#2",
+        "pin": 54
+      },
+      {
+        "buttonId": "P2_B5",
+        "channel": "R",
+        "boardKey": "PacLED64#2",
+        "pin": 55
+      },
+      {
+        "buttonId": "P2_B5",
+        "channel": "G",
+        "boardKey": "PacLED64#2",
+        "pin": 56
+      },
+      {
+        "buttonId": "P2_B5",
+        "channel": "B",
+        "boardKey": "PacLED64#2",
+        "pin": 57
+      },
+      {
+        "buttonId": "P2_B6",
+        "channel": "R",
+        "boardKey": "PacLED64#2",
+        "pin": 58
+      },
+      {
+        "buttonId": "P2_B6",
+        "channel": "G",
+        "boardKey": "PacLED64#2",
+        "pin": 59
+      },
+      {
+        "buttonId": "P2_B6",
+        "channel": "B",
+        "boardKey": "PacLED64#2",
+        "pin": 60
+      }
+    ],
+    "buttonNodePositions": {
+      "TRACKBALL": {
+        "x": 1460,
+        "y": -190
+      }
+    }
+  },
+  "output": {
+    "brightness": 1,
+    "gamma": 1,
+    "refreshHz": 30
+  },
+  "hardware": {
+    "mode": "Hardware",
+    "pacDriveDllPath": null
+  }
+}

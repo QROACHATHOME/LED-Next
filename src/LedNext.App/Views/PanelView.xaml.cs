@@ -40,10 +40,31 @@ public partial class PanelView : UserControl
     /// Keeps keyboard focus on this view after clicks (buttons, sliders, the canvas) so the wizard
     /// and editing shortcuts keep working. Text boxes and dropdowns keep their own focus.
     /// </summary>
+    /// <remarks>
+    /// A button or checkbox cancels its click if it loses keyboard focus while pressed, so for those
+    /// focus is taken back only after the mouse-up (and the click) has been handled.
+    /// </remarks>
     private void OnPreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
         for (var d = e.OriginalSource as DependencyObject; d is not null && d != this; d = ParentOf(d))
+        {
             if (d is TextBox or ComboBox) return;
+            if (d is ButtonBase)
+            {
+                _refocusAfterClick = true;
+                return;
+            }
+        }
+        Dispatcher.BeginInvoke(() => Focus(), System.Windows.Threading.DispatcherPriority.Input);
+    }
+
+    private bool _refocusAfterClick;
+
+    private void OnPreviewMouseUp(object sender, MouseButtonEventArgs e)
+    {
+        if (!_refocusAfterClick) return;
+        _refocusAfterClick = false;
+        // Queued behind the current mouse-up, so the button's Click runs first.
         Dispatcher.BeginInvoke(() => Focus(), System.Windows.Threading.DispatcherPriority.Input);
     }
 

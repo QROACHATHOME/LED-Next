@@ -8,8 +8,9 @@
 - [x] WPF app: panel designer, wiring graph, boards view, log
 - [x] Cabinet-visit prep: wiring wizard, panel photo background, undo/redo, duplicate/copy/paste, arrow-key nudge
 - [x] Default layout includes Coin + joystick per player and a shared trackball (41 controls, 123 of 128 pins)
-- [ ] **Verify on the arcade machine** (below)
-- [ ] Replace the default 4-player layout with the real panel layout and wiring
+- [x] **Verify on the arcade machine** (below). Done 2026-11-10; see `TASKS/CABINET_RESULTS.md`
+- [x] Replace the default 4-player layout with the real panel layout and wiring (`cabinet/cabinet.json`)
+- [ ] Restore/clamp the main window position (it can open partly off-screen; see CABINET_RESULTS §5)
 
 ## At the arcade machine — suggested order
 
