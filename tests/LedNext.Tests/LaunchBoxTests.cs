@@ -230,6 +230,52 @@ public class LaunchBoxDatabaseTests : IDisposable
     }
 
     [Fact]
+    public void AGameWithoutLightsUsesTheSameGameUnderAnotherEmulator()
+    {
+        // Visit 6: TeknoParrot runs Model 2 / MAME games whose LEDBlinky lights are under Sega_Model_2 or MAME.
+        var lib = Library();
+        lib.AddPlatform(new PlatformInfo("TEKNO_PARROT", "TEKNO PARROT", null, false, Rgb.White));
+        lib.AddPlatform(new PlatformInfo("Sega_Model_2", "Sega Model 2", null, false, Rgb.White));
+        lib.SetLights("TEKNO_PARROT", null, new LightProfile { Controls = { new ControlLight("P1_BUTTON1", Rgb.White, "White", null) } });
+        void Lit(string platform, string game, string title)
+        {
+            lib.AddGame(new GameInfo(platform, game, title, null, 2, "", "LEDBlinkyControls.xml", GameLighting.Own));
+            lib.SetLights(platform, game, new LightProfile { Controls = { new ControlLight("P1_BUTTON2", Rgb.Blue, "Blue", null) } });
+        }
+        Lit("Sega_Model_2", "vcop", "Virtua Cop");
+        Lit("Sega_Model_2", "StarWars", "Star Wars");          // same ROM name, different game
+        Lit("TEKNO_PARROT", "WackyRaces", "Wacky Races");
+        Lit("Sega_Model_2", "WackyRaces", "Wacky Races");      // TeknoParrot's own entry wins
+        lib.AddGame(new GameInfo("TEKNO_PARROT", "hotd", "", null, 2, "", "LEDBlinkyControls.xml", GameLighting.PlatformDefault));
+        Lit("Sega_Model_2", "hotd", "House of the Dead (Rev A)");
+
+        File.WriteAllText(Path.Combine(_root, "LaunchBox", "Data", "Platforms", "Tekno Parrot.xml"), """
+            <?xml version="1.0" standalone="yes"?>
+            <LaunchBox>
+              <Game><ApplicationPath>..\TeknoParrot\UserProfiles\vcop.xml</ApplicationPath><Platform>Tekno Parrot</Platform><Title>Virtua Cop</Title></Game>
+              <Game><ApplicationPath>..\TeknoParrot\UserProfiles\StarWars.xml</ApplicationPath><Platform>Tekno Parrot</Platform><Title>Star Wars: Battle Pod</Title></Game>
+              <Game><ApplicationPath>..\TeknoParrot\UserProfiles\WackyRaces.xml</ApplicationPath><Platform>Tekno Parrot</Platform><Title>Wacky Races</Title></Game>
+              <Game><ApplicationPath>..\TeknoParrot\UserProfiles\hotd.xml</ApplicationPath><Platform>Tekno Parrot</Platform><Title>The House of the Dead</Title></Game>
+              <Game><ApplicationPath>..\TeknoParrot\UserProfiles\sf2.xml</ApplicationPath><Platform>Tekno Parrot</Platform><Title>sf2</Title></Game>
+            </LaunchBox>
+            """);
+        var db = GameDatabase.Open(_dbPath);
+        db.ReplaceAll(lib, "test");
+        var overrides = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { ["Tekno Parrot"] = "TEKNO_PARROT" };
+        db.ImportLaunchBox(LaunchBoxLibrary.Read(Path.Combine(_root, "LaunchBox"), new List<string>()), overrides, Path.Combine(_root, "LaunchBox"));
+
+        (string, string)? Lb(string title) => db.FindFrontEndGame(null, "Tekno Parrot", title, null, overrides) is { } f ? (f.Platform, f.Game) : null;
+        Assert.Equal(("Sega_Model_2", "vcop"), Lb("Virtua Cop"));
+        Assert.Equal(("Sega_Model_2", "hotd"), Lb("The House of the Dead"));     // "The", "(Rev A)" ignored
+        Assert.Equal(("TEKNO_PARROT", "StarWars"), Lb("Star Wars: Battle Pod")); // titles differ: not moved
+        Assert.Equal(("TEKNO_PARROT", "WackyRaces"), Lb("Wacky Races"));       // has its own lights
+        Assert.Equal(("TEKNO_PARROT", "sf2"), Lb("sf2"));                      // MAME/sf2 is from Colors.ini, not set up in LEDBlinky
+        Assert.Equal("MAME", db.FindFrontEndGame(null, "Arcade", "Street Fighter II", null, overrides)!.Value.Platform);
+        var vcop = GameLightResolver.Resolve(db, "Sega_Model_2", "vcop", new ControlMap(), new PanelLayout());
+        Assert.Equal("game vcop", vcop.From);
+    }
+
+    [Fact]
     public void AnOldWronglyNamedLaunchBoxGameIsReplacedNotMatchedByTitle()
     {
         // The cabinet's library from before the emulator fix: Zangus was added as game "mame", and on the

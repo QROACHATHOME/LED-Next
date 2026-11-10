@@ -358,3 +358,37 @@ All mappings looked right; nothing was changed by hand. Notable:
 - Other entries on that wheel level: Taito B System, Taito Air System, Samurai Showdown Collection, American
   Laser, Atari (playlists, lights unchanged), Arcade Duck and Arcade PC (MAME default).
 - Board #1 still on its slow hub: 206 ms when the lights change.
+
+---
+
+# Visit 6b: P3 button 3 and LEDBlinky colours under another emulator (2026-11-10)
+
+## P3 button 3 still green — fixed
+- The visit-2 rule (always-active UI controls such as `UI_SELECT` light only shared buttons) only ran for
+  platform defaults *added to* a game's own lights. When the platform default itself decides the lights (a game
+  with no lights of its own, e.g. Powerball → MAME default, and the platform wheel), `UI_SELECT` (Enter) still lit
+  P3 button 3 green. Fix in `GameLightResolver`: the same rule applies to the deciding level when it is a platform
+  default. Test `AlwaysActiveUiControlsDoNotLightPlayerButtonsFromAPlatformDefault` (failed before).
+- Now 300 of 41,633 LaunchBox games light P3 button 3 (298 use P3_BUTTON3, 2 list UI_SELECT themselves).
+  **User: P3 button 3 off in Powerball. LED behaviour change.**
+
+## LEDBlinky colour edits "not showing" — games set up under another emulator
+- LED-Next reads `LEDBlinkyControls.xml` correctly: for 1,103 of its 1,107 games LED-Next shows exactly its colours
+  (the 4 others are listed twice in the file: quartet2play, rampart2p2play, rampart2pxbox, quartetxbox).
+  `Colors.ini` is LEDBlinky's stock 2007 file; the user's edits are in `LEDBlinkyControls.xml` (saved 10/16).
+- Cause: games whose colours are under a different emulator than their LaunchBox platform — TeknoParrot games under
+  Sega_Model_2 / MAME, Arcade vector games under AAE, Arcade Clones under Model 2 / Model 3, Laser Disc under Daphne.
+  LED-Next only looked under the LaunchBox platform and showed its default.
+- Fix (`GameDatabase.UseLightsFromAnotherEmulator`, first step after a LaunchBox read or LEDBlinky import): a
+  LaunchBox game whose own entry has no lights uses the same ROM name under another platform when that entry comes
+  from `LEDBlinkyControls.xml`, has coloured lights, and its title matches (`GameMatcher.SameTitle`: ignores
+  brackets, a leading "The", punctuation; "Star Wars: Battle Pod" ≠ "Star Wars"). Not for customized games, and
+  never MAME for a platform that already uses MAME's data. `launchbox_games.matched_by` = "rom name on <platform>".
+  New index `games(name)`. Test `AGameWithoutLightsUsesTheSameGameUnderAnotherEmulator`.
+- At the cabinet: **80 games** re-pointed (TeknoParrot → MAME 17, → Sega_Model_2 14; Arcade → AAE 9; Arcade Clones →
+  Model 2/3 12; Laser Disc → Daphne 3; …). A first, broader version moved 466 (incl. Arcade Clones / Neo Geo → MAME
+  and consoles → MAME's general data); narrowed, and the next read restored them.
+- ~15 are not matched because LEDBlinky's title differs ("Virtua Fighter 2.1", "Gun Blade New York"…).
+  "Rampage" (Arcade Clones, Atari 800/ST) now uses the TeknoParrot "Rampage" entry (same title) — check if wrong.
+- **User: Virtua Cop and Gauntlet Legends (Tekno Parrot) show their LEDBlinky colours.**
+- 114 tests pass.

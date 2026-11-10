@@ -88,6 +88,11 @@
       hubs deep on a hub shared with another Ultimarc device. The user felt no lag this time
 - [ ] **At the cabinet (no code):** move PacLED64 #1's USB cable to a port on the PC (or #2's hub) and re-run
       the timing test (CABINET_RESULTS visit 6). Per-pin diff writes would not help on the slow board
+- [x] Visit 6b: P3 button 3 no longer green in games lit by a platform default; LaunchBox games without
+      lights use the same game set up under another emulator in LEDBlinkyControls.xml (80 games:
+      TeknoParrot → Model 2 / MAME, Arcade → AAE…). Verified at the panel
+- [ ] ~15 games not matched because LEDBlinky's title differs ("Virtua Fighter 2.1"…); a manual link or
+      looser title rule could cover them
 - [ ] BigBox playlists on the wheel (most of the cabinet's wheel: Cinematronics, Gaelco, Taito B System…)
       keep the last lights. Idea: light a playlist from its games' platform (e.g. MAME default)
 - [x] BigBox platform wheel lights the highlighted platform's default lights (plugin sends the selected

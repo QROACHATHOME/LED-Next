@@ -83,7 +83,11 @@ public static class GameLightResolver
         if (activeIndex >= 0)
         {
             from = levels[activeIndex].Description;
-            foreach (var c in levels[activeIndex].Profile.Controls) Add(c, activeIndex);
+            // When a platform default decides (a game without its own lights, or the platform wheel), its
+            // always-active UI controls follow the same rule as below: shared buttons only.
+            bool fromDefault = levels[activeIndex].IsPlatformDefault;
+            foreach (var c in levels[activeIndex].Profile.Controls)
+                Add(c, activeIndex, sharedButtonsOnly: fromDefault && c.AlwaysActive && ControlNames.PlayerOf(c.Control) == 0);
         }
         for (int i = 0; i < levels.Count; i++)
         {

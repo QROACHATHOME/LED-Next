@@ -137,6 +137,23 @@ public class ResolverTests
         Assert.Empty(r.Controls.Single(c => c.Control == "UI_SELECT").Buttons);
     }
 
+    [Theory]
+    [InlineData(null)]          // the platform wheel: the platform's own default
+    [InlineData("nolights")]    // a game with no lights of its own: lit by the platform default
+    public void AlwaysActiveUiControlsDoNotLightPlayerButtonsFromAPlatformDefault(string? game)
+    {
+        // Visit 6: P3 button 3 was still green in MAME games without their own lights, because the
+        // platform default was the level that decides the lit controls and the rule above was skipped.
+        var lib = Library();
+        lib.AddGame(new GameInfo("MAME", "nolights", "No lights", null, 2, "", "", GameLighting.PlatformDefault));
+        var map = new ControlMap();
+        map.Mappings.Add(new ControlMapping { Control = "UI_SELECT", Buttons = { "P3_B3" }, Source = "input code KEYCODE_ENTER" });
+        var r = GameLightResolver.Resolve(lib, "MAME", game, map, Panel());
+        Assert.Equal("MAME default", r.From);
+        Assert.False(r.ButtonColors.ContainsKey("P3_B3"));
+        Assert.Equal(Grey, r.ButtonColors["P1_B1"]);   // the default's other controls still light
+    }
+
     [Fact]
     public void CloneUsesParentAndUnknownGameUsesPlatformDefault()
     {

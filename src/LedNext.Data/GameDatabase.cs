@@ -55,6 +55,7 @@ public sealed class GameDatabase : IGameLibrary
                 sources TEXT NOT NULL, lighting INTEGER NOT NULL,
                 buttons INTEGER NOT NULL DEFAULT 0, tags TEXT NOT NULL DEFAULT '', PRIMARY KEY(platform, name));
             CREATE INDEX IF NOT EXISTS games_description ON games(description COLLATE NOCASE);
+            CREATE INDEX IF NOT EXISTS games_name ON games(name);
             CREATE TABLE IF NOT EXISTS lights(
                 platform TEXT NOT NULL COLLATE NOCASE, game TEXT NOT NULL COLLATE NOCASE, seq INTEGER NOT NULL,
                 control TEXT NOT NULL, color TEXT, color_name TEXT, label TEXT, always_active INTEGER NOT NULL,
@@ -606,10 +607,72 @@ public sealed class GameDatabase : IGameLibrary
     /// </summary>
     private void MergeLaunchBoxGames()
     {
+        UseLightsFromAnotherEmulator();
         RemoveStaleLaunchBoxGames();
         UseMameDataForArcadePlatforms();
         AddMissingLaunchBoxGames();
         FillFromMameData();
+    }
+
+    /// <summary>
+    /// A LaunchBox game whose own entry has no lights, while LEDBlinkyControls.xml has coloured lights for
+    /// the same ROM name and title under another emulator (a Model 2 or MAME game run through TeknoParrot,
+    /// an Atari vector game set up under AAE), is lit from that entry instead. Customized games, and
+    /// MAME-data platforms (already lit from MAME), are left alone.
+    /// </summary>
+    private void UseLightsFromAnotherEmulator()
+    {
+        var candidates = new List<(long RowId, string Title, string Platform, string Game, string OtherPlatform, string OtherName, string OtherDescription)>();
+        using (var c = Connect())
+        using (var cmd = c.CreateCommand())
+        {
+            cmd.CommandText = """
+                SELECT lb.rowid, lb.title, lb.platform, lb.game, o.platform, o.name, o.description
+                FROM launchbox_games lb
+                JOIN games o ON o.name = lb.rom AND o.platform <> lb.platform
+                WHERE lb.rom <> ''
+                  -- only a game set up in LEDBlinkyControls.xml (not MAME's general controls data)
+                  AND o.sources LIKE '%LEDBlinkyControls.xml%'
+                  AND EXISTS(SELECT 1 FROM lights l WHERE l.platform = o.platform AND l.game = o.name AND l.color IS NOT NULL)
+                  -- a platform that uses MAME's data already lights its games from MAME
+                  AND NOT (o.platform = 'MAME' AND EXISTS(SELECT 1 FROM platforms p WHERE p.key = lb.platform AND p.uses_mame = 1))
+                  AND NOT EXISTS(SELECT 1 FROM lights l WHERE l.platform = lb.platform AND l.game = lb.game)
+                  AND NOT EXISTS(SELECT 1 FROM user_profiles u WHERE u.platform = lb.platform AND u.game = lb.game)
+                ORDER BY lb.rowid, o.platform
+                """;
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+                candidates.Add((r.GetInt64(0), r.GetString(1), r.GetString(2), r.GetString(3), r.GetString(4), r.GetString(5), r.GetString(6)));
+        }
+        // One entry per LaunchBox game, and only when the titles agree (the ROM name alone can collide).
+        var moves = candidates
+            .Where(m => Core.Import.LaunchBox.GameMatcher.SameTitle(m.Title, m.OtherDescription))
+            .GroupBy(m => m.RowId)
+            .Where(g => g.Count() == 1)
+            .Select(g => g.First())
+            .ToList();
+        if (moves.Count == 0) return;
+
+        using (var c = Connect())
+        using (var tx = c.BeginTransaction())
+        {
+            using var cmd = c.CreateCommand();
+            cmd.Transaction = tx;
+            cmd.CommandText = "UPDATE launchbox_games SET platform = $p, game = $g, matched_by = $m WHERE rowid = $id";
+            var p = cmd.Parameters.Add("$p", SqliteType.Text);
+            var g = cmd.Parameters.Add("$g", SqliteType.Text);
+            var m = cmd.Parameters.Add("$m", SqliteType.Text);
+            var id = cmd.Parameters.Add("$id", SqliteType.Integer);
+            foreach (var move in moves)
+            {
+                p.Value = move.OtherPlatform; g.Value = move.OtherName; m.Value = $"rom name on {move.OtherPlatform}"; id.Value = move.RowId;
+                cmd.ExecuteNonQuery();
+            }
+            tx.Commit();
+        }
+        foreach (var move in moves.Take(10))
+            AppLog.Info($"LaunchBox '{move.Title}': no lights on {move.Platform}/{move.Game}; lit from {move.OtherPlatform}/{move.OtherName}.");
+        AppLog.Info($"{moves.Count:N0} LaunchBox games are lit from the same game under another emulator (LEDBlinky has their lights there).");
     }
 
     /// <summary>

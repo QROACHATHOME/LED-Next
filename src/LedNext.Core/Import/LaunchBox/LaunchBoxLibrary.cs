@@ -186,4 +186,21 @@ public static class GameMatcher
         var name = g.Rom.Length > 0 ? g.Rom : g.Title;
         return new LaunchBoxMatch(g, platform, name, "new");
     }
+
+    /// <summary>
+    /// True when a LaunchBox title and a library description name the same game: equal after dropping
+    /// bracketed parts ("(version 1.6)", "[Rev A]"), a leading "The", and anything but letters and digits.
+    /// Strict on purpose: "Star Wars: Battle Pod" is not "Star Wars".
+    /// </summary>
+    public static bool SameTitle(string launchBoxTitle, string description)
+    {
+        static string Key(string s)
+        {
+            s = System.Text.RegularExpressions.Regex.Replace(s, @"\([^)]*\)|\[[^\]]*\]", " ").Trim();
+            if (s.StartsWith("The ", StringComparison.OrdinalIgnoreCase)) s = s[4..];
+            return PlatformMatcher.Normalize(s);
+        }
+        var a = Key(launchBoxTitle);
+        return a.Length > 0 && a == Key(description);
+    }
 }
