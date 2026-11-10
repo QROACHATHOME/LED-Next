@@ -115,12 +115,26 @@ public class ResolverTests
     }
 
     [Fact]
-    public void AlwaysActiveDefaultsAreAddedToEveryGame()
+    public void AlwaysActiveUiControlsLightSharedButtonsInEveryGame()
     {
+        var panel = Panel();
+        panel.Buttons.Add(new PanelButton { Id = "ADMIN_1", Kind = ControlKind.Admin });
+        var map = new ControlMap();
+        map.Mappings.Add(new ControlMapping { Control = "UI_SELECT", Buttons = { "ADMIN_1" }, Source = "input code KEYCODE_ENTER" });
+        var r = GameLightResolver.Resolve(Library(), "MAME", "game", map, panel);
+        Assert.Equal(Rgb.Green, r.ButtonColors["ADMIN_1"]);
+    }
+
+    [Fact]
+    public void AlwaysActiveUiControlsDoNotLightPlayerButtons()
+    {
+        // The cabinet's P3 button 3 sends Enter, which is also MAME's UI_SELECT. LEDBlinky lit it green
+        // in every game; it should follow the game instead.
         var map = new ControlMap();
         map.Mappings.Add(new ControlMapping { Control = "UI_SELECT", Buttons = { "P3_B3" }, Source = "input code KEYCODE_ENTER" });
         var r = GameLightResolver.Resolve(Library(), "MAME", "game", map, Panel());
-        Assert.Equal(Rgb.Green, r.ButtonColors["P3_B3"]);
+        Assert.False(r.ButtonColors.ContainsKey("P3_B3"));
+        Assert.Empty(r.Controls.Single(c => c.Control == "UI_SELECT").Buttons);
     }
 
     [Fact]
@@ -241,13 +255,23 @@ public class LedBlinkyImportTests(ITestOutputHelper output)
         throw new InvalidOperationException("Repository root not found.");
     }
 
-    private static readonly Lazy<(LedBlinkyImportResult Result, CabinetConfig Cabinet)> Imported = new(() =>
+    // The copied settings.ini names the cabinet's real MAME folder (D:\…\Mame02XX). Pass the MAME folder
+    // explicitly so the result is the same on every machine: a folder without cfg/default.cfg gives
+    // MAME's built-in keys; import-samples/mame holds the cabinet's real cfg/default.cfg.
+    private static readonly Lazy<(LedBlinkyImportResult Result, CabinetConfig Cabinet)> Imported =
+        new(() => ImportWith(Path.Combine(RepoRoot(), "import-samples", "no-mame-folder")));
+
+    private static readonly Lazy<(LedBlinkyImportResult Result, CabinetConfig Cabinet)> ImportedWithMameCfg =
+        new(() => ImportWith(Path.Combine(RepoRoot(), "import-samples", "mame")));
+
+    private static (LedBlinkyImportResult Result, CabinetConfig Cabinet) ImportWith(string mameFolder)
     {
         var root = RepoRoot();
         var cabinet = ConfigStore.LoadOrCreate(Path.Combine(root, "cabinet", "cabinet.json"));
-        var result = LedBlinkyImporter.Import(Path.Combine(root, "import-samples", "ledblinky"), cabinet.Panel, cabinet.Wiring);
+        var result = LedBlinkyImporter.Import(Path.Combine(root, "import-samples", "ledblinky"), cabinet.Panel, cabinet.Wiring,
+            mameFolder: mameFolder);
         return (result, cabinet);
-    });
+    }
 
     private ResolvedLights Resolve(string platform, string game)
     {
@@ -289,6 +313,7 @@ public class LedBlinkyImportTests(ITestOutputHelper output)
         Assert.Equal(new Rgb(255, 0, 0), lights.ButtonColors["P2_B1"]);
         Assert.False(lights.ButtonColors.ContainsKey("P1_B3"));          // unused button stays off
         Assert.Equal(Rgb.White, lights.ButtonColors["P1_START"]);        // Start/Coin lit by name even with no LEDs yet
+        Assert.False(lights.ButtonColors.ContainsKey("P3_B3"));          // UI_SELECT (Enter) no longer lights P3 button 3
     }
 
     [Fact]
@@ -298,6 +323,18 @@ public class LedBlinkyImportTests(ITestOutputHelper output)
         // MAME's P1_BUTTON7 is KEYCODE_C; on this cabinet KEYCODE_C is the button labelled 8.
         Assert.Equal(new[] { "P1_B8" }, r.ControlMap.Lookup("P1_BUTTON7", cab.Panel).Buttons);
         Assert.Equal(new[] { "P1_B7" }, r.ControlMap.Lookup("P1_BUTTON8", cab.Panel).Buttons);
+        Assert.Equal(new[] { "TRACKBALL" }, r.ControlMap.Lookup("P1_TRACKBALL", cab.Panel).Buttons);
+    }
+
+    [Fact]
+    public void CabinetMameCfgReplacesMameDefaults()
+    {
+        var (r, cab) = ImportedWithMameCfg.Value;
+        Assert.Contains(r.Notes, n => n.StartsWith("Using ") && n.Contains("default.cfg"));
+        // The cabinet's default.cfg swaps MAME's defaults: P1_BUTTON7 = KEYCODE_V, P1_BUTTON8 = KEYCODE_C,
+        // so MAME's button 7 is the button labelled 7 here.
+        Assert.Equal(new[] { "P1_B7" }, r.ControlMap.Lookup("P1_BUTTON7", cab.Panel).Buttons);
+        Assert.Equal(new[] { "P1_B8" }, r.ControlMap.Lookup("P1_BUTTON8", cab.Panel).Buttons);
         Assert.Equal(new[] { "TRACKBALL" }, r.ControlMap.Lookup("P1_TRACKBALL", cab.Panel).Buttons);
     }
 

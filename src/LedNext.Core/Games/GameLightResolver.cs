@@ -29,7 +29,9 @@ public sealed record ResolvedLights(
 /// The first level that lists any controls decides <i>which</i> controls are lit (unlisted ones are off),
 /// the same as LEDBlinky. A control without a colour takes the colour of the same control further up the
 /// chain, else the platform's default-active colour. Always-active controls of the platform defaults
-/// (e.g. UI_SELECT) are added to every game.
+/// are added to every game. Always-active UI controls (no player: UI_SELECT, UI_PAUSE…) light only
+/// shared (player 0) buttons: on a cabinet where a player button also sends the UI key (P3 button 3
+/// sends Enter = UI_SELECT), LEDBlinky lit that button green in every game; here it follows the game.
 /// </remarks>
 public static class GameLightResolver
 {
@@ -46,7 +48,7 @@ public static class GameLightResolver
         var controls = new List<ResolvedControl>();
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        void Add(ControlLight c, int fromIndex)
+        void Add(ControlLight c, int fromIndex, bool sharedButtonsOnly = false)
         {
             if (!seen.Add(c.Control)) return;
             Rgb? color = c.Color;
@@ -60,6 +62,13 @@ public static class GameLightResolver
                 label ??= up.Label;
             }
             var (buttons, source) = map.Lookup(c.Control, panel);
+            if (sharedButtonsOnly)
+            {
+                var shared = buttons.Where(id => panel.Find(id)?.Player == 0).ToList();
+                if (shared.Count < buttons.Count)
+                    source = shared.Count > 0 ? source : $"{source}; not lit: {string.Join(", ", buttons)} is a player button";
+                buttons = shared;
+            }
             controls.Add(new ResolvedControl(c.Control, label, color ?? defaultActive, color is null ? "default" : colorName,
                 c.AlwaysActive, buttons, source));
         }
@@ -74,7 +83,7 @@ public static class GameLightResolver
         {
             if (!levels[i].IsPlatformDefault) continue;
             foreach (var c in levels[i].Profile.Controls)
-                if (c.AlwaysActive) Add(c, i);
+                if (c.AlwaysActive) Add(c, i, sharedButtonsOnly: ControlNames.PlayerOf(c.Control) == 0);
         }
 
         // A game's own controls come first, so they win if two controls share a button.

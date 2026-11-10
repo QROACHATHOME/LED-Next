@@ -18,10 +18,11 @@
       Color-RGB.ini, settings.ini, input map → control map (tested on the real LEDBlinky 8.3 files)
 - [x] SQLite library (`config/games.db`), search
 - [x] Games tab: import, platform filter, search, live preview on the panel and the boards
-- [ ] **Verify at the cabinet**: import from `C:\LEDBlinky`, preview a few games, compare with what
-      LEDBlinky lights. Check MAME's `cfg/default.cfg` is found (import report says so).
-- [ ] Decide: `UI_SELECT` (always lit, green) maps to P3 button 3 because that button sends Enter.
-      LEDBlinky probably does the same; confirm at the cabinet, else drop always-active UI controls.
+- [x] **Verify at the cabinet**: done 2026-11-10 (visit 2). 34 games matched LEDBlinky; `default.cfg` found.
+      See CABINET_RESULTS "Visit 2".
+- [x] Decided: always-active UI controls (`UI_SELECT`…) light only shared (player 0) buttons. LEDBlinky lit
+      P3 button 3 green in every game (it sends Enter); that was a bug, and it now follows the game.
+- [ ] Next visit: preview a trackball game and a Neo Geo game specifically (not covered in visit 2)
 - [ ] Editing: per-game / per-platform colour overrides stored apart from imported data
 - [ ] Control templates (e.g. "6-button fighter") and bulk assign; smart lists
 - [ ] Control map editor (today it is rebuilt on import; re-import after re-wiring)

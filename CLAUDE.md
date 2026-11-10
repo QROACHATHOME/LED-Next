@@ -43,8 +43,9 @@ starting work. Never commit `PacDrive*.dll` (Ultimarc's file; git-ignored).
   run against real boards yet.
 - Nodify graph bindings (anchors, pending connections) — check after any Nodify upgrade.
 - The LEDBlinky control map (`ControlMapBuilder`) and MAME `cfg/default.cfg` reading: tested on the
-  real LEDBlinky files, but MAME's own `default.cfg` has not been seen yet. Compare the Games tab
-  with what LEDBlinky lights before trusting it.
+  real LEDBlinky files and the cabinet's real `default.cfg` (`import-samples/mame/cfg/`), and matched
+  LEDBlinky at the cabinet for 34 games (visit 2). Tests must pass `mameFolder` explicitly so they
+  don't depend on the machine's MAME install.
 
 ## Expected working style
 - Say which subsystem you are changing.

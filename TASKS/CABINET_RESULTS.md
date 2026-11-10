@@ -84,3 +84,40 @@ single 1920×1080 display. Git for Windows 2.56 installed this session (it was n
 - [ ] `cabinet/panel-background.*` (no photo set)
 - [x] `cabinet/led-next.log` (whole log, 360 lines)
 - [x] `import-samples/ledblinky/…`
+
+---
+
+# Visit 2: game import (2026-11-10)
+
+## Setup
+- Pulled `4387a02` (Phase 3). Build clean. `cabinet.json` upgraded 1 → 2 on start (logged; written to disk on the next save).
+- Games tab → Import from LEDBlinky → `C:\LEDBlinky`: 37,891 games in `config/games.db`. MAME's `cfg/default.cfg`
+  was found through `settings.ini` (`MameFolder=D:\CoinOPS Collections\emulators\Mame02XX`).
+- `default.cfg` copied (read-only) to `import-samples/mame/cfg/default.cfg`, keeping MAME's own `cfg/` layout so the folder
+  can be passed straight to the importer.
+
+## What we found
+- **The cabinet's `default.cfg` swaps MAME's P1 buttons 7 and 8**: `P1_BUTTON7 = KEYCODE_V`, `P1_BUTTON8 = KEYCODE_C`
+  (MAME's defaults are the other way round). With the real file, MAME's button 7 is the button labelled 7.
+- **Test was machine-dependent**: `ControlMapFollowsTheCabinetsInputMap` passed on the dev PC (no MAME folder there, so
+  MAME's built-in keys) and failed here (the real `default.cfg` was found). Fix: `LedBlinkyImporter.Import` takes an
+  optional `mameFolder` (null = settings.ini, as before; the app is unchanged). The tests now pass it explicitly: a
+  folder without `default.cfg` for the built-in keys, and `import-samples/mame` for the real file (new test
+  `CabinetMameCfgReplacesMameDefaults`).
+- **UI_SELECT / P3 button 3, decided: LEDBlinky's behaviour was a bug.** Every MAME platform default in
+  `LEDBlinkyControls.xml` has `UI_SELECT alwaysActive="1" color="Green"`. P3 button 3 sends `KEYCODE_ENTER`, which
+  is both MAME's `P3_BUTTON3` and `UI_SELECT`, so LEDBlinky (and our first import) lit P3 button 3 green in every
+  game. Fix in `GameLightResolver`: always-active controls with no player (`UI_SELECT`, `UI_CANCEL`, `UI_PAUSE`…)
+  light only shared (player 0) buttons; a player's button follows the game. Always-active *player* controls are
+  unchanged. **LED behaviour change**: P3 button 3 now lights only in games that use it, in the game's colour.
+  Confirmed at the panel.
+
+## Game previews (Hardware mode)
+- 34 games previewed by the user, including 10-Yard Fight, 1000 Miglia, 1945k III, Act Raiser, Alien Syndrome,
+  Alien vs. Predator (+ `avspu`), Altered Beast, APB, Arabian Magic, Arkanoid bootlegs, Arrow Flash, Astro Fantasia,
+  Astro Wars, B-Wings, Bass, Battle Circuit.
+- Result: **all matched what LEDBlinky lights**, apart from the P3 button 3 fix above.
+- Not specifically covered: a trackball game and a Neo Geo game (the unit tests cover `centiped` and `mslug`).
+
+## Files brought back
+- [x] `import-samples/mame/cfg/default.cfg`

@@ -48,7 +48,13 @@ public static class LedBlinkyImporter
     private const string MinimizedMame = "LEDBlinkyMinimizedMame.xml";
     private const string InputMapXml = "LEDBlinkyInputMap.xml";
 
-    public static LedBlinkyImportResult Import(string folder, PanelLayout panel, WiringMap wiring, IProgress<string>? progress = null)
+    /// <param name="mameFolder">
+    /// MAME folder whose <c>cfg/default.cfg</c> holds the user's key assignments. Null (the default) uses
+    /// <c>MameFolder</c> from LEDBlinky's settings.ini; tests pass a fixed folder so the result does not
+    /// depend on which machine they run on.
+    /// </param>
+    public static LedBlinkyImportResult Import(string folder, PanelLayout panel, WiringMap wiring, IProgress<string>? progress = null,
+        string? mameFolder = null)
     {
         if (!Directory.Exists(folder)) throw new DirectoryNotFoundException($"LEDBlinky folder not found: {folder}");
         string P(string file) => Path.Combine(folder, file);
@@ -65,7 +71,7 @@ public static class LedBlinkyImporter
             r.FilesRead.Add("settings.ini");
         }
         bool mameDefaultForOthers = settings?.Get("MAMEConfig", "UseMameDefaultForOtherEmulators") != "0";
-        string? mameFolder = settings?.Get("MAMEConfig", "MameFolder");
+        mameFolder ??= settings?.Get("MAMEConfig", "MameFolder");
 
         ctx.Colors = LedBlinkyColors.Load(P("Color-RGB.ini"));
         if (File.Exists(P("Color-RGB.ini"))) r.FilesRead.Add("Color-RGB.ini");
