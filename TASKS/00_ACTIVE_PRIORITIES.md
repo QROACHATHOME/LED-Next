@@ -30,7 +30,15 @@
 - [x] Bulk assign: Copy all lights / Copy this button, multi-select in the games list (Ctrl/Shift-click,
       Ctrl+A, Ctrl+C / Ctrl+V), Paste to selected or to all search matches (one transaction, confirmation
       with a count), Revert selected
-- [ ] Control templates (e.g. "6-button fighter", saved and named); smart lists
+- [x] Named templates (Games tab → Templates): preview, apply to selected / all matches, save the
+      lights shown now as a template, delete. Starters: 6-button fighter, Neo Geo 4-button, 3-button,
+      2-button, 4-player 3-button, Trackball (seeded once; deleting them sticks)
+- [x] Smart lists: saved filters (platform, search, lit/customized, hide clones, buttons min–max,
+      players min–max, control type). Starters: 6/4/2-button games, 4-player, trackball, spinner,
+      lightgun, my customized games. Button counts and control types are worked out on import
+      (re-import an older library to fill them)
+- [ ] Next visit: pick "6-button games", apply "6-button fighter", check a fighter on the real panel
+      (are buttons 4-6 the bottom row?)
 - [ ] Control map editor (today it is rebuilt on import; re-import after re-wiring)
 - [ ] Platform name mapping LaunchBox ↔ LEDBlinky (`Sega Genesis` ↔ `Sega_Genesis`, `Arcade` → MAME)
 - [ ] Animations (`*.lwax`) — phase 5

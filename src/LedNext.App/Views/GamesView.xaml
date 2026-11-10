@@ -36,23 +36,64 @@
                         </TextBlock.Style>
                     </TextBlock>
 
-                    <ComboBox ItemsSource="{Binding Platforms}" SelectedItem="{Binding SelectedPlatform}"
-                              DisplayMemberPath="Display" Margin="0,12,0,0" />
+                    <DockPanel Margin="0,12,0,0">
+                        <TextBlock Text="Smart list" Foreground="{StaticResource AppTextDim}" VerticalAlignment="Center" Width="62" />
+                        <Button DockPanel.Dock="Right" Content="Delete" Command="{Binding DeleteSmartListCommand}"
+                                ToolTip="Delete this smart list (games are not changed)" />
+                        <ComboBox ItemsSource="{Binding SmartLists}" SelectedItem="{Binding SelectedSmartList}" DisplayMemberPath="Name"
+                                  ToolTip="Saved filters, e.g. all 6-button games. Pick one, then apply a template to all matches." />
+                    </DockPanel>
                     <DockPanel Margin="0,8,0,0">
-                        <TextBlock Text="Search" Foreground="{StaticResource AppTextDim}" VerticalAlignment="Center" Width="50" />
+                        <TextBlock Text="Platform" Foreground="{StaticResource AppTextDim}" VerticalAlignment="Center" Width="62" />
+                        <ComboBox ItemsSource="{Binding Platforms}" SelectedItem="{Binding SelectedPlatform}" DisplayMemberPath="Display" />
+                    </DockPanel>
+                    <DockPanel Margin="0,8,0,0">
+                        <TextBlock Text="Search" Foreground="{StaticResource AppTextDim}" VerticalAlignment="Center" Width="62" />
                         <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" ToolTip="ROM name or title" />
                     </DockPanel>
-                    <DockPanel Margin="0,8,0,4">
+
+                    <Expander IsExpanded="{Binding FiltersExpanded}" Margin="0,8,0,0" Foreground="{StaticResource AppText}">
+                        <Expander.Header>
+                            <TextBlock>
+                                <Run Text="Filters: " Foreground="{StaticResource AppTextDim}" /><Run Text="{Binding FilterSummary, Mode=OneWay}" />
+                            </TextBlock>
+                        </Expander.Header>
+                        <StackPanel Margin="4,6,0,0">
+                            <WrapPanel>
+                                <CheckBox Content="Only with lights" IsChecked="{Binding LitOnly}" Margin="0,0,12,4"
+                                          ToolTip="Hide games that only get the platform default" />
+                                <CheckBox Content="Only customized" IsChecked="{Binding CustomizedOnly}" Margin="0,0,12,4"
+                                          ToolTip="Games whose lights you changed in LED-Next" />
+                                <CheckBox Content="Hide clones" IsChecked="{Binding HideClones}" Margin="0,0,0,4"
+                                          ToolTip="Clones follow their parent ROM, so changing parents is usually enough" />
+                            </WrapPanel>
+                            <WrapPanel Margin="0,2,0,0">
+                                <TextBlock Text="Buttons" Foreground="{StaticResource AppTextDim}" VerticalAlignment="Center" Width="56" />
+                                <TextBox Text="{Binding MinButtonsText, UpdateSourceTrigger=PropertyChanged}" Width="34" ToolTip="At least (empty = any)" />
+                                <TextBlock Text="to" Foreground="{StaticResource AppTextDim}" VerticalAlignment="Center" Margin="4,0" />
+                                <TextBox Text="{Binding MaxButtonsText, UpdateSourceTrigger=PropertyChanged}" Width="34" ToolTip="At most (empty = any)" />
+                                <TextBlock Text="Players" Foreground="{StaticResource AppTextDim}" VerticalAlignment="Center" Margin="16,0,6,0" />
+                                <TextBox Text="{Binding MinPlayersText, UpdateSourceTrigger=PropertyChanged}" Width="34" ToolTip="At least (empty = any)" />
+                                <TextBlock Text="to" Foreground="{StaticResource AppTextDim}" VerticalAlignment="Center" Margin="4,0" />
+                                <TextBox Text="{Binding MaxPlayersText, UpdateSourceTrigger=PropertyChanged}" Width="34" ToolTip="At most (empty = any)" />
+                            </WrapPanel>
+                            <DockPanel Margin="0,6,0,0">
+                                <TextBlock Text="Control" Foreground="{StaticResource AppTextDim}" VerticalAlignment="Center" Width="56" />
+                                <ComboBox ItemsSource="{Binding ControlChoices}" SelectedItem="{Binding ControlFilter}" Width="120" HorizontalAlignment="Left" />
+                            </DockPanel>
+                            <DockPanel Margin="0,8,0,0">
+                                <Button DockPanel.Dock="Right" Content="Save as smart list" Command="{Binding SaveSmartListCommand}" />
+                                <TextBox Text="{Binding NewSmartListName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,6,0"
+                                         ToolTip="Name for these filters (same name = replace)" />
+                            </DockPanel>
+                        </StackPanel>
+                    </Expander>
+
+                    <DockPanel Margin="0,8,0,6">
                         <Button DockPanel.Dock="Right" Content="Platform default" Command="{Binding PreviewPlatformDefaultCommand}"
                                 ToolTip="Show what a game with no lighting data of its own gets on this platform" />
-                        <StackPanel>
-                            <CheckBox Content="Only games with lights" IsChecked="{Binding LitOnly}"
-                                      ToolTip="Hide games that only get the platform default" />
-                            <CheckBox Content="Only customized" IsChecked="{Binding CustomizedOnly}" Margin="0,4,0,0"
-                                      ToolTip="Games whose lights you changed in LED-Next" />
-                        </StackPanel>
+                        <TextBlock Text="{Binding ResultInfo}" Foreground="{StaticResource AppTextDim}" VerticalAlignment="Center" TextWrapping="Wrap" />
                     </DockPanel>
-                    <TextBlock Text="{Binding ResultInfo}" Foreground="{StaticResource AppTextDim}" Margin="0,0,0,6" />
                 </StackPanel>
 
                 <!-- Bulk: paste copied lights onto many games -->
@@ -265,6 +306,40 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </ScrollViewer>
+                </TabItem>
+                <TabItem Header="Templates">
+                    <DockPanel Margin="6">
+                        <ListBox DockPanel.Dock="Left" Width="320" ItemsSource="{Binding Templates}" SelectedItem="{Binding SelectedTemplate}"
+                                 Background="{StaticResource AppBackground}" Foreground="{StaticResource AppText}" BorderBrush="{StaticResource AppBorder}"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="2,3">
+                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding Description}" FontSize="11" Opacity="0.65" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <StackPanel Margin="14,0,0,0">
+                            <TextBlock Text="Pick a template to preview it on the panel. Applying replaces each game's lights with the template's colours (each game keeps its own button descriptions) and can be reverted per game."
+                                       TextWrapping="Wrap" Foreground="{StaticResource AppTextDim}" />
+                            <WrapPanel Margin="0,8,0,0">
+                                <Button Content="Preview" Command="{Binding ShowTemplateCommand}" />
+                                <Button Content="{Binding ApplySelectedText}" Command="{Binding ApplyTemplateToSelectedCommand}"
+                                        ToolTip="The games selected in the list (Ctrl/Shift-click)" />
+                                <Button Content="{Binding ApplyAllText}" Command="{Binding ApplyTemplateToAllCommand}"
+                                        ToolTip="Every game matching the smart list / filters, including ones not listed" />
+                                <Button Content="Delete" Command="{Binding DeleteTemplateCommand}" />
+                            </WrapPanel>
+                            <TextBlock Text="Save the lights shown now as a template" Foreground="{StaticResource AppTextDim}" Margin="0,16,0,4" />
+                            <DockPanel>
+                                <Button DockPanel.Dock="Right" Content="Save template" Command="{Binding SaveTemplateCommand}" />
+                                <TextBox Text="{Binding NewTemplateName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,6,0"
+                                         ToolTip="Name, e.g. 6-button fighter (same name = replace)" />
+                            </DockPanel>
+                        </StackPanel>
+                    </DockPanel>
                 </TabItem>
                 <TabItem Header="Import report">
                     <ListBox ItemsSource="{Binding ImportReport}" Background="{StaticResource AppBackground}" Foreground="{StaticResource AppText}"

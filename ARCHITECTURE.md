@@ -71,6 +71,14 @@ LEDBlinky folder ──► LedBlinkyImporter ──► InMemoryGameLibrary ─�
   keeps the target's own labels; a one-button copy changes only that control (including "off").
   Each target starts from its own customized profile or a materialized copy of what it shows, and
   all targets are written in one transaction (`SaveUserLightsMany`).
+- **Templates** (`LightTemplate`, tables `templates` / `template_lights`): a named whole layout in
+  logical controls, colours only (no game labels). Applying one is a whole-layout paste.
+  `GameLightResolver.ResolveProfile` previews it with no inheritance. Starters live in `BuiltIns`
+  and are seeded once (meta `seeded_builtins`), so deleting one is permanent.
+- **Smart lists** (`GameFilter`, table `smart_lists` as JSON): a saved filter, evaluated when opened.
+  Filters use `games.buttons` (highest `Pn_BUTTONm` lit by the game or its parent, else Controls.ini
+  `P1NumButtons`) and `games.tags` (`ControlTags`: from lit controls and the control description),
+  both computed on import. Schema 3 added these columns; an older file gets them empty until re-import.
 
 ## Lighting engine (`LedEngine`)
 

@@ -99,6 +99,17 @@ public static class GameLightResolver
         return new ResolvedLights(platform, game, from, controls, colors);
     }
 
+    /// <summary>A stand-alone profile (a template) on this panel, with no inheritance; colourless controls are white.</summary>
+    public static ResolvedLights ResolveProfile(LightProfile profile, string title, ControlMap map, PanelLayout panel)
+    {
+        const string key = "\u0001template";
+        var lib = new InMemoryGameLibrary();
+        lib.AddPlatform(new PlatformInfo(key, key, null, false, Rgb.White));
+        lib.SetLights(key, title, profile);
+        var r = Resolve(lib, key, title, map, panel);
+        return r with { From = $"template {title}" };
+    }
+
     private static List<Level> BuildChain(IGameLibrary library, string platform, string? game, out Rgb defaultActive)
     {
         var levels = new List<Level>();

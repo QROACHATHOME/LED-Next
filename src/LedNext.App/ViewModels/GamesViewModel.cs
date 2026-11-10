@@ -162,6 +162,51 @@ public sealed partial class GamesViewModel : ObservableObject
     [ObservableProperty] private bool _customizedOnly;
     partial void OnCustomizedOnlyChanged(bool value) => Search();
 
+    [ObservableProperty] private bool _hideClones;
+    partial void OnHideClonesChanged(bool value) => Search();
+
+    // Number filters are text so an empty box means "any".
+    [ObservableProperty] private string _minButtonsText = "";
+    [ObservableProperty] private string _maxButtonsText = "";
+    [ObservableProperty] private string _minPlayersText = "";
+    [ObservableProperty] private string _maxPlayersText = "";
+    partial void OnMinButtonsTextChanged(string value) => DelayedSearch();
+    partial void OnMaxButtonsTextChanged(string value) => DelayedSearch();
+    partial void OnMinPlayersTextChanged(string value) => DelayedSearch();
+    partial void OnMaxPlayersTextChanged(string value) => DelayedSearch();
+
+    public IReadOnlyList<string> ControlChoices { get; } = new[] { "any" }.Concat(ControlTags.All).ToList();
+    [ObservableProperty] private string _controlFilter = "any";
+    partial void OnControlFilterChanged(string value) => Search();
+
+    [ObservableProperty] private bool _filtersExpanded;
+
+    public string FilterSummary => CurrentFilter().Describe();
+
+    private void DelayedSearch()
+    {
+        _searchDelay.Stop();
+        _searchDelay.Start();
+    }
+
+    private static int? ParseCount(string text) =>
+        int.TryParse(text.Trim(), out var n) && n >= 0 ? n : null;
+
+    /// <summary>The filter the list shows now (what a smart list saves).</summary>
+    public GameFilter CurrentFilter() => new()
+    {
+        Platform = SelectedPlatform?.Key,
+        Text = string.IsNullOrWhiteSpace(SearchText) ? null : SearchText.Trim(),
+        LitOnly = LitOnly,
+        CustomizedOnly = CustomizedOnly,
+        HideClones = HideClones,
+        MinButtons = ParseCount(MinButtonsText),
+        MaxButtons = ParseCount(MaxButtonsText),
+        MinPlayers = ParseCount(MinPlayersText),
+        MaxPlayers = ParseCount(MaxPlayersText),
+        Control = ControlFilter == "any" ? null : ControlFilter,
+    };
+
     [ObservableProperty] private GameRow? _selectedGame;
     partial void OnSelectedGameChanged(GameRow? value)
     {
@@ -175,7 +220,8 @@ public sealed partial class GamesViewModel : ObservableObject
     [ObservableProperty] private string? _previewFrom;
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(ImportCommand), nameof(PasteSelectedCommand), nameof(PasteAllMatchesCommand), nameof(RevertSelectedCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ImportCommand), nameof(PasteSelectedCommand), nameof(PasteAllMatchesCommand), nameof(RevertSelectedCommand),
+        nameof(ApplyTemplateToSelectedCommand), nameof(ApplyTemplateToAllCommand))]
     private bool _isBusy;
 
     [ObservableProperty] private string? _busyText;
@@ -195,7 +241,8 @@ public sealed partial class GamesViewModel : ObservableObject
     [NotifyCanExecuteChangedFor(nameof(RevertCommand))]
     private bool _isCustomized;
 
-    public bool CanEdit => SelectedControl is not null && _lights is not null;
+    // Templates are previewed read-only: edit a game, then save it as a template.
+    public bool CanEdit => SelectedControl is not null && _lights is not null && _platform is not null;
 
     partial void OnSelectedLabelChanged(string value)
     {
@@ -234,6 +281,8 @@ public sealed partial class GamesViewModel : ObservableObject
             ? "No games yet. Import from LEDBlinky to fill the library."
             : $"{count:N0} games on {summaries.Count} platforms, imported from {db.Meta("imported_from")} on {db.Meta("imported_at")}.";
         RefreshLibraryInfoOnly();
+        LoadSmartLists(SelectedSmartList?.Name);
+        LoadTemplates(SelectedTemplate?.Name);
         Search();
     }
 
@@ -242,10 +291,13 @@ public sealed partial class GamesViewModel : ObservableObject
     private void Search()
     {
         if (_suppressSearch || _session.Games is null) return;
-        var (games, total) = _session.Games.Search(SelectedPlatform?.Key, SearchText, LitOnly, ResultLimit, CustomizedOnly);
+        var (games, total) = _session.Games.Search(CurrentFilter(), ResultLimit);
         _matchCount = total;
         OnPropertyChanged(nameof(PasteAllText));
+        OnPropertyChanged(nameof(ApplyAllText));
+        OnPropertyChanged(nameof(FilterSummary));
         PasteAllMatchesCommand.NotifyCanExecuteChanged();
+        ApplyTemplateToAllCommand.NotifyCanExecuteChanged();
         Results.Clear();
         foreach (var g in games) Results.Add(new GameRow(g, _platformNames.GetValueOrDefault(g.Platform, g.Platform)));
         ResultInfo = total > games.Count ? $"Showing {games.Count:N0} of {total:N0} matches. Type to narrow it down."
@@ -451,6 +503,8 @@ public sealed partial class GamesViewModel : ObservableObject
         OnPropertyChanged(nameof(PasteSelectedText));
         PasteSelectedCommand.NotifyCanExecuteChanged();
         RevertSelectedCommand.NotifyCanExecuteChanged();
+        OnPropertyChanged(nameof(ApplySelectedText));
+        ApplyTemplateToSelectedCommand.NotifyCanExecuteChanged();
         var show = clicked ?? (selected.Count == 1 ? selected[0] : null);
         if (show is not null) Preview(show.Game.Platform, show.Game.Name, show.Description);
     }
@@ -478,21 +532,16 @@ public sealed partial class GamesViewModel : ObservableObject
     private bool CanRevertSelected() => !IsBusy && _selectedRows.Any(r => r.Game.Customized);
 
     [RelayCommand(CanExecute = nameof(CanPasteSelected))]
-    private Task PasteSelected() => PasteTo(_selectedRows.Select(r => r.Game).ToList(), "selected");
+    private Task PasteSelected() => PasteTo(Clipboard, _selectedRows.Select(r => r.Game).ToList(), "selected");
 
     [RelayCommand(CanExecute = nameof(CanPasteAll))]
-    private Task PasteAllMatches()
-    {
-        var db = _session.Games;
-        if (db is null) return Task.CompletedTask;
-        var (all, _) = db.Search(SelectedPlatform?.Key, SearchText, LitOnly, int.MaxValue, CustomizedOnly);
-        return PasteTo(all, "matching the search");
-    }
+    private Task PasteAllMatches() => PasteTo(Clipboard, AllMatches(), $"matching {FilterSummary}");
 
-    private async Task PasteTo(List<GameInfo> targets, string which)
+    private List<GameInfo> AllMatches() => _session.Games?.Search(CurrentFilter(), int.MaxValue).Games ?? new();
+
+    private async Task PasteTo(LightClipboard? clip, List<GameInfo> targets, string which)
     {
         var db = _session.Games;
-        var clip = Clipboard;
         if (db is null || clip is null || targets.Count == 0) return;
 
         int already = targets.Count(t => t.Customized);
@@ -556,6 +605,191 @@ public sealed partial class GamesViewModel : ObservableObject
         RevertSelectedCommand.NotifyCanExecuteChanged();
         RefreshLibraryInfoOnly();
         if (_platform is not null) Preview(_platform, _game, _title);
+    }
+
+    // ---- Smart lists ------------------------------------------------------------------------
+
+    public sealed record SmartListItem(string Name, GameFilter? Filter)
+    {
+        public string Tip => Filter?.Describe() ?? "Your own filter";
+    }
+
+    public ObservableCollection<SmartListItem> SmartLists { get; } = new();
+    private static readonly SmartListItem NoList = new("(your own filter)", null);
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(DeleteSmartListCommand))]
+    private SmartListItem? _selectedSmartList;
+
+    partial void OnSelectedSmartListChanged(SmartListItem? value)
+    {
+        if (_updatingSelection || value?.Filter is null) return;
+        ApplyFilter(value.Filter);
+        NewSmartListName = value.Name;
+    }
+
+    [ObservableProperty] private string _newSmartListName = "";
+
+    private void LoadSmartLists(string? select = null)
+    {
+        var db = _session.Games;
+        if (db is null) return;
+        SmartLists.Clear();
+        SmartLists.Add(NoList);
+        foreach (var (name, filter) in db.ListSmartLists()) SmartLists.Add(new SmartListItem(name, filter));
+        _updatingSelection = true;
+        SelectedSmartList = SmartLists.FirstOrDefault(s => s.Name == select) ?? NoList;
+        _updatingSelection = false;
+    }
+
+    /// <summary>Shows a smart list: sets every filter field, then searches once.</summary>
+    private void ApplyFilter(GameFilter f)
+    {
+        _suppressSearch = true;
+        SelectedPlatform = Platforms.FirstOrDefault(p => string.Equals(p.Key, f.Platform, StringComparison.OrdinalIgnoreCase)) ?? Platforms.FirstOrDefault();
+        SearchText = f.Text ?? "";
+        LitOnly = f.LitOnly;
+        CustomizedOnly = f.CustomizedOnly;
+        HideClones = f.HideClones;
+        MinButtonsText = f.MinButtons?.ToString() ?? "";
+        MaxButtonsText = f.MaxButtons?.ToString() ?? "";
+        MinPlayersText = f.MinPlayers?.ToString() ?? "";
+        MaxPlayersText = f.MaxPlayers?.ToString() ?? "";
+        ControlFilter = f.Control ?? "any";
+        _suppressSearch = false;
+        _searchDelay.Stop();
+        Search();
+    }
+
+    [RelayCommand]
+    private void SaveSmartList()
+    {
+        var db = _session.Games;
+        var name = NewSmartListName.Trim();
+        if (db is null) return;
+        if (name.Length == 0) { BusyText = "Type a name for the smart list first."; return; }
+        if (SmartLists.Any(s => s.Filter is not null && string.Equals(s.Name, name, StringComparison.OrdinalIgnoreCase)) &&
+            System.Windows.MessageBox.Show($"Replace the smart list '{name}' with the current filters?", "Smart list",
+                System.Windows.MessageBoxButton.OKCancel) != System.Windows.MessageBoxResult.OK) return;
+        db.SaveSmartList(name, CurrentFilter());
+        AppLog.Info($"Saved smart list '{name}': {FilterSummary}");
+        LoadSmartLists(name);
+        BusyText = $"Saved smart list '{name}'.";
+    }
+
+    private bool CanDeleteSmartList() => SelectedSmartList?.Filter is not null;
+
+    [RelayCommand(CanExecute = nameof(CanDeleteSmartList))]
+    private void DeleteSmartList()
+    {
+        var db = _session.Games;
+        var item = SelectedSmartList;
+        if (db is null || item?.Filter is null) return;
+        if (System.Windows.MessageBox.Show($"Delete the smart list '{item.Name}'? Games are not changed.", "Smart list",
+                System.Windows.MessageBoxButton.OKCancel) != System.Windows.MessageBoxResult.OK) return;
+        db.DeleteSmartList(item.Name);
+        AppLog.Info($"Deleted smart list '{item.Name}'.");
+        LoadSmartLists();
+    }
+
+    // ---- Templates --------------------------------------------------------------------------
+
+    public ObservableCollection<LightTemplate> Templates { get; } = new();
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ApplyTemplateToSelectedCommand), nameof(ApplyTemplateToAllCommand), nameof(DeleteTemplateCommand), nameof(ShowTemplateCommand))]
+    private LightTemplate? _selectedTemplate;
+
+    partial void OnSelectedTemplateChanged(LightTemplate? value)
+    {
+        if (value is not null) PreviewTemplate(value);
+    }
+
+    [ObservableProperty] private string _newTemplateName = "";
+
+    public string ApplySelectedText => $"Apply to {_selectedRows.Count:N0} selected";
+    public string ApplyAllText => $"Apply to all {_matchCount:N0} matches";
+
+    private void LoadTemplates(string? select = null)
+    {
+        var db = _session.Games;
+        if (db is null) return;
+        Templates.Clear();
+        foreach (var t in db.ListTemplates()) Templates.Add(t);
+        if (select is not null) SelectedTemplate = Templates.FirstOrDefault(t => t.Name == select);
+    }
+
+    private void PreviewTemplate(LightTemplate t)
+    {
+        var config = _session.Config;
+        var lights = GameLightResolver.ResolveProfile(t.Profile, t.Name, config.ControlMap, config.Panel);
+        _platform = null;
+        _game = null;
+        _title = $"Template: {t.Name}";
+        _lights = lights;
+        PreviewTitle = _title;
+        PreviewSubtitle = t.Description;
+        PreviewFrom = "Preview only. Apply it to games, or edit a game and save it as a template.";
+        IsCustomized = false;
+        Controls.Clear();
+        foreach (var c in lights.Controls) Controls.Add(new ControlRow(c));
+        RebuildPreviewButtons();
+        UpdateSelection();
+        OnPropertyChanged(nameof(CanEdit));
+        CopyAllCommand.NotifyCanExecuteChanged();
+        _main.SetSource(new GameLights(lights, _title));
+    }
+
+    [RelayCommand(CanExecute = nameof(CanDeleteTemplate))]
+    private void ShowTemplate()
+    {
+        if (SelectedTemplate is { } t) PreviewTemplate(t);
+    }
+
+    private LightClipboard? TemplateClip() =>
+        SelectedTemplate is { } t ? new LightClipboard($"template {t.Name}", t.Profile, null) : null;
+
+    private bool CanApplySelected() => !IsBusy && SelectedTemplate is not null && _selectedRows.Count > 0;
+    private bool CanApplyAll() => !IsBusy && SelectedTemplate is not null && _matchCount > 0;
+
+    [RelayCommand(CanExecute = nameof(CanApplySelected))]
+    private Task ApplyTemplateToSelected() => PasteTo(TemplateClip(), _selectedRows.Select(r => r.Game).ToList(), "selected");
+
+    [RelayCommand(CanExecute = nameof(CanApplyAll))]
+    private Task ApplyTemplateToAll() => PasteTo(TemplateClip(), AllMatches(), $"matching {FilterSummary}");
+
+    /// <summary>Saves what the panel shows now (a game, platform default or template) under a name.</summary>
+    [RelayCommand]
+    private void SaveTemplate()
+    {
+        var db = _session.Games;
+        var name = NewTemplateName.Trim();
+        if (db is null) return;
+        if (_lights is null) { BusyText = "Pick a game whose lights you want to save first."; return; }
+        if (name.Length == 0) { BusyText = "Type a name for the template first."; return; }
+        if (Templates.Any(t => string.Equals(t.Name, name, StringComparison.OrdinalIgnoreCase)) &&
+            System.Windows.MessageBox.Show($"Replace the template '{name}' with the lights shown now ({_title})?", "Template",
+                System.Windows.MessageBoxButton.OKCancel) != System.Windows.MessageBoxResult.OK) return;
+        var profile = GameLightEditor.Materialize(_lights);
+        db.SaveTemplate(new LightTemplate(name, profile, $"Saved from {_title}."));
+        AppLog.Info($"Saved template '{name}' from {_title}.");
+        LoadTemplates(name);
+        BusyText = $"Saved template '{name}'.";
+    }
+
+    private bool CanDeleteTemplate() => SelectedTemplate is not null;
+
+    [RelayCommand(CanExecute = nameof(CanDeleteTemplate))]
+    private void DeleteTemplate()
+    {
+        var db = _session.Games;
+        var t = SelectedTemplate;
+        if (db is null || t is null) return;
+        if (System.Windows.MessageBox.Show($"Delete the template '{t.Name}'? Games it was applied to keep their lights.", "Template",
+                System.Windows.MessageBoxButton.OKCancel) != System.Windows.MessageBoxResult.OK) return;
+        db.DeleteTemplate(t.Name);
+        AppLog.Info($"Deleted template '{t.Name}'.");
+        LoadTemplates();
     }
 
     // ---- Import -----------------------------------------------------------------------------

@@ -31,7 +31,11 @@ public sealed record GameInfo(
     string Info,
     string Sources,
     GameLighting Lighting,
-    bool Customized = false);
+    bool Customized = false,
+    int Buttons = 0,
+    string Tags = "");
+// Buttons: highest button number the game lights for any player (P1_BUTTON6 → 6), 0 if unknown.
+// Tags: space-separated control types (joystick trackball spinner lightgun paddle pedal), see ControlTags.
 
 /// <summary>One logical control of a game (e.g. P1_BUTTON1) and how it is lit.</summary>
 /// <param name="Control">Normalised logical control name, see <see cref="ControlNames"/>.</param>

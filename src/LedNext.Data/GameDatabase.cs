@@ -21,7 +21,7 @@ public sealed class GameDatabase : IGameLibrary
     public const int SchemaVersion = 2;
     private const string GameColumns = """
         g.platform, g.name, g.description, g.parent, g.players, g.info, g.sources, g.lighting,
-        EXISTS(SELECT 1 FROM user_profiles u WHERE u.platform = g.platform AND u.game = g.name)
+        EXISTS(SELECT 1 FROM user_profiles u WHERE u.platform = g.platform AND u.game = g.name), g.buttons, g.tags
         """;
     private readonly string _connectionString;
     private readonly object _cacheLock = new();
@@ -50,7 +50,8 @@ public sealed class GameDatabase : IGameLibrary
             CREATE TABLE IF NOT EXISTS games(
                 platform TEXT NOT NULL COLLATE NOCASE, name TEXT NOT NULL COLLATE NOCASE,
                 description TEXT NOT NULL, parent TEXT, players INTEGER NOT NULL, info TEXT NOT NULL,
-                sources TEXT NOT NULL, lighting INTEGER NOT NULL, PRIMARY KEY(platform, name));
+                sources TEXT NOT NULL, lighting INTEGER NOT NULL,
+                buttons INTEGER NOT NULL DEFAULT 0, tags TEXT NOT NULL DEFAULT '', PRIMARY KEY(platform, name));
             CREATE INDEX IF NOT EXISTS games_description ON games(description COLLATE NOCASE);
             CREATE TABLE IF NOT EXISTS lights(
                 platform TEXT NOT NULL COLLATE NOCASE, game TEXT NOT NULL COLLATE NOCASE, seq INTEGER NOT NULL,
@@ -63,9 +64,46 @@ public sealed class GameDatabase : IGameLibrary
                 platform TEXT NOT NULL COLLATE NOCASE, game TEXT NOT NULL COLLATE NOCASE, seq INTEGER NOT NULL,
                 control TEXT NOT NULL, color TEXT, color_name TEXT, label TEXT, always_active INTEGER NOT NULL,
                 PRIMARY KEY(platform, game, seq));
-            INSERT OR REPLACE INTO meta(key, value) VALUES('schema_version', '2');
+            CREATE TABLE IF NOT EXISTS templates(
+                name TEXT PRIMARY KEY COLLATE NOCASE, description TEXT NOT NULL, updated_at TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS template_lights(
+                name TEXT NOT NULL COLLATE NOCASE, seq INTEGER NOT NULL, control TEXT NOT NULL, color TEXT,
+                color_name TEXT, label TEXT, always_active INTEGER NOT NULL, PRIMARY KEY(name, seq));
+            CREATE TABLE IF NOT EXISTS smart_lists(
+                name TEXT PRIMARY KEY COLLATE NOCASE, filter TEXT NOT NULL, seq INTEGER NOT NULL);
             """);
+
+        // Schema 3 added games.buttons / games.tags. Older files get the columns (empty until the next import).
+        if (!HasColumn(c, "games", "buttons"))
+        {
+            Exec(c, "ALTER TABLE games ADD COLUMN buttons INTEGER NOT NULL DEFAULT 0; ALTER TABLE games ADD COLUMN tags TEXT NOT NULL DEFAULT '';");
+            AppLog.Info("Game library upgraded to schema 3; re-import from LEDBlinky to fill the button and control filters.");
+        }
+        Exec(c, "INSERT OR REPLACE INTO meta(key, value) VALUES('schema_version', '3');");
+        db.SeedBuiltIns(c);
         return db;
+    }
+
+    private static bool HasColumn(SqliteConnection c, string table, string column)
+    {
+        using var cmd = c.CreateCommand();
+        cmd.CommandText = $"SELECT COUNT(*) FROM pragma_table_info('{table}') WHERE name = $c";
+        cmd.Parameters.AddWithValue("$c", column);
+        return Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture) > 0;
+    }
+
+    /// <summary>Adds the starter templates and smart lists once. Deleted ones stay deleted.</summary>
+    private void SeedBuiltIns(SqliteConnection c)
+    {
+        using (var check = c.CreateCommand())
+        {
+            check.CommandText = "SELECT value FROM meta WHERE key = 'seeded_builtins'";
+            if (check.ExecuteScalar() is not null) return;
+        }
+        foreach (var t in BuiltIns.Templates) SaveTemplate(t);
+        int seq = 0;
+        foreach (var (name, filter) in BuiltIns.SmartLists) SaveSmartList(name, filter, seq++);
+        Exec(c, "INSERT OR REPLACE INTO meta(key, value) VALUES('seeded_builtins', '1');");
     }
 
     private SqliteConnection Connect()
@@ -112,7 +150,12 @@ public sealed class GameDatabase : IGameLibrary
         using (var cmd = c.CreateCommand())
         {
             cmd.Transaction = tx;
-            cmd.CommandText = "INSERT OR REPLACE INTO games VALUES($pl, $n, $d, $pa, $pr, $i, $s, $l)";
+            cmd.CommandText = """
+                INSERT OR REPLACE INTO games(platform, name, description, parent, players, info, sources, lighting, buttons, tags)
+                VALUES($pl, $n, $d, $pa, $pr, $i, $s, $l, $b, $tg)
+                """;
+            var b = cmd.Parameters.Add("$b", SqliteType.Integer);
+            var tg = cmd.Parameters.Add("$tg", SqliteType.Text);
             var pl = cmd.Parameters.Add("$pl", SqliteType.Text);
             var n = cmd.Parameters.Add("$n", SqliteType.Text);
             var d = cmd.Parameters.Add("$d", SqliteType.Text);
@@ -125,6 +168,7 @@ public sealed class GameDatabase : IGameLibrary
             {
                 pl.Value = g.Platform; n.Value = g.Name; d.Value = g.Description; pa.Value = (object?)g.Parent ?? DBNull.Value;
                 pr.Value = g.Players; i.Value = g.Info; s.Value = g.Sources; l.Value = (int)g.Lighting;
+                b.Value = g.Buttons; tg.Value = g.Tags;
                 cmd.ExecuteNonQuery();
             }
         }
@@ -213,23 +257,39 @@ public sealed class GameDatabase : IGameLibrary
 
     /// <summary>Games whose name or description contains <paramref name="text"/>, sorted by description.</summary>
     /// <returns>Up to <paramref name="limit"/> games and the total number of matches.</returns>
-    public (List<GameInfo> Games, int Total) Search(string? platform, string? text, bool litOnly, int limit = 500, bool customizedOnly = false)
+    public (List<GameInfo> Games, int Total) Search(string? platform, string? text, bool litOnly, int limit = 500, bool customizedOnly = false) =>
+        Search(new GameFilter { Platform = platform, Text = text, LitOnly = litOnly, CustomizedOnly = customizedOnly }, limit);
+
+    /// <summary>Games matching a filter (a smart list), sorted by description.</summary>
+    /// <returns>Up to <paramref name="limit"/> games and the total number of matches.</returns>
+    public (List<GameInfo> Games, int Total) Search(GameFilter f, int limit = 500)
     {
         using var c = Connect();
         const string custom = "EXISTS(SELECT 1 FROM user_profiles u WHERE u.platform = g.platform AND u.game = g.name)";
         const string where = $"""
             WHERE ($p IS NULL OR g.platform = $p) AND ($lit = 0 OR g.lighting > 0 OR {custom})
               AND ($custom = 0 OR {custom})
+              AND ($noclones = 0 OR g.parent IS NULL)
+              AND ($minp IS NULL OR g.players >= $minp) AND ($maxp IS NULL OR g.players <= $maxp)
+              AND ($minb IS NULL OR g.buttons >= $minb) AND ($maxb IS NULL OR g.buttons <= $maxb)
+              AND ($tag IS NULL OR (' ' || g.tags || ' ') LIKE $tag)
               AND ($t IS NULL OR g.name LIKE $t ESCAPE '\' OR g.description LIKE $t ESCAPE '\')
             """;
         void Bind(SqliteCommand cmd)
         {
-            cmd.Parameters.AddWithValue("$p", (object?)platform ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("$lit", litOnly ? 1 : 0);
-            cmd.Parameters.AddWithValue("$custom", customizedOnly ? 1 : 0);
-            var t = string.IsNullOrWhiteSpace(text) ? null
-                : "%" + text.Trim().Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_") + "%";
-            cmd.Parameters.AddWithValue("$t", (object?)t ?? DBNull.Value);
+            static object N(object? v) => v ?? DBNull.Value;
+            cmd.Parameters.AddWithValue("$p", N(f.Platform));
+            cmd.Parameters.AddWithValue("$lit", f.LitOnly ? 1 : 0);
+            cmd.Parameters.AddWithValue("$custom", f.CustomizedOnly ? 1 : 0);
+            cmd.Parameters.AddWithValue("$noclones", f.HideClones ? 1 : 0);
+            cmd.Parameters.AddWithValue("$minp", N(f.MinPlayers));
+            cmd.Parameters.AddWithValue("$maxp", N(f.MaxPlayers));
+            cmd.Parameters.AddWithValue("$minb", N(f.MinButtons));
+            cmd.Parameters.AddWithValue("$maxb", N(f.MaxButtons));
+            cmd.Parameters.AddWithValue("$tag", N(string.IsNullOrWhiteSpace(f.Control) ? null : $"% {f.Control.Trim().ToLowerInvariant()} %"));
+            var t = string.IsNullOrWhiteSpace(f.Text) ? null
+                : "%" + f.Text.Trim().Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_") + "%";
+            cmd.Parameters.AddWithValue("$t", N(t));
         }
 
         int total;
@@ -252,7 +312,8 @@ public sealed class GameDatabase : IGameLibrary
 
     private static GameInfo ReadGame(SqliteDataReader r) => new(
         r.GetString(0), r.GetString(1), r.GetString(2), r.IsDBNull(3) ? null : r.GetString(3),
-        r.GetInt32(4), r.GetString(5), r.GetString(6), (GameLighting)r.GetInt32(7), r.GetInt32(8) != 0);
+        r.GetInt32(4), r.GetString(5), r.GetString(6), (GameLighting)r.GetInt32(7), r.GetInt32(8) != 0,
+        r.GetInt32(9), r.GetString(10));
 
     // ---- IGameLibrary ---------------------------------------------------------------------------
 
@@ -322,6 +383,135 @@ public sealed class GameDatabase : IGameLibrary
         }
         lock (_cacheLock) _lightCache[key] = profile;
         return profile;
+    }
+
+    // ---- Templates ------------------------------------------------------------------------------
+
+    public List<LightTemplate> ListTemplates()
+    {
+        using var c = Connect();
+        var heads = new List<(string Name, string Description)>();
+        using (var cmd = c.CreateCommand())
+        {
+            cmd.CommandText = "SELECT name, description FROM templates ORDER BY name COLLATE NOCASE";
+            using var r = cmd.ExecuteReader();
+            while (r.Read()) heads.Add((r.GetString(0), r.GetString(1)));
+        }
+        return heads.Select(h => new LightTemplate(h.Name, ReadTemplateLights(c, h.Name), h.Description)).ToList();
+    }
+
+    public LightTemplate? GetTemplate(string name) => ListTemplates().FirstOrDefault(t => string.Equals(t.Name, name, StringComparison.OrdinalIgnoreCase));
+
+    private static LightProfile ReadTemplateLights(SqliteConnection c, string name)
+    {
+        var profile = new LightProfile { Source = "LED-Next", Customized = true };
+        using var cmd = c.CreateCommand();
+        cmd.CommandText = "SELECT control, color, color_name, label, always_active FROM template_lights WHERE name = $n ORDER BY seq";
+        cmd.Parameters.AddWithValue("$n", name);
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
+            profile.Controls.Add(new ControlLight(r.GetString(0), r.IsDBNull(1) ? null : Rgb.ParseHex(r.GetString(1)),
+                r.IsDBNull(2) ? null : r.GetString(2), r.IsDBNull(3) ? null : r.GetString(3), r.GetInt32(4) != 0));
+        return profile;
+    }
+
+    /// <summary>Saves (or replaces) a template by name.</summary>
+    public void SaveTemplate(LightTemplate template)
+    {
+        using var c = Connect();
+        using var tx = c.BeginTransaction();
+        DeleteTemplate(c, tx, template.Name);
+        using (var head = c.CreateCommand())
+        {
+            head.Transaction = tx;
+            head.CommandText = "INSERT INTO templates VALUES($n, $d, $t)";
+            head.Parameters.AddWithValue("$n", template.Name);
+            head.Parameters.AddWithValue("$d", template.Description);
+            head.Parameters.AddWithValue("$t", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
+            head.ExecuteNonQuery();
+        }
+        using (var cmd = c.CreateCommand())
+        {
+            cmd.Transaction = tx;
+            cmd.CommandText = "INSERT INTO template_lights VALUES($n, $seq, $c, $col, $cn, $lab, $a)";
+            cmd.Parameters.AddWithValue("$n", template.Name);
+            var seq = cmd.Parameters.Add("$seq", SqliteType.Integer);
+            var ctl = cmd.Parameters.Add("$c", SqliteType.Text);
+            var col = cmd.Parameters.Add("$col", SqliteType.Text);
+            var cn = cmd.Parameters.Add("$cn", SqliteType.Text);
+            var lab = cmd.Parameters.Add("$lab", SqliteType.Text);
+            var a = cmd.Parameters.Add("$a", SqliteType.Integer);
+            for (int i = 0; i < template.Profile.Controls.Count; i++)
+            {
+                var cl = template.Profile.Controls[i];
+                seq.Value = i; ctl.Value = cl.Control;
+                col.Value = cl.Color is { } rgb ? rgb.ToHex() : DBNull.Value;
+                cn.Value = (object?)cl.ColorName ?? DBNull.Value;
+                lab.Value = DBNull.Value; // labels are game-specific; templates carry colours only
+                a.Value = cl.AlwaysActive ? 1 : 0;
+                cmd.ExecuteNonQuery();
+            }
+        }
+        tx.Commit();
+    }
+
+    public void DeleteTemplate(string name)
+    {
+        using var c = Connect();
+        using var tx = c.BeginTransaction();
+        DeleteTemplate(c, tx, name);
+        tx.Commit();
+    }
+
+    private static void DeleteTemplate(SqliteConnection c, SqliteTransaction tx, string name)
+    {
+        using var cmd = c.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = "DELETE FROM template_lights WHERE name = $n; DELETE FROM templates WHERE name = $n;";
+        cmd.Parameters.AddWithValue("$n", name);
+        cmd.ExecuteNonQuery();
+    }
+
+    // ---- Smart lists ----------------------------------------------------------------------------
+
+    public List<(string Name, GameFilter Filter)> ListSmartLists()
+    {
+        using var c = Connect();
+        using var cmd = c.CreateCommand();
+        cmd.CommandText = "SELECT name, filter FROM smart_lists ORDER BY seq, name COLLATE NOCASE";
+        using var r = cmd.ExecuteReader();
+        var list = new List<(string, GameFilter)>();
+        while (r.Read())
+        {
+            try { list.Add((r.GetString(0), System.Text.Json.JsonSerializer.Deserialize<GameFilter>(r.GetString(1), ConfigStore.JsonOptions)!)); }
+            catch (System.Text.Json.JsonException ex) { AppLog.Warn($"Smart list '{r.GetString(0)}' could not be read: {ex.Message}"); }
+        }
+        return list;
+    }
+
+    /// <summary>Saves (or replaces) a smart list. New lists go to the end unless <paramref name="seq"/> is given.</summary>
+    public void SaveSmartList(string name, GameFilter filter, int? seq = null)
+    {
+        using var c = Connect();
+        using var cmd = c.CreateCommand();
+        cmd.CommandText = """
+            INSERT INTO smart_lists(name, filter, seq)
+            VALUES($n, $f, COALESCE($s, (SELECT COUNT(*) FROM smart_lists s WHERE s.name <> $n)))
+            ON CONFLICT(name) DO UPDATE SET filter = excluded.filter
+            """;
+        cmd.Parameters.AddWithValue("$n", name);
+        cmd.Parameters.AddWithValue("$f", System.Text.Json.JsonSerializer.Serialize(filter, ConfigStore.JsonOptions));
+        cmd.Parameters.AddWithValue("$s", (object?)seq ?? DBNull.Value);
+        cmd.ExecuteNonQuery();
+    }
+
+    public void DeleteSmartList(string name)
+    {
+        using var c = Connect();
+        using var cmd = c.CreateCommand();
+        cmd.CommandText = "DELETE FROM smart_lists WHERE name = $n";
+        cmd.Parameters.AddWithValue("$n", name);
+        cmd.ExecuteNonQuery();
     }
 
     // ---- User edits -----------------------------------------------------------------------------

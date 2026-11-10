@@ -266,12 +266,14 @@ public static class LedBlinkyImporter
             int.TryParse(values.GetValueOrDefault("numPlayers"), out var players);
             var p1 = values.GetValueOrDefault("P1Controls");
             var info = p1 is null ? "" : p1.Split('+')[0].Trim();
+            int.TryParse(values.GetValueOrDefault("P1NumButtons"), out var numButtons);
 
             AddOrUpdateGame(lib, rom, g => g with
             {
                 Description = g.Description == g.Name && !string.IsNullOrEmpty(gameName) ? gameName : g.Description,
                 Players = g.Players > 0 ? g.Players : players,
                 Info = string.IsNullOrEmpty(g.Info) ? info : g.Info,
+                Buttons = g.Buttons > 0 ? g.Buttons : numButtons,
                 Sources = AppendSource(g.Sources, ControlsIni),
             });
 
@@ -356,21 +358,30 @@ public static class LedBlinkyImporter
 
     private static void ComputeLighting(InMemoryGameLibrary lib)
     {
-        GameLighting For(string platform, string name)
+        // The game's own lights or the nearest parent's, and where they came from.
+        (GameLighting, LightProfile?) For(string platform, string name)
         {
-            if (lib.GetLights(platform, name) is not null) return GameLighting.Own;
+            if (lib.GetLights(platform, name) is { } own) return (GameLighting.Own, own);
             var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { name };
             for (var parent = lib.GetGame(platform, name)?.Parent; parent is not null && seen.Add(parent); parent = lib.GetGame(platform, parent)?.Parent)
-                if (lib.GetLights(platform, parent) is not null) return GameLighting.Parent;
-            return GameLighting.PlatformDefault;
+                if (lib.GetLights(platform, parent) is { } p) return (GameLighting.Parent, p);
+            return (GameLighting.PlatformDefault, null);
         }
 
         foreach (var g in lib.Games.Values.ToList())
         {
-            var lighting = For(g.Platform, g.Name);
+            var (lighting, profile) = For(g.Platform, g.Name);
             if (lighting == GameLighting.PlatformDefault && g.Platform != Mame && lib.GetPlatform(g.Platform)?.UsesMameData == true)
-                lighting = For(Mame, g.Name) == GameLighting.PlatformDefault ? GameLighting.PlatformDefault : GameLighting.Parent;
-            if (lighting != g.Lighting) lib.AddGame(g with { Lighting = lighting });
+            {
+                var (mameLighting, mameProfile) = For(Mame, g.Name);
+                if (mameLighting != GameLighting.PlatformDefault) (lighting, profile) = (GameLighting.Parent, mameProfile);
+            }
+
+            // Filters for smart lists: buttons used and control types.
+            int buttons = ControlTags.ButtonCount(profile);
+            if (buttons == 0) buttons = g.Buttons;
+            var tags = ControlTags.Join(ControlTags.FromLights(profile).Concat(ControlTags.FromInfo(g.Info)));
+            lib.AddGame(g with { Lighting = lighting, Buttons = buttons, Tags = tags });
         }
     }
 
