@@ -22,11 +22,11 @@
       See CABINET_RESULTS "Visit 2".
 - [x] Decided: always-active UI controls (`UI_SELECT`…) light only shared (player 0) buttons. LEDBlinky lit
       P3 button 3 green in every game (it sends Enter); that was a bug, and it now follows the game.
-- [ ] Next visit: preview a trackball game and a Neo Geo game specifically (not covered in visit 2)
+- [x] Visit 3: trackball game (Golden Tee Golf II) and Neo Geo games previewed on the panel; correct
 - [x] Editing: per-game / per-platform colour overrides stored apart from imported data
       (Games tab: click a button, pick a colour / Off / #hex, edit "Does"; Revert to imported;
       "Only customized" filter). Kept on re-import. Not part of Ctrl+Z (Revert is the way back).
-- [ ] Next visit: edit a game in Hardware mode and check the real panel follows it live
+- [x] Visit 3: edited Fatal Fury 2 in Hardware mode; the real panel followed live
 - [x] Bulk assign: Copy all lights / Copy this button, multi-select in the games list (Ctrl/Shift-click,
       Ctrl+A, Ctrl+C / Ctrl+V), Paste to selected or to all search matches (one transaction, confirmation
       with a count), Revert selected
@@ -37,8 +37,9 @@
       players min–max, control type). Starters: 6/4/2-button games, 4-player, trackball, spinner,
       lightgun, my customized games. Button counts and control types are worked out on import
       (re-import an older library to fill them)
-- [ ] Next visit: pick "6-button games", apply "6-button fighter", check a fighter on the real panel
-      (are buttons 4-6 the bottom row?)
+- [ ] Still open: "6-button fighter" on the real panel (are buttons 4-6 the bottom row?). Visit 3 only
+      previewed it: "6-button games" matched 5,000+ games and the user would not apply to all of them.
+      Make the list narrower or make preview-on-one-game easy; see CABINET_RESULTS "Visit 3"
 - [ ] Control map editor (today it is rebuilt on import; re-import after re-wiring)
 - [x] Platform name mapping LaunchBox ↔ LEDBlinky (`Sega Genesis` ↔ `Sega_Genesis`, `Arcade` → MAME),
       changeable in Games tab → LaunchBox (done in phase 4a)
@@ -52,13 +53,15 @@
 - [x] Filters: added to LaunchBox in the last N days (presets or typed), only in LaunchBox, needs setup.
       Smart lists: "New in LaunchBox, needs setup (30 days)", "New in LaunchBox (7 days)",
       "In LaunchBox, needs setup"
-- [ ] **Verify at the cabinet** with `D:\LaunchBox`: counts per platform, matches look right, recent
-      games show up; copy samples to `import-samples/launchbox/` (see its README)
+- [x] **Verified at the cabinet** (visit 3): 41,633 games, mappings right, recent list confirmed by the
+      user; samples in `import-samples/launchbox/` (Arcade.xml too big; Neo Geo MVS instead)
+- [ ] Map Cave and ZiNc (arcade platforms with no LEDBlinky data) to MAME data by default; don't take an
+      emulator exe as the rom name (`Inter Stellar Zangus` became game `mame`); fix the "schema 3" log
+      line (it writes 4)
 
 ### 4b — Live lighting from LaunchBox / BigBox (needs the arcade machine)
-- [ ] Bring back from the cabinet: LaunchBox's .NET version and plugin API version (`D:\LaunchBox\Core\`
-      `Unbroken.LaunchBox.Plugins.dll` file version; `LaunchBox.runtimeconfig.json` / `BigBox.runtimeconfig.json`
-      if present). Don't commit LaunchBox's DLLs.
+- [x] Brought back (visit 3): `Unbroken.LaunchBox.Plugins.dll` 14.1.0.5; LaunchBox and BigBox run on
+      **.NET 10.0.14** (`net10.0` in both runtimeconfig files). Plan the plugin's target framework for that.
 - [ ] Decide the host: `LedNext.Service` owning the boards (spec) vs. the app listening on a named pipe
 - [ ] Plugin: selection changed (BigBox), game launched, game exited, attract mode → light the panel
 - [ ] Animations (`*.lwax`) — phase 5

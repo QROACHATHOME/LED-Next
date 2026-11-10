@@ -121,3 +121,70 @@ single 1920×1080 display. Git for Windows 2.56 installed this session (it was n
 
 ## Files brought back
 - [x] `import-samples/mame/cfg/default.cfg`
+
+---
+
+# Visit 3: LaunchBox data, templates, editing (2026-11-10)
+
+## Setup
+- Pulled `c46e0c3` (Phase 4a). Build clean, 91 tests pass. Hardware mode, both boards found as before.
+- Config upgraded 2 → 3 (logged). Game library: the log says "upgraded to schema 3", but `meta.schema_version` is
+  written as 4 (and `GameDatabase.SchemaVersion` is still the constant 2). **Log wording only**; worth tidying.
+- Re-imported from `C:\LEDBlinky`: 37,891 games on 173 platforms, 6,274 with their own or a parent's lights, 59 MAME
+  keys from the real `default.cfg`. One warning: unknown colour `Whie` (a typo in LEDBlinky's data, `AAE/demon`).
+- Read LaunchBox `D:\LaunchBox`: **41,633 games** on 109 LaunchBox platforms; 37,367 added as new library games.
+
+## Platform mapping
+All mappings looked right; nothing was changed by hand. Notable:
+| LaunchBox platform | LED-Next platform | How | Games | Matched |
+|---|---|---|---|---|
+| Arcade | MAME | alias | 3,407 | 3,391 rom name, 1 title, 15 new |
+| Arcade Clones | ARCADE_CLONES (uses MAME data) | same name | 7,242 | 1 rom name, 7,241 new |
+| SNK Neo Geo MVS | SNK_Neo_Geo_MVS (uses MAME data) | same name | 146 | 1 rom name, 145 new |
+| SNK Neo Geo AES | SNK_Neo_Geo_MVS | alias | 118 | |
+| Sega Mega Drive | Sega_Genesis | alias | 522 | |
+| Tekno Parrot | TEKNO_PARROT | same name | 722 | 153 rom name |
+- "new" on the MAME-based platforms is expected: they find MAME's data by rom name in the resolver. In the library,
+  ARCADE_CLONES has 3,856 of 7,206 games lit from MAME data (lighting 2), SNK_Neo_Geo_MVS 143 of 155.
+- SNK Neo Geo AES runs in RetroArch here, not MAME, but the MVS lights fit the same games, so the alias is fine.
+- About 60 LaunchBox platforms have no LEDBlinky platform (PS2/PS3, Switch, Xbox, Arcade PC, IGS PC, Cave, ZiNc,
+  Sega Model 1, Naomi 2, Casino Arcade…) and are "new" with no lights until set up. **Cave and ZiNc are arcade
+  platforms** (Cave runs FBNeo, ZiNc runs MAME): they could be mapped to a MAME-data platform by default.
+- Quirks seen in the data:
+  - `Laser Disc / Inter Stellar Zangus` got the game name `mame` (its LaunchBox entry probably points at the
+    emulator, not a rom); the matcher should ignore an application path that is an emulator exe.
+  - `Arcade / Wangan Midnight Maximum Tune 4` is a TeknoParrot game filed under Arcade (`rom` "Wangan Midnight
+    Maximum Tune 4 (TeknoRaven WMMT4)"): user data, not an app bug.
+- LaunchBox `DateAdded` range: 2025-03-31 to 2026-11-08.
+
+## Smart list "New in LaunchBox, needs setup (30 days)"
+- 57 games, newest first: Euro League, ATV Track (Gaelco G4), Smashing Drive ×2, WMMT4, Galaxian 3 ×2 (8 Nov), then
+  TeknoParrot, IGS PC, Arcade PC, Arcade Duck, Laser Disc additions back to 11 Oct. Guardians of the 'Hood (added 28 Oct)
+  is correctly absent because LEDBlinky already lights it.
+- **The user confirmed the list matches the games they added recently.** None missing or wrongly matched.
+
+## Templates, previews and live editing (Hardware mode)
+- **6-button fighter template: previewed, not applied.** "6-button games" lists over 5,000 games and the user did
+  not want to change that many. So "kicks (buttons 4-6) are the bottom row" is **not verified on the panel**.
+  Suggest: let a template preview on the selected game's panel before applying, and make the 6-button list narrower
+  (e.g. hide games already lit by LEDBlinky, or fighters only), so applying is a real choice.
+- Trackball game: Golden Tee Golf II (Trackball) lit the trackball. Correct.
+- Neo Geo: 3 Count Bout, Aggressors of Dark Kombat, Eight Man, Fatal Fury 2. Correct (4 buttons per player).
+- Live edit: Fatal Fury 2, P1_BUTTON5 → Lime, then → off. The panel followed immediately. Correct.
+  (Fatal Fury 2 stays "customized" in the cabinet's `games.db`; same lights as imported.)
+
+## For phase 4b (the plugin)
+- `D:\LaunchBox\Core\Unbroken.LaunchBox.Plugins.dll`: file version **14.1.0.5**, product version
+  `14.1.0+2cca3715be24d6aedb0449d3a9f0c745f018322e`, 367,928 bytes. Not copied.
+- `LaunchBox.runtimeconfig.json` and `BigBox.runtimeconfig.json`: **`net10.0`**, Microsoft.NETCore.App and
+  Microsoft.WindowsDesktop.App **10.0.14**. LaunchBox runs on .NET 10, not .NET 8: an in-process plugin must target
+  a framework .NET 10 can load (net8.0 class library loads fine; it cannot be built against `net10.0` APIs with the
+  .NET 8 SDK installed here). Only .NET SDK 8.0.427 is installed on this machine.
+
+## Files brought back
+- [x] `import-samples/launchbox/Data/Platforms.xml` (1.4 MB) and `Data/Emulators.xml` (0.3 MB)
+- [x] `import-samples/launchbox/Data/Platforms/SNK Neo Geo MVS.xml` (1.0 MB, runs MAME here) and
+      `Data/Platforms/Sega Genesis.xml` (4.6 MB, console)
+- `Arcade.xml` is 25.8 MB (and `Arcade Clones.xml` 48.5 MB): **not copied** (over the ~20 MB limit). Neo Geo MVS is
+  the MAME-based sample instead. Checked the copies: no user paths, e-mail addresses or keys.
+- [x] `cabinet/led-next.log` updated

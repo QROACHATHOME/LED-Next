@@ -358,3 +358,112 @@
 09:07:05.775 [Info]   device 1: VID D209 PID 1402 type 5 version 25
 09:07:05.776 [Info] PacLED64: 2 board(s): PacLED64#1, PacLED64#2
 09:07:05.777 [Info] Output thread started.
+09:51:02.592 [Info] LED-Next starting (64-bit). Config: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\cabinet.json
+09:51:02.626 [Info] Config upgraded from version 1 to 2 (adds the game control map).
+09:51:02.631 [Info] Loaded C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\PacDrive64.dll
+09:51:02.750 [Info] PacDrive SDK reports 2 Ultimarc device(s).
+09:51:02.750 [Info]   device 0: VID D209 PID 1401 type 5 version 25
+09:51:02.756 [Info]   device 1: VID D209 PID 1402 type 5 version 25
+09:51:02.757 [Info] PacLED64: 2 board(s): PacLED64#1, PacLED64#2
+09:51:02.758 [Info] Output thread started.
+09:51:02.791 [Info] Game library: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\games.db (0 games)
+10:08:13.315 [Info] LEDBlinky import from C:\LEDBlinky: 37,891 games on 173 platforms, 6,274 with their own or a parent's lights; 30 controls mapped by input code. Files: settings.ini, Color-RGB.ini, LEDBlinkyControls.xml, Colors.ini, Controls.ini, LEDBlinkyMinimizedMame.xml, D:\CoinOPS Collections\emulators\Mame02XX\cfg\default.cfg, LEDBlinkyInputMap.xml.
+10:08:13.597 [Warn] Unknown colour 'Whie' (first seen in AAE/demon); the default colour is used.
+10:08:13.598 [Info] 194 MAME games in Colors.ini are overridden by LEDBlinkyControls.xml.
+10:08:13.598 [Info] MAME machine list is from MAME 0.287 (unknown).
+10:08:13.598 [Info] Using 59 MAME key assignments from D:\CoinOPS Collections\emulators\Mame02XX\cfg\default.cfg.
+10:08:55.014 [Info] Light source: Game: Art of Fighting / Ryuuko no Ken (NGM-044)(NGH-044)
+10:09:02.851 [Info] Light source: Game: Art of Fighting 2 / Ryuuko no Ken 2 (NGM-056)
+10:09:07.994 [Info] Light source: Game: Art of Fighting / Ryuuko no Ken (NGM-044)(NGH-044)
+10:09:11.856 [Info] Light source: Game: Art of Fighting 2 / Ryuuko no Ken 2 (NGM-056)
+10:09:13.055 [Info] Light source: Game: Art of Fighting 2 / Ryuuko no Ken 2 (NGM-056)
+10:09:13.927 [Info] Light source: Game: Art of Fighting 3 - The Path of the Warrior / Art of Fighting - Ryuuko no Ken Gaiden
+10:09:32.126 [Info] Light source: Game: 005
+10:10:11.269 [Info] Light source: Game: 10-Yard Fight (Japan)
+10:10:11.941 [Info] Light source: Game: 10-Yard Fight (World, set 1)
+10:10:12.541 [Info] Light source: Game: 10-Yard Fight (World, set 1)
+10:10:13.660 [Info] Light source: Game: 1000 Miglia: Great 1000 Miles Rally (94/07/18)
+10:10:16.684 [Info] Light source: Game: 1943: The Battle of Midway Mark II (US)
+10:10:18.939 [Info] Light source: Game: 1943bj
+10:10:20.506 [Info] Light source: Game: 1943j
+10:10:27.680 [Info] Light source: Game: Teenage Mutant Ninja Turtles (World 4 Players)
+10:10:30.790 [Info] Light source: Game: Teenage Mutant Ninja Turtles - Turtles in Time (4 Players ver UAA)
+10:10:31.734 [Info] Light source: Game: Teenage Mutant Ninja Turtles - Turtles in Time (4 Players ver UAA)
+10:10:33.357 [Info] Light source: Game: Teenage Mutant Ninja Turtles - Turtles in Time (4 Players ver UAA)
+10:10:34.052 [Info] Light source: Game: Teenage Mutant Ninja Turtles II: The Arcade Game (PlayChoice-10)
+10:11:38.041 [Info] Light source: Game: Turtles
+10:11:39.208 [Info] Light source: Game: Turtles
+10:11:48.532 [Info] Light source: Game: aerofgtc
+10:11:49.595 [Info] Light source: Game: aeroboto
+10:13:51.706 [Info] Output thread stopped.
+10:13:52.120 [Info] LED-Next stopped.
+10:13:54.266 [Info] LED-Next starting (64-bit). Config: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\cabinet.json
+10:13:54.314 [Info] Loaded C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\PacDrive64.dll
+10:13:54.431 [Info] PacDrive SDK reports 2 Ultimarc device(s).
+10:13:54.432 [Info]   device 0: VID D209 PID 1401 type 5 version 25
+10:13:54.437 [Info]   device 1: VID D209 PID 1402 type 5 version 25
+10:13:54.438 [Info] PacLED64: 2 board(s): PacLED64#1, PacLED64#2
+10:13:54.439 [Info] Output thread started.
+10:13:54.459 [Info] Game library: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\games.db (37,891 games)
+10:14:03.565 [Info] Light source: Game: 10-Yard Fight (Japan)
+10:14:06.546 [Info] Light source: Game: 10-Yard Fight (World, set 1)
+10:14:07.681 [Info] Light source: Game: 10-Yard Fight (World, set 1)
+10:14:08.752 [Info] Light source: Game: 1000 Miglia: Great 1000 Miles Rally (94/07/18)
+10:14:11.711 [Info] Light source: Game: 1945k III (newer, OPCX2 PCB)
+10:14:13.238 [Info] Light source: Game: Act Raiser (Nintendo Super System)
+10:14:20.652 [Info] Light source: Game: Alien Syndrome (Mega-Tech, SMS based)
+10:14:21.715 [Info] Light source: Game: Alien vs. Predator (Euro 940520)
+10:14:27.361 [Info] Light source: Game: Alien vs. Predator (Euro 940520)
+10:14:31.743 [Info] Light source: Game: altbeast6
+10:14:34.110 [Info] Light source: Game: apb5
+10:14:48.463 [Info] Light source: Game: Arabian Magic (Ver 1.0O 1992/07/06)
+10:14:58.579 [Info] Light source: Game: arkbloc3
+10:14:58.602 [Info] Light source: Game: arkbloc2
+10:15:00.642 [Info] Light source: Game: Arrow Flash (Mega-Tech)
+10:15:35.843 [Info] Light source: Game: Astro Fantasia (DECO Cassette) (US)
+10:15:38.369 [Info] Light source: Game: Astro Wars
+10:15:39.321 [Info] Light source: Game: astrob2a
+10:15:45.127 [Info] Light source: Game: avspu
+10:15:46.406 [Info] Light source: Game: B-Wings (Japan new Ver.)
+10:15:49.197 [Info] Light source: Game: B-Wings (Japan new Ver.)
+10:15:50.788 [Info] Light source: Game: bagnarda
+10:16:32.896 [Info] Light source: RGB cycle
+10:16:36.855 [Info] Light source: Rainbow
+10:16:46.146 [Info] Light source: Pin walk
+10:16:59.796 [Info] Light source: Off
+10:17:06.500 [Info] Light source: Game: bass
+10:17:08.667 [Info] Light source: Game: Battle Circuit (Europe 970319)
+10:17:11.798 [Info] Light source: Game: Battle Circuit (Europe 970319)
+10:17:13.250 [Info] Light source: Game: Battle Circuit (Europe 970319)
+10:17:47.024 [Info] Output thread stopped.
+10:17:47.437 [Info] LED-Next stopped.
+11:56:23.320 [Info] LED-Next starting (64-bit). Config: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\cabinet.json
+11:56:23.356 [Info] Config upgraded from version 2 to 3 (adds LaunchBox settings).
+11:56:23.360 [Info] Loaded C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\PacDrive64.dll
+11:56:23.477 [Info] PacDrive SDK reports 2 Ultimarc device(s).
+11:56:23.477 [Info]   device 0: VID D209 PID 1401 type 5 version 25
+11:56:23.483 [Info]   device 1: VID D209 PID 1402 type 5 version 25
+11:56:23.484 [Info] PacLED64: 2 board(s): PacLED64#1, PacLED64#2
+11:56:23.485 [Info] Output thread started.
+11:56:23.515 [Info] Game library upgraded to schema 3; re-import from LEDBlinky to fill the button and control filters.
+11:56:23.548 [Info] Game library: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\games.db (37,891 games)
+12:03:41.488 [Info] LEDBlinky import from C:\LEDBlinky: 37,891 games on 173 platforms, 6,274 with their own or a parent's lights; 30 controls mapped by input code. Files: settings.ini, Color-RGB.ini, LEDBlinkyControls.xml, Colors.ini, Controls.ini, LEDBlinkyMinimizedMame.xml, D:\CoinOPS Collections\emulators\Mame02XX\cfg\default.cfg, LEDBlinkyInputMap.xml.
+12:03:41.853 [Warn] Unknown colour 'Whie' (first seen in AAE/demon); the default colour is used.
+12:03:41.853 [Info] 194 MAME games in Colors.ini are overridden by LEDBlinkyControls.xml.
+12:03:41.853 [Info] MAME machine list is from MAME 0.287 (unknown).
+12:03:41.853 [Info] Using 59 MAME key assignments from D:\CoinOPS Collections\emulators\Mame02XX\cfg\default.cfg.
+12:04:11.270 [Info] Added 37,367 LaunchBox games that are not in the LEDBlinky data.
+12:04:11.292 [Info] Read 41,633 games from LaunchBox at D:\LaunchBox.
+12:11:14.759 [Info] Light source: Template: 6-button fighter
+12:12:16.219 [Info] Light source: Game: Golden Tee Golf (Joystick, v3.3)
+12:12:18.336 [Info] Light source: Game: Golden Tee Golf (Joystick, v3.3)
+12:12:19.263 [Info] Light source: Game: Golden Tee Golf (Joystick, v3.3)
+12:12:20.223 [Info] Light source: Game: Golden Tee Golf II (Trackball, V2.2)
+12:13:04.365 [Info] Light source: Game: 3 Count Bout / Fire Suplex
+12:13:07.283 [Info] Light source: Game: Aggressors of Dark Kombat
+12:13:09.274 [Info] Light source: Game: Eight Man
+12:13:10.914 [Info] Light source: Game: Fatal Fury 2
+12:13:35.714 [Info] Edited Fatal Fury 2: P1_BUTTON5 → Lime
+12:13:35.726 [Info] Light source: Game: Fatal Fury 2
+12:14:07.880 [Info] Edited Fatal Fury 2: P1_BUTTON5 → off
+12:14:07.883 [Info] Light source: Game: Fatal Fury 2
