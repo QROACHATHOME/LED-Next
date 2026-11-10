@@ -287,7 +287,9 @@ All mappings looked right; nothing was changed by hand. Notable:
 - `SelectionChanged` and `GetAllSelectedGames()` work in BigBox too, so the theme element is **not needed**
   (theme not touched). 83 selection changes, all by LaunchBox id. Launch (Rim Rockin' Basketball, game `rimrockn`),
   exit back to the selection, closing BigBox → all off.
-- User: **instant, no slowdown.**
+- User: **instant, no slowdown.** The lights changed about as fast as BigBox switched each game's preview video.
+- While browsing **platforms / playlists** (before opening a game list) the panel was **off**; lights only came
+  on once a list was opened and a game was selected. (No game is selected there, so nothing is sent.)
 
 ## Open
 - LED-Next only connected on the first selection (~26–38 s after it started), so the plugin's `started` message
