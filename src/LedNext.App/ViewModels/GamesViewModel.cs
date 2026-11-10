@@ -206,6 +206,10 @@ public sealed partial class GamesViewModel : ObservableObject
     [ObservableProperty] private bool _needsSetupOnly;
     partial void OnNeedsSetupOnlyChanged(bool value) => Search();
 
+    /// <summary>Part of LaunchBox's genre, e.g. "fight". Empty = any.</summary>
+    [ObservableProperty] private string _genreText = "";
+    partial void OnGenreTextChanged(string value) => DelayedSearch();
+
     public string FilterSummary => CurrentFilter().Describe();
 
     private void DelayedSearch()
@@ -233,6 +237,7 @@ public sealed partial class GamesViewModel : ObservableObject
         AddedWithinDays = ParseCount(AddedDaysText) is { } typed and > 0 ? typed : SelectedAdded?.Days,
         InLaunchBoxOnly = InLaunchBoxOnly,
         NeedsSetupOnly = NeedsSetupOnly,
+        Genre = string.IsNullOrWhiteSpace(GenreText) ? null : GenreText.Trim(),
     };
 
     [ObservableProperty] private GameRow? _selectedGame;
@@ -535,6 +540,7 @@ public sealed partial class GamesViewModel : ObservableObject
         RevertSelectedCommand.NotifyCanExecuteChanged();
         OnPropertyChanged(nameof(ApplySelectedText));
         ApplyTemplateToSelectedCommand.NotifyCanExecuteChanged();
+        TryTemplateOnSelectedCommand.NotifyCanExecuteChanged();
         var show = clicked ?? (selected.Count == 1 ? selected[0] : null);
         if (show is not null) Preview(show.Game.Platform, show.Game.Name, show.Description);
     }
@@ -691,6 +697,7 @@ public sealed partial class GamesViewModel : ObservableObject
         AddedDaysText = preset is null && f.AddedWithinDays is { } d ? d.ToString() : "";
         InLaunchBoxOnly = f.InLaunchBoxOnly;
         NeedsSetupOnly = f.NeedsSetupOnly;
+        GenreText = f.Genre ?? "";
         _suppressSearch = false;
         _searchDelay.Stop();
         Search();
@@ -732,7 +739,8 @@ public sealed partial class GamesViewModel : ObservableObject
     public ObservableCollection<LightTemplate> Templates { get; } = new();
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(ApplyTemplateToSelectedCommand), nameof(ApplyTemplateToAllCommand), nameof(DeleteTemplateCommand), nameof(ShowTemplateCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ApplyTemplateToSelectedCommand), nameof(ApplyTemplateToAllCommand), nameof(DeleteTemplateCommand),
+        nameof(ShowTemplateCommand), nameof(TryTemplateOnSelectedCommand))]
     private LightTemplate? _selectedTemplate;
 
     partial void OnSelectedTemplateChanged(LightTemplate? value)
@@ -757,14 +765,43 @@ public sealed partial class GamesViewModel : ObservableObject
     private void PreviewTemplate(LightTemplate t)
     {
         var config = _session.Config;
-        var lights = GameLightResolver.ResolveProfile(t.Profile, t.Name, config.ControlMap, config.Panel);
+        ShowUnsavedPreview(GameLightResolver.ResolveProfile(t.Profile, t.Name, config.ControlMap, config.Panel),
+            $"Template: {t.Name}", t.Description, "Preview only. Apply it to games, or edit a game and save it as a template.");
+    }
+
+    private bool CanTryTemplate() => SelectedTemplate is not null && _selectedRows.Count > 0 && _session.Games is not null;
+
+    /// <summary>
+    /// Shows what the first selected game would look like with the template (the same result as
+    /// "Apply to selected": the game's own button descriptions are kept). Nothing is saved.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanTryTemplate))]
+    private void TryTemplateOnSelected()
+    {
+        var db = _session.Games;
+        if (db is null || TemplateClip() is not { } clip || _selectedRows.FirstOrDefault() is not { } row) return;
+        var config = _session.Config;
+        var g = row.Game;
+        var current = db.GetLights(g.Platform, g.Name) is { Customized: true } own
+            ? own
+            : GameLightEditor.Materialize(GameLightResolver.Resolve(db, g.Platform, g.Name, config.ControlMap, config.Panel));
+        var result = GameLightEditor.Paste(current, clip);
+        var lights = GameLightResolver.ResolveProfile(result, SelectedTemplate!.Name, config.ControlMap, config.Panel);
+        var more = _selectedRows.Count > 1 ? $" · first of {_selectedRows.Count:N0} selected" : "";
+        ShowUnsavedPreview(lights, $"{row.Description} + {SelectedTemplate!.Name}", $"{g.Name} · {g.Platform.Replace('_', ' ')}{more}",
+            $"Trying the template; nothing is saved. \"{ApplySelectedText}\" keeps it, picking the game again shows its own lights.");
+        AppLog.Info($"Trying template '{SelectedTemplate.Name}' on {g.Platform}/{g.Name} (not saved).");
+    }
+
+    private void ShowUnsavedPreview(ResolvedLights lights, string title, string? subtitle, string from)
+    {
         _platform = null;
         _game = null;
-        _title = $"Template: {t.Name}";
+        _title = title;
         _lights = lights;
         PreviewTitle = _title;
-        PreviewSubtitle = t.Description;
-        PreviewFrom = "Preview only. Apply it to games, or edit a game and save it as a template.";
+        PreviewSubtitle = subtitle;
+        PreviewFrom = from;
         IsCustomized = false;
         Controls.Clear();
         foreach (var c in lights.Controls) Controls.Add(new ControlRow(c));

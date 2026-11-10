@@ -43,6 +43,12 @@ public static class BuiltIns
         ("In LaunchBox, needs setup", new GameFilter { InLaunchBoxOnly = true, NeedsSetupOnly = true, LitOnly = false }),
     };
 
+    /// <summary>Added with the genre filter (schema 5); seeded into existing libraries once.</summary>
+    public static IReadOnlyList<(string Name, GameFilter Filter)> SmartListsV3 { get; } = new[]
+    {
+        ("6-button fighting games", new GameFilter { MinButtons = 6, MaxButtons = 6, HideClones = true, Genre = "fight" }),
+    };
+
     private static LightTemplate Make(string name, string description, int players, params (string Control, string Color)[] perPlayer)
     {
         var controls = new List<ControlLight>();

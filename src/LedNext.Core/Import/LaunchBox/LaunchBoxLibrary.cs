@@ -7,7 +7,9 @@ namespace LedNext.Core.Import.LaunchBox;
 
 /// <summary>One game in the LaunchBox library (read from Data\Platforms\*.xml).</summary>
 /// <param name="Rom">File name of ApplicationPath without extension ("sf2"), the usual key for MAME-style platforms.</param>
-public sealed record LaunchBoxGame(string Id, string Title, string Platform, string ApplicationPath, string Rom, DateTimeOffset? DateAdded);
+/// <param name="Genre">LaunchBox's genre text, e.g. "Fighting" or "Platform; Shooter" (may be empty).</param>
+public sealed record LaunchBoxGame(string Id, string Title, string Platform, string ApplicationPath, string Rom, DateTimeOffset? DateAdded,
+    string Genre = "");
 
 /// <summary>A LaunchBox game matched to an LED-Next platform and game name.</summary>
 /// <param name="MatchedBy">"rom name", "title", or "new" (not in the LED-Next library yet).</param>
@@ -29,9 +31,10 @@ public static class LaunchBoxLibrary
         var dir = PlatformsFolder(launchBoxFolder);
         if (!Directory.Exists(dir)) throw new DirectoryNotFoundException($"No LaunchBox platform data at {dir}. Is this the LaunchBox folder?");
         var games = new List<LaunchBoxGame>();
+        var emulators = EmulatorExeNames(launchBoxFolder, warnings);
         foreach (var file in Directory.EnumerateFiles(dir, "*.xml").Order(StringComparer.OrdinalIgnoreCase))
         {
-            try { games.AddRange(ReadPlatformFile(file)); }
+            try { games.AddRange(ReadPlatformFile(file, emulators)); }
             catch (Exception ex) when (ex is XmlException or IOException or UnauthorizedAccessException)
             {
                 warnings.Add($"Could not read {Path.GetFileName(file)}: {ex.Message}");
@@ -40,8 +43,42 @@ public static class LaunchBoxLibrary
         return games;
     }
 
-    public static IEnumerable<LaunchBoxGame> ReadPlatformFile(string file)
+    /// <summary>Emulator programs that a LaunchBox game's ApplicationPath must not be taken as a rom name.</summary>
+    public static readonly string[] BuiltInEmulatorExes =
     {
+        "mame.exe", "mame64.exe", "mameui.exe", "mameui64.exe", "retroarch.exe", "fbneo.exe", "fbneo64.exe",
+        "daphne.exe", "hypseus.exe", "singe.exe", "demul.exe", "flycast.exe", "teknoparrotui.exe",
+    };
+
+    /// <summary>
+    /// File names (with extension, any case) of every emulator in <c>Data\Emulators.xml</c>, plus
+    /// <see cref="BuiltInEmulatorExes"/>. A game whose ApplicationPath is one of these has no rom name.
+    /// </summary>
+    public static HashSet<string> EmulatorExeNames(string launchBoxFolder, List<string>? warnings = null)
+    {
+        var set = new HashSet<string>(BuiltInEmulatorExes, StringComparer.OrdinalIgnoreCase);
+        var file = Path.Combine(launchBoxFolder, "Data", "Emulators.xml");
+        if (!File.Exists(file)) return set;
+        try
+        {
+            using var reader = XmlReader.Create(file, new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, IgnoreComments = true });
+            while (reader.ReadToFollowing("Emulator"))
+            {
+                var e = (XElement)XNode.ReadFrom(reader);
+                var exe = FileName(e.Element("ApplicationPath")?.Value ?? "");
+                if (exe.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)) set.Add(exe);
+            }
+        }
+        catch (Exception ex) when (ex is XmlException or IOException or UnauthorizedAccessException)
+        {
+            warnings?.Add($"Could not read Emulators.xml: {ex.Message}");
+        }
+        return set;
+    }
+
+    public static IEnumerable<LaunchBoxGame> ReadPlatformFile(string file, IReadOnlySet<string>? emulatorExes = null)
+    {
+        emulatorExes ??= new HashSet<string>(BuiltInEmulatorExes, StringComparer.OrdinalIgnoreCase);
         var fallbackPlatform = Path.GetFileNameWithoutExtension(file);
         using var reader = XmlReader.Create(file, new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, IgnoreComments = true });
         reader.MoveToContent();
@@ -55,8 +92,10 @@ public static class LaunchBoxLibrary
                 var title = V("Title");
                 var path = V("ApplicationPath");
                 if (title.Length == 0 && path.Length == 0) continue;
+                // A game that points at the emulator itself ("…\mame.exe") has no rom name; it is matched by title.
+                var rom = emulatorExes.Contains(FileName(path)) ? "" : RomName(path);
                 list.Add(new LaunchBoxGame(V("ID"), title, V("Platform") is { Length: > 0 } p ? p : fallbackPlatform, path,
-                    RomName(path), ParseDate(V("DateAdded"))));
+                    rom, ParseDate(V("DateAdded")), V("Genre")));
             }
             else reader.Read();
         }
@@ -72,6 +111,13 @@ public static class LaunchBoxLibrary
         if (slash >= 0) name = name[(slash + 1)..];
         int dot = name.LastIndexOf('.');
         return dot > 0 ? name[..dot] : name;
+    }
+
+    private static string FileName(string path)
+    {
+        var name = path.Trim().TrimEnd('\\', '/');
+        int slash = name.LastIndexOfAny(new[] { '\\', '/' });
+        return slash >= 0 ? name[(slash + 1)..] : name;
     }
 
     public static DateTimeOffset? ParseDate(string text) =>
@@ -94,6 +140,18 @@ public static class PlatformMatcher
         ["TeknoParrot"] = "TEKNO_PARROT",
         ["Sega Mega Drive"] = "Sega_Genesis",
     };
+
+    /// <summary>
+    /// Arcade platforms that LEDBlinky has no data for but whose games use MAME rom names (Cave runs
+    /// FBNeo, ZiNc runs MAME). A new LED-Next platform made for one of these uses MAME's game data.
+    /// </summary>
+    private static readonly HashSet<string> MameRomsetPlatforms = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Cave", "ZiNc", "Final Burn Neo", "FBNeo", "FinalBurn Neo", "FinalBurn Alpha", "Final Burn Alpha",
+    };
+
+    /// <summary>True when a new platform for this LaunchBox platform should use MAME's game data.</summary>
+    public static bool UsesMameDataByDefault(string launchBoxPlatform) => MameRomsetPlatforms.Contains(launchBoxPlatform.Trim());
 
     /// <summary>The LED-Next platform key and how it was found ("your mapping", "same name", "alias", "new").</summary>
     public static (string Key, string How) Match(string launchBoxPlatform, IEnumerable<string> ledPlatforms, IReadOnlyDictionary<string, string>? overrides)

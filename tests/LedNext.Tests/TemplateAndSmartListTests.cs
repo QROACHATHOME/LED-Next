@@ -125,7 +125,7 @@ public class TemplateAndSmartListDatabaseTests
             var g = db.GetGame("MAME", "old")!;
             Assert.Equal(0, g.Buttons);
             Assert.Equal("", g.Tags);
-            Assert.Equal("4", db.Meta("schema_version"));
+            Assert.Equal(GameDatabase.SchemaVersion.ToString(), db.Meta("schema_version"));
         }
         finally { Cleanup(path); }
     }

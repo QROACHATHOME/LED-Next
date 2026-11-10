@@ -99,7 +99,10 @@
                             </WrapPanel>
                             <DockPanel Margin="0,6,0,0">
                                 <TextBlock Text="Control" Foreground="{StaticResource AppTextDim}" VerticalAlignment="Center" Width="56" />
-                                <ComboBox ItemsSource="{Binding ControlChoices}" SelectedItem="{Binding ControlFilter}" Width="120" HorizontalAlignment="Left" />
+                                <ComboBox ItemsSource="{Binding ControlChoices}" SelectedItem="{Binding ControlFilter}" Width="120" />
+                                <TextBlock Text="Genre" Foreground="{StaticResource AppTextDim}" VerticalAlignment="Center" Margin="16,0,6,0" />
+                                <TextBox Text="{Binding GenreText, UpdateSourceTrigger=PropertyChanged}" Width="90" HorizontalAlignment="Left"
+                                         ToolTip="Part of LaunchBox's genre, e.g. fight, shooter, sports (empty = any). Needs Read LaunchBox." />
                             </DockPanel>
                             <DockPanel Margin="0,8,0,0">
                                 <Button DockPanel.Dock="Right" Content="Save as smart list" Command="{Binding SaveSmartListCommand}" />
@@ -346,6 +349,8 @@
                                        TextWrapping="Wrap" Foreground="{StaticResource AppTextDim}" />
                             <WrapPanel Margin="0,8,0,0">
                                 <Button Content="Preview" Command="{Binding ShowTemplateCommand}" />
+                                <Button Content="Try on selected game" Command="{Binding TryTemplateOnSelectedCommand}"
+                                        ToolTip="Show the selected game with this template on the panel (Hardware mode lights it). Nothing is saved." />
                                 <Button Content="{Binding ApplySelectedText}" Command="{Binding ApplyTemplateToSelectedCommand}"
                                         ToolTip="The games selected in the list (Ctrl/Shift-click)" />
                                 <Button Content="{Binding ApplyAllText}" Command="{Binding ApplyTemplateToAllCommand}"

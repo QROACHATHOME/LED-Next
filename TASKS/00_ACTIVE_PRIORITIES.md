@@ -10,7 +10,8 @@
 - [x] Default layout includes Coin + joystick per player and a shared trackball (41 controls, 123 of 128 pins)
 - [x] **Verify on the arcade machine** (below). Done 2026-11-10; see `TASKS/CABINET_RESULTS.md`
 - [x] Replace the default 4-player layout with the real panel layout and wiring (`cabinet/cabinet.json`)
-- [ ] Restore/clamp the main window position (it can open partly off-screen; see CABINET_RESULTS §5)
+- [x] Main window position saved in `config/window.json` and moved onto the nearest monitor at start
+      (dev PC: checked with off-screen and two-monitor positions; check once on the cabinet)
 
 ## Phase 3 — Game database
 - [x] Game model, logical control names, inheritance resolver (game → parent → platform → MAME)
@@ -37,9 +38,10 @@
       players min–max, control type). Starters: 6/4/2-button games, 4-player, trackball, spinner,
       lightgun, my customized games. Button counts and control types are worked out on import
       (re-import an older library to fill them)
-- [ ] Still open: "6-button fighter" on the real panel (are buttons 4-6 the bottom row?). Visit 3 only
-      previewed it: "6-button games" matched 5,000+ games and the user would not apply to all of them.
-      Make the list narrower or make preview-on-one-game easy; see CABINET_RESULTS "Visit 3"
+- [x] Narrower lists: LaunchBox genre filter + smart list "6-button fighting games"; Templates tab →
+      **Try on selected game** shows the result on the panel without saving
+- [ ] Next visit: "6-button fighter" on the real panel via Try on selected game (are buttons 4-6 the
+      bottom row?). Note how many games "6-button fighting games" lists on the cabinet
 - [ ] Control map editor (today it is rebuilt on import; re-import after re-wiring)
 - [x] Platform name mapping LaunchBox ↔ LEDBlinky (`Sega Genesis` ↔ `Sega_Genesis`, `Arcade` → MAME),
       changeable in Games tab → LaunchBox (done in phase 4a)
@@ -55,9 +57,10 @@
       "In LaunchBox, needs setup"
 - [x] **Verified at the cabinet** (visit 3): 41,633 games, mappings right, recent list confirmed by the
       user; samples in `import-samples/launchbox/` (Arcade.xml too big; Neo Geo MVS instead)
-- [ ] Map Cave and ZiNc (arcade platforms with no LEDBlinky data) to MAME data by default; don't take an
-      emulator exe as the rom name (`Inter Stellar Zangus` became game `mame`); fix the "schema 3" log
-      line (it writes 4)
+- [x] Cave, ZiNc, Final Burn Neo/Alpha platforms use MAME data (existing libraries upgraded); an emulator
+      exe (Emulators.xml + built-in list) is never a rom name; schema log line fixed (schema 5: genre)
+- [x] LaunchBox-only games lit from MAME data get MAME's button count / control types / players, so the
+      button and control smart lists find them (they were 0 before: Neo Geo MVS, Arcade Clones)
 
 ### 4b — Live lighting from LaunchBox / BigBox (needs the arcade machine)
 - [x] Brought back (visit 3): `Unbroken.LaunchBox.Plugins.dll` 14.1.0.5; LaunchBox and BigBox run on

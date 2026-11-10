@@ -1,5 +1,19 @@
 # Cabinet session brief (for Claude on the arcade machine)
 
+## Visit 4 (next visit) — visit-3 fixes, the fighter template
+1. `git pull`, build, run. The game library upgrades to schema 5 (logged). The window should open fully on
+   screen (position now kept in `config/window.json`); move it, restart, check it comes back there.
+2. Games tab: the app reads LaunchBox at start-up. Check the log for "Platforms Cave, ZiNc … now use
+   MAME's game data" and "… LaunchBox games took their button count … from MAME's data". In the
+   platform list, Cave and ZiNc should now show lit games. `Laser Disc / Inter Stellar Zangus` should be
+   listed under its title, not as `mame`.
+3. Smart list **6-button fighting games**: note the count. Pick a fighter the user knows (Street Fighter II,
+   Marvel vs. Capcom…), Templates tab → **6-button fighter** → **Try on selected game**, Hardware mode on.
+   Ask the user: are kicks (buttons 4-6) the bottom row on the real panel? Nothing is saved by trying.
+4. Add a "Visit 4" section to `CABINET_RESULTS.md`; commit, ask before pushing.
+
+---
+
 ## Visit 3 (next visit) — LaunchBox data, templates, editing
 1. `git pull`, build, run (config upgrades to version 3, game library to schema 4; both logged).
 2. Games tab → **Import from LEDBlinky…** → `C:\LEDBlinky` (fills the button/control filters).

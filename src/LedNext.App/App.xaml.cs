@@ -15,7 +15,7 @@ public partial class App : Application
         DispatcherUnhandledException += OnUnhandledException;
 
         _session = new AppSession();
-        var window = new MainWindow { DataContext = new MainViewModel(_session) };
+        var window = new MainWindow(System.IO.Path.Combine(_session.ConfigDirectory, "window.json")) { DataContext = new MainViewModel(_session) };
         window.Show();
     }
 

@@ -29,6 +29,8 @@ public sealed record GameFilter
     public bool InLaunchBoxOnly { get; init; }
     /// <summary>Only games with no lights of their own (just the platform default) and not customized.</summary>
     public bool NeedsSetupOnly { get; init; }
+    /// <summary>Part of LaunchBox's genre ("fight" matches "Fighting" and "Fighter / Versus"). Null = any.</summary>
+    public string? Genre { get; init; }
 
     /// <summary>Short text for the UI, e.g. "6 buttons · no clones".</summary>
     public string Describe()
@@ -42,6 +44,7 @@ public sealed record GameFilter
         if (MinButtons is not null || MaxButtons is not null) parts.Add(Range(MinButtons, MaxButtons, "button"));
         if (MinPlayers is not null || MaxPlayers is not null) parts.Add(Range(MinPlayers, MaxPlayers, "player"));
         if (Control is not null) parts.Add(Control);
+        if (!string.IsNullOrWhiteSpace(Genre)) parts.Add($"genre \"{Genre.Trim()}\"");
         if (HideClones) parts.Add("no clones");
         if (CustomizedOnly) parts.Add("customized");
         else if (LitOnly && !NeedsSetupOnly) parts.Add("with lights");

@@ -83,16 +83,30 @@ LEDBlinky folder ──► LedBlinkyImporter ──► InMemoryGameLibrary ─�
 ## LaunchBox (phase 4a)
 
 - `LaunchBoxLibrary` (Core, read only) reads `<LaunchBox>\Data\Platforms\*.xml`: one `<Game>` per game
-  with Title, Platform, ApplicationPath, DateAdded. Written from LaunchBox's documented layout; not
-  yet checked against a real LaunchBox 14 library.
+  with Title, Platform, ApplicationPath, DateAdded, Genre. Checked against the cabinet's LaunchBox 14.1
+  (41,633 games). A game whose ApplicationPath is an emulator exe (any in `Data\Emulators.xml`, plus a
+  built-in list: `mame.exe`, `retroarch.exe`…) has no rom name and is matched by title.
 - `PlatformMatcher`: your mapping (`cabinet.json` → `games.launchBoxPlatformMap`, config v3) → same name
   ignoring spaces/underscores/case → alias (`Arcade` → MAME…) → a new platform key.
   `GameMatcher`: ROM file name (`sf2.zip` → `sf2`) → title → new.
 - `GameDatabase.ImportLaunchBox` stores the matches in `launchbox_games` (schema 4) and adds missing
   games/platforms to the library (new platforms inherit the MAME default, like LEDBlinky's
   `UseMameDefaultForOtherEmulators`). This merge also runs after every LEDBlinky import.
+  - New platforms for arcade sets with MAME rom names (`PlatformMatcher.UsesMameDataByDefault`: Cave,
+    ZiNc, Final Burn Neo/Alpha) use MAME's game data; libraries made before this get upgraded on the
+    next merge (only platforms made from LaunchBox, never one you mapped yourself).
+  - LaunchBox-only games lit from MAME's data take the MAME game's button count, control tags and
+    players (`FillFromMameData`), so button/control smart lists find Neo Geo MVS, Arcade Clones, Cave….
 - Filters: `AddedWithinDays` (newest first), `InLaunchBoxOnly`, `NeedsSetupOnly` (lighting from the
-  platform default only and not customized).
+  platform default only and not customized), `Genre` (part of LaunchBox's genre; a parent ROM matches
+  through its clones' LaunchBox entries). Schema 5 added `launchbox_games.genre`.
+- Templates can be tried on the selected game (Templates tab → Try on selected game): the same result as
+  applying, shown on the panel, not saved.
+
+## Window placement
+`config/window.json` (per machine, not in cabinet.json) keeps the main window's position. On load the
+window is moved/shrunk into the work area of the nearest monitor, in physical pixels
+(`WindowPlacement.Clamp` + `MonitorFromRect`), so scaling and several monitors are handled.
 
 ## Lighting engine (`LedEngine`)
 
