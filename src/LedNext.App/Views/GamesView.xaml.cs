@@ -18,6 +18,13 @@ public partial class GamesView : UserControl
         }
     }
 
+    private void OnGamesSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (sender is not ListBox list || DataContext is not GamesViewModel vm) return;
+        var clicked = e.AddedItems.Count > 0 ? e.AddedItems[^1] as GameRow : null;
+        vm.SetListSelection(list.SelectedItems.Cast<GameRow>().ToList(), clicked);
+    }
+
     // Enter saves the label (the binding otherwise updates on focus loss).
     private void OnLabelKeyDown(object sender, KeyEventArgs e)
     {

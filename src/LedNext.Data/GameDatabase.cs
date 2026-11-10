@@ -330,10 +330,33 @@ public sealed class GameDatabase : IGameLibrary
     /// Stores the user's lights for a game (or the platform default when <paramref name="game"/> is
     /// null). Replaces any earlier edit; imported data is kept and comes back on <see cref="RevertUserLights"/>.
     /// </summary>
-    public void SaveUserLights(string platform, string? game, LightProfile profile)
+    public void SaveUserLights(string platform, string? game, LightProfile profile) =>
+        SaveUserLightsMany(new[] { (platform, game, profile) });
+
+    /// <summary>Stores many edits in one transaction (bulk paste): all of them or none.</summary>
+    public void SaveUserLightsMany(IEnumerable<(string Platform, string? Game, LightProfile Profile)> edits)
     {
+        var list = edits.ToList();
         using var c = Connect();
         using var tx = c.BeginTransaction();
+        foreach (var (platform, game, profile) in list) WriteUser(c, tx, platform, game, profile);
+        tx.Commit();
+        foreach (var (platform, game, _) in list) Invalidate(platform, game);
+    }
+
+    /// <summary>Reverts many games in one transaction.</summary>
+    public void RevertUserLightsMany(IEnumerable<(string Platform, string? Game)> keys)
+    {
+        var list = keys.ToList();
+        using var c = Connect();
+        using var tx = c.BeginTransaction();
+        foreach (var (platform, game) in list) DeleteUser(c, tx, platform, game);
+        tx.Commit();
+        foreach (var (platform, game) in list) Invalidate(platform, game);
+    }
+
+    private static void WriteUser(SqliteConnection c, SqliteTransaction tx, string platform, string? game, LightProfile profile)
+    {
         DeleteUser(c, tx, platform, game);
         using (var head = c.CreateCommand())
         {
@@ -367,19 +390,10 @@ public sealed class GameDatabase : IGameLibrary
                 cmd.ExecuteNonQuery();
             }
         }
-        tx.Commit();
-        Invalidate(platform, game);
     }
 
     /// <summary>Drops the user's edit, so the imported lights (or inheritance) apply again.</summary>
-    public void RevertUserLights(string platform, string? game)
-    {
-        using var c = Connect();
-        using var tx = c.BeginTransaction();
-        DeleteUser(c, tx, platform, game);
-        tx.Commit();
-        Invalidate(platform, game);
-    }
+    public void RevertUserLights(string platform, string? game) => RevertUserLightsMany(new[] { (platform, game) });
 
     public bool IsCustomized(string platform, string? game) => GetLights(platform, game)?.Customized == true;
 

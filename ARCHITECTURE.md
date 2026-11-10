@@ -66,6 +66,11 @@ LEDBlinky folder ──► LedBlinkyImporter ──► InMemoryGameLibrary ─�
   Clicking a panel button edits the control that lights it, else the control its name or the
   control map points to (`ControlForButton`: `P1_B3` → `P1_BUTTON3`; with MAME's built-in keys
   `P1_B8` → `P1_BUTTON7`; mahjong/UI keys that share a button are never picked).
+- **Bulk paste** (`LightClipboard`, `GameLightEditor.Paste`): copies are in logical controls, so they
+  mean the same buttons in every game. A whole-layout copy replaces each target's lit controls but
+  keeps the target's own labels; a one-button copy changes only that control (including "off").
+  Each target starts from its own customized profile or a materialized copy of what it shows, and
+  all targets are written in one transaction (`SaveUserLightsMany`).
 
 ## Lighting engine (`LedEngine`)
 

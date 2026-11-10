@@ -175,7 +175,7 @@ public sealed partial class GamesViewModel : ObservableObject
     [ObservableProperty] private string? _previewFrom;
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(ImportCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ImportCommand), nameof(PasteSelectedCommand), nameof(PasteAllMatchesCommand), nameof(RevertSelectedCommand))]
     private bool _isBusy;
 
     [ObservableProperty] private string? _busyText;
@@ -184,7 +184,7 @@ public sealed partial class GamesViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanEdit))]
-    [NotifyCanExecuteChangedFor(nameof(SetColorCommand), nameof(ApplyHexCommand))]
+    [NotifyCanExecuteChangedFor(nameof(SetColorCommand), nameof(ApplyHexCommand), nameof(CopyButtonCommand))]
     private string? _selectedControl;
 
     [ObservableProperty] private string _selectionInfo = "Click a button on the panel to change its colour.";
@@ -243,6 +243,9 @@ public sealed partial class GamesViewModel : ObservableObject
     {
         if (_suppressSearch || _session.Games is null) return;
         var (games, total) = _session.Games.Search(SelectedPlatform?.Key, SearchText, LitOnly, ResultLimit, CustomizedOnly);
+        _matchCount = total;
+        OnPropertyChanged(nameof(PasteAllText));
+        PasteAllMatchesCommand.NotifyCanExecuteChanged();
         Results.Clear();
         foreach (var g in games) Results.Add(new GameRow(g, _platformNames.GetValueOrDefault(g.Platform, g.Platform)));
         ResultInfo = total > games.Count ? $"Showing {games.Count:N0} of {total:N0} matches. Type to narrow it down."
@@ -289,6 +292,8 @@ public sealed partial class GamesViewModel : ObservableObject
         OnPropertyChanged(nameof(PanelWidth));
         OnPropertyChanged(nameof(PanelHeight));
         OnPropertyChanged(nameof(CanEdit));
+        CopyAllCommand.NotifyCanExecuteChanged();
+        CopyButtonCommand.NotifyCanExecuteChanged();
 
         _main.SetSource(new GameLights(lights, $"Game: {title}"));
     }
@@ -410,6 +415,7 @@ public sealed partial class GamesViewModel : ObservableObject
         if (_game is not null)
             foreach (var row in Results.Where(r => r.Game.Platform == _platform && r.Game.Name == _game))
                 row.SetCustomized(IsCustomized);
+        RevertSelectedCommand.NotifyCanExecuteChanged();
         if (wasCustomized != IsCustomized) RefreshLibraryInfoOnly();
     }
 
@@ -419,6 +425,137 @@ public sealed partial class GamesViewModel : ObservableObject
         if (db is null) return;
         int custom = db.CustomizedCount();
         LibraryInfo = _libraryBase + (custom > 0 ? $" {custom:N0} customized (kept on re-import)." : "");
+    }
+
+    // ---- Copy / paste to many games -----------------------------------------------------------
+
+    private List<GameRow> _selectedRows = new();
+    private int _matchCount;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ClipboardInfo))]
+    [NotifyCanExecuteChangedFor(nameof(PasteSelectedCommand), nameof(PasteAllMatchesCommand))]
+    private LightClipboard? _clipboard;
+
+    public string ClipboardInfo => Clipboard is null
+        ? "Copy a game's lights (or one button) in the edit strip, select games here, then paste."
+        : $"Copied: {Clipboard.Describe()}";
+
+    public string PasteSelectedText => $"Paste to {_selectedRows.Count:N0} selected";
+    public string PasteAllText => $"Paste to all {_matchCount:N0} matches";
+
+    /// <summary>Called by the view when the list selection changes. Previews the game just clicked.</summary>
+    public void SetListSelection(List<GameRow> selected, GameRow? clicked)
+    {
+        _selectedRows = selected;
+        OnPropertyChanged(nameof(PasteSelectedText));
+        PasteSelectedCommand.NotifyCanExecuteChanged();
+        RevertSelectedCommand.NotifyCanExecuteChanged();
+        var show = clicked ?? (selected.Count == 1 ? selected[0] : null);
+        if (show is not null) Preview(show.Game.Platform, show.Game.Name, show.Description);
+    }
+
+    private bool CanCopy() => _lights is not null;
+
+    [RelayCommand(CanExecute = nameof(CanCopy))]
+    private void CopyAll()
+    {
+        if (_lights is null) return;
+        Clipboard = new LightClipboard(_title, GameLightEditor.Materialize(_lights), null);
+        AppLog.Info($"Copied {Clipboard.Describe()}");
+    }
+
+    [RelayCommand(CanExecute = nameof(CanEdit))]
+    private void CopyButton()
+    {
+        if (_lights is null || SelectedControl is null) return;
+        Clipboard = new LightClipboard(_title, GameLightEditor.Materialize(_lights), new[] { SelectedControl });
+        AppLog.Info($"Copied {Clipboard.Describe()}");
+    }
+
+    private bool CanPasteSelected() => !IsBusy && Clipboard is not null && _selectedRows.Count > 0;
+    private bool CanPasteAll() => !IsBusy && Clipboard is not null && _matchCount > 0;
+    private bool CanRevertSelected() => !IsBusy && _selectedRows.Any(r => r.Game.Customized);
+
+    [RelayCommand(CanExecute = nameof(CanPasteSelected))]
+    private Task PasteSelected() => PasteTo(_selectedRows.Select(r => r.Game).ToList(), "selected");
+
+    [RelayCommand(CanExecute = nameof(CanPasteAll))]
+    private Task PasteAllMatches()
+    {
+        var db = _session.Games;
+        if (db is null) return Task.CompletedTask;
+        var (all, _) = db.Search(SelectedPlatform?.Key, SearchText, LitOnly, int.MaxValue, CustomizedOnly);
+        return PasteTo(all, "matching the search");
+    }
+
+    private async Task PasteTo(List<GameInfo> targets, string which)
+    {
+        var db = _session.Games;
+        var clip = Clipboard;
+        if (db is null || clip is null || targets.Count == 0) return;
+
+        int already = targets.Count(t => t.Customized);
+        var message = $"Paste {clip.Describe()}\nonto {targets.Count:N0} game{(targets.Count == 1 ? "" : "s")} {which}?" +
+                      (already > 0 ? $"\n\n{already:N0} of them already have your changes; those changes will be replaced." : "") +
+                      "\n\nEach game can be reverted to its imported lights afterwards.";
+        if (System.Windows.MessageBox.Show(message, "Paste lights", System.Windows.MessageBoxButton.OKCancel,
+                System.Windows.MessageBoxImage.Question) != System.Windows.MessageBoxResult.OK) return;
+
+        var snapshot = ConfigStore.Clone(_session.Config);
+        IsBusy = true;
+        BusyText = $"Pasting onto {targets.Count:N0} games…";
+        try
+        {
+            await Task.Run(() =>
+            {
+                var edits = targets.Select(g =>
+                {
+                    var current = db.GetLights(g.Platform, g.Name) is { Customized: true } own
+                        ? own
+                        : GameLightEditor.Materialize(GameLightResolver.Resolve(db, g.Platform, g.Name, snapshot.ControlMap, snapshot.Panel));
+                    return (g.Platform, (string?)g.Name, GameLightEditor.Paste(current, clip));
+                }).ToList();
+                db.SaveUserLightsMany(edits);
+            });
+            AppLog.Info($"Pasted {clip.Describe()} onto {targets.Count:N0} games.");
+            MarkRows(targets, customized: true);
+            BusyText = $"Pasted onto {targets.Count:N0} games.";
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("Paste failed; no game was changed", ex);
+            BusyText = $"Paste failed (no game was changed): {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(CanRevertSelected))]
+    private void RevertSelected()
+    {
+        var db = _session.Games;
+        if (db is null) return;
+        var targets = _selectedRows.Where(r => r.Game.Customized).Select(r => r.Game).ToList();
+        if (System.Windows.MessageBox.Show($"Revert {targets.Count:N0} game{(targets.Count == 1 ? "" : "s")} to the imported lights? Your changes to them are dropped.",
+                "Revert", System.Windows.MessageBoxButton.OKCancel, System.Windows.MessageBoxImage.Question) != System.Windows.MessageBoxResult.OK) return;
+        db.RevertUserLightsMany(targets.Select(t => (t.Platform, (string?)t.Name)));
+        AppLog.Info($"Reverted {targets.Count:N0} games to the imported lights.");
+        MarkRows(targets, customized: false);
+        BusyText = $"Reverted {targets.Count:N0} games.";
+    }
+
+    /// <summary>Updates list rows, the library count and the preview after a bulk change.</summary>
+    private void MarkRows(List<GameInfo> games, bool customized)
+    {
+        var keys = games.Select(g => InMemoryGameLibrary.Key(g.Platform, g.Name)).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        foreach (var row in Results)
+            if (keys.Contains(InMemoryGameLibrary.Key(row.Game.Platform, row.Game.Name))) row.SetCustomized(customized);
+        RevertSelectedCommand.NotifyCanExecuteChanged();
+        RefreshLibraryInfoOnly();
+        if (_platform is not null) Preview(_platform, _game, _title);
     }
 
     // ---- Import -----------------------------------------------------------------------------

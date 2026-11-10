@@ -116,6 +116,55 @@ public class GameLightEditorTests
     }
 }
 
+public class PasteTests
+{
+    private static readonly Rgb Red = new(255, 0, 0), Blue = new(0, 0, 255);
+
+    private static LightProfile Target() => new()
+    {
+        Controls =
+        {
+            new ControlLight("P1_BUTTON1", Rgb.White, "White", "Punch"),
+            new ControlLight("P1_BUTTON2", Rgb.White, "White", "Kick"),
+            new ControlLight("P1_START", Rgb.White, "White", null),
+        },
+    };
+
+    private static LightProfile Source() => new()
+    {
+        Customized = true,
+        Controls =
+        {
+            new ControlLight("P1_BUTTON1", Red, "Red", "Fire"),
+            new ControlLight("P1_BUTTON3", Blue, "Blue", "Bomb"),
+        },
+    };
+
+    [Fact]
+    public void WholeLayoutReplacesControlsButKeepsTargetLabels()
+    {
+        var p = GameLightEditor.Paste(Target(), new LightClipboard("src", Source(), null));
+        Assert.True(p.Customized);
+        Assert.Equal(new[] { "P1_BUTTON1", "P1_BUTTON3" }, p.Controls.Select(c => c.Control));
+        Assert.Equal(Red, p.Find("P1_BUTTON1")!.Color);
+        Assert.Equal("Punch", p.Find("P1_BUTTON1")!.Label); // the target's label, not "Fire"
+        Assert.Null(p.Find("P1_BUTTON3")!.Label);
+        Assert.Null(p.Find("P1_START"));                     // not in the copy → off
+    }
+
+    [Fact]
+    public void SomeControlsChangeOnlyThoseIncludingOff()
+    {
+        var clip = new LightClipboard("src", Source(), new[] { "P1_BUTTON3", "P1_BUTTON2" });
+        var p = GameLightEditor.Paste(Target(), clip);
+        Assert.Equal(Rgb.White, p.Find("P1_BUTTON1")!.Color); // untouched
+        Assert.Null(p.Find("P1_BUTTON2"));                    // off in the source → turned off
+        Assert.Equal(Blue, p.Find("P1_BUTTON3")!.Color);
+        Assert.NotNull(p.Find("P1_START"));
+        Assert.Equal("P1_BUTTON3 Blue, P1_BUTTON2 off from src", clip.Describe());
+    }
+}
+
 public class UserEditDatabaseTests
 {
     private static readonly Rgb Blue = new(0, 0, 255);
@@ -187,6 +236,19 @@ public class UserEditDatabaseTests
         var unlit = GameLightResolver.Resolve(db, "MAME", "unlit", new ControlMap(), Panel());
         Assert.Equal("MAME default (customized)", unlit.From);
         Assert.Equal(Blue, unlit.ButtonColors["P1_B1"]);
+    });
+
+    [Fact]
+    public void BulkSaveAndRevert() => WithDb(db =>
+    {
+        var blue = new LightProfile { Customized = true, Controls = { new ControlLight("P1_BUTTON2", Blue, "Blue", null) } };
+        db.SaveUserLightsMany(new (string, string?, LightProfile)[] { ("MAME", "1942", blue), ("MAME", "unlit", blue) });
+        Assert.Equal(2, db.CustomizedCount());
+        Assert.Equal(Blue, GameLightResolver.Resolve(db, "MAME", "unlit", new ControlMap(), Panel()).ButtonColors["P1_B2"]);
+
+        db.RevertUserLightsMany(new (string, string?)[] { ("MAME", "1942"), ("MAME", "unlit") });
+        Assert.Equal(0, db.CustomizedCount());
+        Assert.Equal(Rgb.Red, GameLightResolver.Resolve(db, "MAME", "1942", new ControlMap(), Panel()).ButtonColors["P1_B1"]);
     });
 
     [Fact]

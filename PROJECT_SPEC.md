@@ -42,7 +42,8 @@ thousands of games.
 Done so far: SQLite library, inheritance game → parent ROM → platform default → MAME default,
 LEDBlinky import (everything above except animations), control map from the LEDBlinky input map,
 Games tab with platform filter, search and live preview, per-game and per-platform editing
-(kept on re-import, Revert to imported). Next: control templates, bulk assign, smart lists.
+(kept on re-import, Revert to imported), bulk copy/paste onto selected games or all search matches.
+Next: named control templates, smart lists.
 
 ### Phase 4 — Front ends
 - `LedNext.Service` owns hardware; app and plugins are clients over a named pipe

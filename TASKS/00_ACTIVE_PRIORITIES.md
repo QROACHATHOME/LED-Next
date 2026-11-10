@@ -27,7 +27,10 @@
       (Games tab: click a button, pick a colour / Off / #hex, edit "Does"; Revert to imported;
       "Only customized" filter). Kept on re-import. Not part of Ctrl+Z (Revert is the way back).
 - [ ] Next visit: edit a game in Hardware mode and check the real panel follows it live
-- [ ] Control templates (e.g. "6-button fighter") and bulk assign; smart lists
+- [x] Bulk assign: Copy all lights / Copy this button, multi-select in the games list (Ctrl/Shift-click,
+      Ctrl+A, Ctrl+C / Ctrl+V), Paste to selected or to all search matches (one transaction, confirmation
+      with a count), Revert selected
+- [ ] Control templates (e.g. "6-button fighter", saved and named); smart lists
 - [ ] Control map editor (today it is rebuilt on import; re-import after re-wiring)
 - [ ] Platform name mapping LaunchBox ↔ LEDBlinky (`Sega Genesis` ↔ `Sega_Genesis`, `Arcade` → MAME)
 - [ ] Animations (`*.lwax`) — phase 5

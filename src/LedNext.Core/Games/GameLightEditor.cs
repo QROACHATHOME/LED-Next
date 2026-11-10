@@ -90,4 +90,43 @@ public static class GameLightEditor
 
     private static LightProfile With(LightProfile p, List<ControlLight> controls) =>
         new() { Controls = controls, Source = "LED-Next", Customized = true };
+
+    /// <summary>
+    /// Puts copied lights onto another game. A whole-layout copy replaces the target's lit controls
+    /// (keeping the target's own labels, since "Fire" in one game is not "Fire" in another). A copy of
+    /// some controls changes only those: lit ones take the copied colour, ones that were off are turned off.
+    /// </summary>
+    public static LightProfile Paste(LightProfile target, LightClipboard clip)
+    {
+        if (clip.Controls is null)
+        {
+            var controls = clip.Profile.Controls
+                .Select(c => c with { Label = target.Find(c.Control)?.Label })
+                .ToList();
+            return With(target, controls);
+        }
+
+        var result = With(target, target.Controls.ToList());
+        foreach (var control in clip.Controls)
+        {
+            var source = clip.Profile.Find(control);
+            result = source is { Color: { } color }
+                ? SetColor(result, control, color, source.ColorName)
+                : TurnOff(result, control);
+        }
+        return result;
+    }
+}
+
+/// <summary>Lights copied from one game, to paste onto others.</summary>
+/// <param name="Profile">Everything the source game showed (see <see cref="GameLightEditor.Materialize"/>).</param>
+/// <param name="Controls">Null = the whole layout; otherwise only these controls are pasted.</param>
+public sealed record LightClipboard(string SourceTitle, LightProfile Profile, IReadOnlyCollection<string>? Controls)
+{
+    public string Describe()
+    {
+        if (Controls is null) return $"all lights of {SourceTitle}";
+        var parts = Controls.Select(c => Profile.Find(c) is { } lit ? $"{c} {lit.ColorName ?? lit.Color?.ToHex()}" : $"{c} off");
+        return $"{string.Join(", ", parts)} from {SourceTitle}";
+    }
 }

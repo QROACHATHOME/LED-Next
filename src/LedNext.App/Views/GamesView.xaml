@@ -55,11 +55,28 @@
                     <TextBlock Text="{Binding ResultInfo}" Foreground="{StaticResource AppTextDim}" Margin="0,0,0,6" />
                 </StackPanel>
 
-                <ListBox ItemsSource="{Binding Results}" SelectedItem="{Binding SelectedGame}"
+                <!-- Bulk: paste copied lights onto many games -->
+                <StackPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
+                    <TextBlock Text="{Binding ClipboardInfo}" TextWrapping="Wrap" Foreground="{StaticResource AppTextDim}" Margin="0,0,0,6" />
+                    <WrapPanel>
+                        <Button Content="{Binding PasteSelectedText}" Command="{Binding PasteSelectedCommand}"
+                                ToolTip="Ctrl+V. Ctrl/Shift-click to select several games, Ctrl+A for all listed" />
+                        <Button Content="{Binding PasteAllText}" Command="{Binding PasteAllMatchesCommand}"
+                                ToolTip="Every game matching the platform, search and filters, including ones not listed" />
+                        <Button Content="Revert selected" Command="{Binding RevertSelectedCommand}"
+                                ToolTip="Drop your changes to the selected games and use the imported lights again" />
+                    </WrapPanel>
+                </StackPanel>
+
+                <ListBox ItemsSource="{Binding Results}" SelectionMode="Extended" SelectionChanged="OnGamesSelectionChanged"
                          Background="{StaticResource AppBackground}" Foreground="{StaticResource AppText}"
                          BorderBrush="{StaticResource AppBorder}"
                          VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListBox.InputBindings>
+                        <KeyBinding Key="C" Modifiers="Ctrl" Command="{Binding CopyAllCommand}" />
+                        <KeyBinding Key="V" Modifiers="Ctrl" Command="{Binding PasteSelectedCommand}" />
+                    </ListBox.InputBindings>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Margin="2,3">
@@ -160,6 +177,10 @@
                     <DockPanel>
                         <Button DockPanel.Dock="Right" Content="Revert to imported" Command="{Binding RevertCommand}"
                                 ToolTip="Drop your changes for this game (or platform default) and use the LEDBlinky data again" />
+                        <Button DockPanel.Dock="Right" Content="Copy this button" Command="{Binding CopyButtonCommand}"
+                                ToolTip="Copy just the selected button's colour (or off) to paste onto other games" />
+                        <Button DockPanel.Dock="Right" Content="Copy all lights" Command="{Binding CopyAllCommand}"
+                                ToolTip="Ctrl+C in the games list. Copy this game's whole layout to paste onto other games" />
                         <TextBlock Text="{Binding SelectionInfo}" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                     </DockPanel>
                     <TextBlock Text="Customized: your changes replace the imported lights for this one and are kept when you re-import."
