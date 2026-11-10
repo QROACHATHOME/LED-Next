@@ -53,8 +53,12 @@ public static class LedBlinkyImporter
     /// <c>MameFolder</c> from LEDBlinky's settings.ini; tests pass a fixed folder so the result does not
     /// depend on which machine they run on.
     /// </param>
+    /// <param name="extraColorsIni">
+    /// Optional colors.ini from elsewhere (a newer or community version). Read after LEDBlinky's own files and
+    /// only for MAME games they give no lights, so nothing set up in LEDBlinky changes.
+    /// </param>
     public static LedBlinkyImportResult Import(string folder, PanelLayout panel, WiringMap wiring, IProgress<string>? progress = null,
-        string? mameFolder = null)
+        string? mameFolder = null, string? extraColorsIni = null)
     {
         if (!Directory.Exists(folder)) throw new DirectoryNotFoundException($"LEDBlinky folder not found: {folder}");
         string P(string file) => Path.Combine(folder, file);
@@ -92,6 +96,19 @@ public static class LedBlinkyImporter
             progress?.Report($"Reading {ColorsIni}…");
             ReadColorsIni(ctx, P(ColorsIni));
             r.FilesRead.Add(ColorsIni);
+        }
+        if (!string.IsNullOrWhiteSpace(extraColorsIni))
+        {
+            if (File.Exists(extraColorsIni))
+            {
+                progress?.Report($"Reading {Path.GetFileName(extraColorsIni)}…");
+                ReadExtraColorsIni(ctx, extraColorsIni);
+                r.FilesRead.Add(extraColorsIni);
+            }
+            else
+            {
+                r.Warnings.Add($"Extra colors.ini not found: {extraColorsIni}");
+            }
         }
         if (File.Exists(P(ControlsIni)))
         {
@@ -250,6 +267,27 @@ public static class LedBlinkyImporter
         }
         if (overridden > 0)
             ctx.Result.Notes.Add($"{overridden} MAME games in {ColorsIni} are overridden by {ControlsXml}.");
+    }
+
+    /// <summary>The source name stored for games lit from an extra colors.ini.</summary>
+    public const string ExtraColorsSource = "extra colors.ini";
+
+    private static void ReadExtraColorsIni(Context ctx, string path)
+    {
+        var lib = ctx.Result.Library;
+        int added = 0, kept = 0, empty = 0;
+        foreach (var (rom, entries) in IniFile.Load(path).Sections)
+        {
+            if (lib.GetLights(Mame, rom) is not null) { kept++; continue; } // LEDBlinky already lights it
+            var lights = new List<ControlLight>();
+            foreach (var (key, value) in entries) ctx.AddLight(lights, key, value, null, false, $"{Path.GetFileName(path)} [{rom}]");
+            if (lights.Count == 0) { empty++; continue; }
+            lib.SetLights(Mame, rom, new LightProfile { Controls = lights, Source = ExtraColorsSource });
+            AddOrUpdateGame(lib, rom, g => g with { Sources = AppendSource(g.Sources, ExtraColorsSource) });
+            added++;
+        }
+        ctx.Result.Notes.Add($"Extra colors.ini ({path}): {added:N0} MAME games lit from it; {kept:N0} already lit by LEDBlinky were left as they are" +
+                             (empty > 0 ? $"; {empty:N0} sections without colours skipped." : "."));
     }
 
     private static void ReadControlsIni(Context ctx, string path)

@@ -1484,3 +1484,272 @@
 17:55:43.943 [Info] BigBox: platform 'Arcade' → MAME (LaunchBox games); MAME default.
 17:55:43.943 [Info] Light source: BigBox (platform): Arcade
 17:55:44.149 [Info] Timing 'platform Arcade': pipe 0 ms, wait 0 ms, lookup 19 ms, boards 206 ms (write 206 ms); total 225 ms.
+18:09:14.525 [Info] Output thread stopped.
+18:09:14.938 [Info] LED-Next stopped.
+18:09:34.630 [Info] LED-Next starting (64-bit). Config: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\cabinet.json
+18:09:34.667 [Info] Config upgraded from version 3 to 4 (adds an extra colors.ini).
+18:09:34.672 [Info] Loaded C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\PacDrive64.dll
+18:09:34.702 [Info] PacDrive SDK reports 2 Ultimarc device(s).
+18:09:34.703 [Info]   device 0: VID D209 PID 1401 type 5 version 25
+18:09:34.708 [Info]   device 1: VID D209 PID 1402 type 5 version 25
+18:09:34.709 [Info] PacLED64: 2 board(s): PacLED64#1, PacLED64#2
+18:09:34.710 [Info] Output thread started.
+18:09:34.734 [Info] Game library: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\games.db (75,202 games)
+18:09:35.318 [Info] Listening for front ends on pipe 'LedNext.FrontEnd'.
+18:09:38.965 [Info] LaunchBox 'Zero Gunner': no lights on Arcade_-_not_used/zerogun; lit from Sega_Model_2/zerogun.
+18:09:38.965 [Info] LaunchBox 'Dead or Alive': no lights on Arcade_-_not_used/doaa; lit from Sega_Model_2/doaa.
+18:09:38.966 [Info] LaunchBox 'Virtua Fighter 3': no lights on ARCADE_CLONES/vf3; lit from Sega_Model_3/vf3.
+18:09:38.966 [Info] LaunchBox 'Virtua Fighter 2': no lights on ARCADE_CLONES/vf2o; lit from Sega_Model_2/vf2o.
+18:09:38.966 [Info] LaunchBox 'Otomedius': no lights on ARCADE_CLONES/otomedius; lit from TEKNO_PARROT/OTOMEDIUS.
+18:09:38.966 [Info] LaunchBox 'Rampage': no lights on ARCADE_CLONES/rampage; lit from TEKNO_PARROT/RAMPAGE.
+18:09:38.966 [Info] LaunchBox 'Virtua Fighter 3': no lights on ARCADE_CLONES/vf3a; lit from Sega_Model_3/vf3a.
+18:09:38.966 [Info] LaunchBox 'Virtua Fighter 2': no lights on ARCADE_CLONES/vf2a; lit from Sega_Model_2/vf2a.
+18:09:38.966 [Info] LaunchBox 'Lunar Battle': no lights on ARCADE_CLONES/lunarbat; lit from AAE/lunarbat.
+18:09:38.966 [Info] LaunchBox 'Dynamite Cop!': no lights on ARCADE_CLONES/dynmcopc; lit from Sega_Model_2/dynmcopc.
+18:09:38.966 [Info] 80 LaunchBox games are lit from the same game under another emulator (LEDBlinky has their lights there).
+18:09:40.673 [Info] Read 41,633 games from LaunchBox at D:\LaunchBox.
+18:15:50.285 [Info] Light source: Game: Gals Panic
+18:15:51.125 [Info] Light source: Game: Gals Panic II
+18:16:33.003 [Info] Light source: Game: Demolish Fist
+18:16:35.953 [Info] Light source: Game: Rumble Fish
+18:17:17.600 [Info] Light source: Game: 005
+18:17:18.782 [Info] Light source: Game: 005a
+18:17:19.382 [Info] Light source: Game: 10-Yard Fight (Japan)
+18:18:00.652 [Info] Light source: Game: 10-Yard Fight
+18:18:01.500 [Info] Light source: Game: 1000 Miglia: Great 1000 Miles Rally
+18:18:03.004 [Info] Light source: Game: 1000 Miglia: Great 1000 Miles Rally
+18:18:03.604 [Info] Light source: Game: 1000 Miglia: Great 1000 Miles Rally
+18:18:04.763 [Info] Light source: Game: 1000 Miglia: Great 1000 Miles Rally
+18:18:51.647 [Info] Light source: Game: 005
+18:18:52.279 [Info] Light source: Game: 10-Yard Fight
+18:18:53.534 [Info] Light source: Game: 005a
+18:18:55.005 [Info] Light source: Game: 10-Yard Fight
+18:18:55.973 [Info] Light source: Game: 10-Yard Fight (Japan)
+18:18:57.732 [Info] Light source: Game: 1943: The Battle of Midway
+18:19:00.172 [Info] Light source: Game: 19XX: The War Against Destiny
+18:19:02.331 [Info] Light source: Game: 720r1
+18:19:03.961 [Info] Light source: Game: acombat
+18:19:05.258 [Info] Light source: Game: aerofgtb
+18:19:07.236 [Info] Light source: Game: Air Buster: Trouble Specialty Raid Unit
+18:19:08.056 [Info] Light source: Game: Aggressors of Dark Kombat
+18:19:09.647 [Info] Light source: Game: Aggressors of Dark Kombat / Tsuukai GANGAN Koushinkyoku (ADM-008)(ADH-008)
+18:19:11.158 [Info] Light source: Game: Alien Storm
+18:19:12.534 [Info] Light source: Game: Alien Storm
+18:19:29.489 [Info] Light source: Game: alien3j
+18:19:31.006 [Info] Light source: Game: alieninv
+18:20:28.459 [Info] Light source: Game: Alien3: The Gun
+18:20:41.896 [Info] Light source: Game: All American Football
+18:21:05.126 [Info] Light source: Game: All American Football
+18:21:11.995 [Info] Light source: Game: 1944: The Loop Master
+18:21:12.871 [Info] Light source: Game: 1944: The Loop Master
+18:21:14.241 [Info] Light source: Game: 1942iti
+18:21:17.937 [Info] Light source: Game: 005
+18:21:29.305 [Info] Front end connected (1 connected).
+18:21:29.313 [Info] BigBox: 'Swimmer' → MAME/swimmer (LaunchBox id).
+18:21:29.313 [Info] Light source: BigBox (browsing): Swimmer
+18:21:29.520 [Info] Timing 'Swimmer': pipe 7 ms, wait 0 ms, lookup 3 ms, boards 207 ms (write 207 ms); total 217 ms.
+18:21:32.748 [Info] BigBox: '1 on 1 Government' → MAME/1on1gov (LaunchBox id).
+18:21:32.748 [Info] Light source: BigBox (browsing): 1 on 1 Government
+18:21:32.954 [Info] Timing '1 on 1 Government': pipe 1 ms, wait 0 ms, lookup 2 ms, boards 206 ms (write 206 ms); total 209 ms.
+18:21:34.717 [Info] BigBox: '2 On 2 Open Ice Challenge' → MAME/openice (LaunchBox id).
+18:21:34.718 [Info] Light source: BigBox (browsing): 2 On 2 Open Ice Challenge
+18:21:34.925 [Info] Timing '2 On 2 Open Ice Challenge': pipe 0 ms, wait 0 ms, lookup 2 ms, boards 207 ms (write 207 ms); total 209 ms.
+18:21:36.816 [Info] BigBox: '2 Spicy' → TEKNO_PARROT/2SpicyElf2 (LaunchBox id).
+18:21:36.817 [Info] Light source: BigBox (browsing): 2 Spicy
+18:21:37.023 [Info] Timing '2 Spicy': pipe 0 ms, wait 0 ms, lookup 10 ms, boards 207 ms (write 207 ms); total 217 ms.
+18:21:38.592 [Info] BigBox: '3 Bags Full' → MAME/3bagfullnz (LaunchBox id).
+18:21:38.593 [Info] Light source: BigBox (browsing): 3 Bags Full
+18:21:38.799 [Info] Timing '3 Bags Full': pipe 0 ms, wait 0 ms, lookup 2 ms, boards 207 ms (write 207 ms); total 209 ms.
+18:21:40.200 [Info] BigBox: '3 Count Bout / Fire Suplex' → SNK_Neo_Geo_MVS/3countb (LaunchBox id).
+18:21:40.200 [Info] Light source: BigBox (browsing): 3 Count Bout / Fire Suplex
+18:21:40.406 [Info] Timing '3 Count Bout / Fire Suplex': pipe 0 ms, wait 0 ms, lookup 7 ms, boards 206 ms (write 206 ms); total 213 ms.
+18:21:41.949 [Info] BigBox: '3 On 3 Dunk Madness' → MAME/3on3dunk (LaunchBox id).
+18:21:41.949 [Info] Light source: BigBox (browsing): 3 On 3 Dunk Madness
+18:21:42.155 [Info] Timing '3 On 3 Dunk Madness': pipe 0 ms, wait 0 ms, lookup 3 ms, boards 206 ms (write 206 ms); total 209 ms.
+18:21:43.617 [Info] BigBox: '3-D Bowling' → MAME/bowl3d (LaunchBox id).
+18:21:43.617 [Info] Light source: BigBox (browsing): 3-D Bowling
+18:21:43.617 [Info] Timing '3-D Bowling': pipe 0 ms, wait 0 ms, lookup 2 ms, boards 0 ms (write 0 ms); total 2 ms.
+18:21:45.555 [Info] BigBox: '3D Cosplay Mahjong' → TEKNO_PARROT/3DCosplayMahjong (LaunchBox id).
+18:21:45.555 [Info] Light source: BigBox (browsing): 3D Cosplay Mahjong
+18:21:45.761 [Info] Timing '3D Cosplay Mahjong': pipe 0 ms, wait 0 ms, lookup 9 ms, boards 206 ms (write 206 ms); total 216 ms.
+18:21:47.305 [Info] BigBox: '3X3 Puzzle' → ADULT_GAMES/3x3puzzl (LaunchBox id).
+18:21:47.305 [Info] Light source: BigBox (browsing): 3X3 Puzzle
+18:21:47.511 [Info] Timing '3X3 Puzzle': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 206 ms (write 206 ms); total 207 ms.
+18:21:49.107 [Info] BigBox: '4 En Raya' → MAME/4enraya (LaunchBox id).
+18:21:49.108 [Info] Light source: BigBox (browsing): 4 En Raya
+18:21:49.108 [Info] Timing '4 En Raya': pipe 1 ms, wait 0 ms, lookup 2 ms, boards 0 ms (write 0 ms); total 3 ms.
+18:21:50.843 [Info] BigBox: '4 Fun in 1' → MAME/4in1 (LaunchBox id).
+18:21:50.843 [Info] Light source: BigBox (browsing): 4 Fun in 1
+18:21:50.843 [Info] Timing '4 Fun in 1': pipe 1 ms, wait 0 ms, lookup 3 ms, boards 0 ms (write 0 ms); total 4 ms.
+18:21:52.560 [Info] BigBox: '4 in 1' → Casino_Arcade/sms4in1a (LaunchBox id).
+18:21:52.560 [Info] Light source: BigBox (browsing): 4 in 1
+18:21:52.560 [Info] Timing '4 in 1': pipe 0 ms, wait 0 ms, lookup 3 ms, boards 0 ms (write 0 ms); total 3 ms.
+18:21:55.029 [Info] BigBox: '4-D Warriors' → MAME/4dwarrio (LaunchBox id).
+18:21:55.029 [Info] Light source: BigBox (browsing): 4-D Warriors
+18:21:55.030 [Info] Timing '4-D Warriors': pipe 0 ms, wait 0 ms, lookup 2 ms, boards 0 ms (write 0 ms); total 2 ms.
+18:21:58.460 [Info] BigBox: '005' → MAME/005 (LaunchBox id).
+18:21:58.460 [Info] Light source: BigBox (browsing): 005
+18:21:58.667 [Info] Timing '005': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 207 ms (write 207 ms); total 208 ms.
+18:22:12.497 [Info] Light source: Game: 005a
+18:22:15.171 [Info] Light source: Game: 10-Yard Fight
+18:22:21.194 [Info] BigBox: '4-D Warriors' → MAME/4dwarrio (LaunchBox id).
+18:22:21.194 [Info] Light source: BigBox (browsing): 4-D Warriors
+18:22:21.401 [Info] Timing '4-D Warriors': pipe 1 ms, wait 0 ms, lookup 1 ms, boards 207 ms (write 207 ms); total 209 ms.
+18:22:22.987 [Info] BigBox: '005' → MAME/005 (LaunchBox id).
+18:22:22.987 [Info] Light source: BigBox (browsing): 005
+18:22:23.193 [Info] Timing '005': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 206 ms (write 206 ms); total 207 ms.
+18:22:24.447 [Info] BigBox: '7 Ordi' → ADULT_GAMES/7ordi (LaunchBox id).
+18:22:24.448 [Info] Light source: BigBox (browsing): 7 Ordi
+18:22:24.654 [Info] Timing '7 Ordi': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 207 ms (write 207 ms); total 208 ms.
+18:22:25.958 [Info] BigBox: '9-Ball Shootout' → MAME/9ballshtc (LaunchBox id).
+18:22:25.958 [Info] Light source: BigBox (browsing): 9-Ball Shootout
+18:22:25.959 [Info] Timing '9-Ball Shootout': pipe 0 ms, wait 0 ms, lookup 2 ms, boards 0 ms (write 0 ms); total 2 ms.
+18:22:27.546 [Info] BigBox: '10-Yard Fight' → MAME/10yard (LaunchBox id).
+18:22:27.546 [Info] Light source: BigBox (browsing): 10-Yard Fight
+18:22:27.752 [Info] Timing '10-Yard Fight': pipe 0 ms, wait 0 ms, lookup 2 ms, boards 207 ms (write 206 ms); total 209 ms.
+18:22:31.751 [Info] BigBox: '19XX: The War Against Destiny' → MAME/19xx (LaunchBox id).
+18:22:31.751 [Info] Light source: BigBox (browsing): 19XX: The War Against Destiny
+18:22:31.957 [Info] Timing '19XX: The War Against Destiny': pipe 1 ms, wait 0 ms, lookup 3 ms, boards 206 ms (write 206 ms); total 211 ms.
+18:22:34.811 [Info] BigBox: '800 Fathoms' → MAME/mariner (LaunchBox id).
+18:22:34.811 [Info] Light source: BigBox (browsing): 800 Fathoms
+18:22:35.017 [Info] Timing '800 Fathoms': pipe 0 ms, wait 0 ms, lookup 2 ms, boards 206 ms (write 206 ms); total 209 ms.
+18:22:38.249 [Info] BigBox: '1945k III' → MAME/1945kiii (LaunchBox id).
+18:22:38.249 [Info] Light source: BigBox (browsing): 1945k III
+18:22:38.456 [Info] Timing '1945k III': pipe 0 ms, wait 0 ms, lookup 2 ms, boards 207 ms (write 207 ms); total 209 ms.
+18:23:08.561 [Info] BigBox: 'Aaargh' → MAME/ar_argh (LaunchBox id).
+18:23:08.561 [Info] Light source: BigBox (browsing): Aaargh
+18:23:08.768 [Info] Timing 'Aaargh': pipe 0 ms, wait 0 ms, lookup 3 ms, boards 206 ms (write 206 ms); total 209 ms.
+18:23:11.829 [Info] BigBox: 'Abnormal Check' → MAME/abcheck (LaunchBox id).
+18:23:11.829 [Info] Light source: BigBox (browsing): Abnormal Check
+18:23:11.829 [Info] Timing 'Abnormal Check': pipe 1 ms, wait 0 ms, lookup 3 ms, boards 0 ms (write 0 ms); total 4 ms.
+18:23:15.563 [Info] BigBox: 'A.B. Cop' → MAME/abcop (LaunchBox id).
+18:23:15.564 [Info] Light source: BigBox (browsing): A.B. Cop
+18:23:15.564 [Info] Timing 'A.B. Cop': pipe 0 ms, wait 0 ms, lookup 2 ms, boards 0 ms (write 0 ms); total 3 ms.
+18:23:20.884 [Info] BigBox: platform 'Arcade' → MAME (LaunchBox games); MAME default.
+18:23:20.884 [Info] Light source: BigBox (platform): Arcade
+18:23:20.884 [Info] Timing 'platform Arcade': pipe 0 ms, wait 0 ms, lookup 18 ms, boards 0 ms (write 0 ms); total 18 ms.
+18:23:32.383 [Info] Light source: Game: aafbb
+18:23:35.373 [Info] Light source: Game: acombat3
+18:23:37.509 [Info] Light source: Game: aerofgtc
+18:23:39.140 [Info] Light source: Game: Ajax
+18:23:41.683 [Info] Light source: Game: Alcon (US)
+18:23:43.369 [Info] Light source: Game: Alcon (US)
+18:23:44.345 [Info] Light source: Game: Alcon (US)
+18:23:45.449 [Info] Light source: Game: Alcon (US)
+18:26:22.926 [Info] Light source: Game: 005
+18:26:35.393 [Warn] BigBox: no LED-Next platform for 'AceAmuse'; lights unchanged.
+18:26:38.979 [Info] BigBox: 'Skull Of Shadow' → Arcade_PC/Skull of Shadow Launcher (LaunchBox id).
+18:26:38.979 [Info] Light source: BigBox (browsing): Skull Of Shadow
+18:26:39.186 [Info] Timing 'Skull Of Shadow': pipe 0 ms, wait 0 ms, lookup 2 ms, boards 206 ms (write 206 ms); total 208 ms.
+18:26:40.672 [Info] BigBox: 'Bullseye CrackShot' → Arcade_PC/Bullseye Crackshot (LaunchBox id).
+18:26:40.672 [Info] Light source: BigBox (browsing): Bullseye CrackShot
+18:26:40.672 [Info] Timing 'Bullseye CrackShot': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 0 ms (write 0 ms); total 1 ms.
+18:26:42.485 [Info] BigBox: 'Hotshots Fire Rescue' → Arcade_PC/HotShotsFire (LaunchBox id).
+18:26:42.485 [Info] Light source: BigBox (browsing): Hotshots Fire Rescue
+18:26:42.485 [Info] Timing 'Hotshots Fire Rescue': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 0 ms (write 0 ms); total 1 ms.
+18:26:45.554 [Info] BigBox: 'Skull Of Shadow' → Arcade_PC/Skull of Shadow Launcher (LaunchBox id).
+18:26:45.554 [Info] Light source: BigBox (browsing): Skull Of Shadow
+18:26:45.554 [Info] Timing 'Skull Of Shadow': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 0 ms (write 0 ms); total 2 ms.
+18:26:49.117 [Info] BigBox: 'Hotshots Fire Rescue' → Arcade_PC/HotShotsFire (LaunchBox id).
+18:26:49.118 [Info] Light source: BigBox (browsing): Hotshots Fire Rescue
+18:26:49.118 [Info] Timing 'Hotshots Fire Rescue': pipe 0 ms, wait 0 ms, lookup 1 ms, boards 0 ms (write 0 ms); total 1 ms.
+18:26:50.100 [Warn] BigBox: no LED-Next platform for 'AceAmuse'; lights unchanged.
+18:27:01.533 [Info] BigBox: platform 'Arcade Duck' → Arcade_Duck (LaunchBox games); MAME default.
+18:27:01.533 [Info] Light source: BigBox (platform): Arcade Duck
+18:27:01.533 [Info] Timing 'platform Arcade Duck': pipe 0 ms, wait 0 ms, lookup 20 ms, boards 0 ms (write 0 ms); total 20 ms.
+18:27:07.977 [Warn] BigBox: no LED-Next platform for 'Banpresto'; lights unchanged.
+18:27:10.005 [Warn] BigBox: no LED-Next platform for 'Cinematronics'; lights unchanged.
+18:27:11.478 [Info] BigBox: platform 'Cave' → Cave (LaunchBox games); MAME default.
+18:27:11.478 [Info] Light source: BigBox (platform): Cave
+18:27:11.478 [Info] Timing 'platform Cave': pipe 0 ms, wait 0 ms, lookup 16 ms, boards 0 ms (write 0 ms); total 16 ms.
+18:27:15.665 [Info] BigBox: 'Deathsmiles' → Cave/deathsml (LaunchBox id).
+18:27:15.666 [Info] Light source: BigBox (browsing): Deathsmiles
+18:27:15.666 [Info] Timing 'Deathsmiles': pipe 0 ms, wait 0 ms, lookup 3 ms, boards 0 ms (write 0 ms); total 4 ms.
+18:27:18.518 [Info] BigBox: 'Deathsmiles II: Makai no Merry Christmas' → Cave/Game Loader All RH (LaunchBox id).
+18:27:18.518 [Info] Light source: BigBox (browsing): Deathsmiles II: Makai no Merry Christmas
+18:27:18.518 [Info] Timing 'Deathsmiles II: Makai no Merry Christmas': pipe 0 ms, wait 0 ms, lookup 4 ms, boards 0 ms (write 0 ms); total 4 ms.
+18:27:21.943 [Info] BigBox: 'DoDonPachi SaiDaiOuJou' → Cave/ddpsdoj (LaunchBox id).
+18:27:21.943 [Info] Light source: BigBox (browsing): DoDonPachi SaiDaiOuJou
+18:27:21.943 [Info] Timing 'DoDonPachi SaiDaiOuJou': pipe 0 ms, wait 0 ms, lookup 3 ms, boards 0 ms (write 0 ms); total 4 ms.
+18:27:26.241 [Info] BigBox: 'Mushihime-Sama Futari Black Label' → Cave/futaribl (LaunchBox id).
+18:27:26.241 [Info] Light source: BigBox (browsing): Mushihime-Sama Futari Black Label
+18:27:26.241 [Info] Timing 'Mushihime-Sama Futari Black Label': pipe 0 ms, wait 0 ms, lookup 4 ms, boards 0 ms (write 0 ms); total 4 ms.
+18:27:29.046 [Info] BigBox: 'Mushihime-Sama Futari Ver 1.5' → Cave/futari15 (LaunchBox id).
+18:27:29.046 [Info] Light source: BigBox (browsing): Mushihime-Sama Futari Ver 1.5
+18:27:29.046 [Info] Timing 'Mushihime-Sama Futari Ver 1.5': pipe 0 ms, wait 0 ms, lookup 3 ms, boards 0 ms (write 0 ms); total 4 ms.
+18:27:31.352 [Info] BigBox: 'Pretty Soldier Sailor Moon' → Cave/sailormn (LaunchBox id).
+18:27:31.352 [Info] Light source: BigBox (browsing): Pretty Soldier Sailor Moon
+18:27:31.352 [Info] Timing 'Pretty Soldier Sailor Moon': pipe 0 ms, wait 0 ms, lookup 4 ms, boards 0 ms (write 0 ms); total 4 ms.
+18:27:39.428 [Info] BigBox: platform 'Cave' → Cave (LaunchBox games); MAME default.
+18:27:39.428 [Info] Light source: BigBox (platform): Cave
+18:27:39.428 [Info] Timing 'platform Cave': pipe 0 ms, wait 0 ms, lookup 18 ms, boards 0 ms (write 0 ms); total 19 ms.
+18:27:54.269 [Info] Front end: BigBox closing
+18:27:54.269 [Info] Front end disconnected (0 connected).
+18:27:54.270 [Info] Light source: Off
+18:27:54.270 [Info] BigBox closed: all lights off.
+18:28:01.649 [Info] Output thread stopped.
+18:28:02.062 [Info] LED-Next stopped.
+18:29:06.049 [Info] LED-Next starting (64-bit). Config: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\cabinet.json
+18:29:06.090 [Info] Loaded C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\PacDrive64.dll
+18:29:06.120 [Info] PacDrive SDK reports 2 Ultimarc device(s).
+18:29:06.120 [Info]   device 0: VID D209 PID 1401 type 5 version 25
+18:29:06.126 [Info]   device 1: VID D209 PID 1402 type 5 version 25
+18:29:06.127 [Info] PacLED64: 2 board(s): PacLED64#1, PacLED64#2
+18:29:06.128 [Info] Output thread started.
+18:29:06.152 [Info] Game library: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\games.db (75,202 games)
+18:29:06.691 [Info] Listening for front ends on pipe 'LedNext.FrontEnd'.
+18:29:09.994 [Info] LaunchBox 'Zero Gunner': no lights on Arcade_-_not_used/zerogun; lit from Sega_Model_2/zerogun.
+18:29:09.995 [Info] LaunchBox 'Dead or Alive': no lights on Arcade_-_not_used/doaa; lit from Sega_Model_2/doaa.
+18:29:09.995 [Info] LaunchBox 'Virtua Fighter 3': no lights on ARCADE_CLONES/vf3; lit from Sega_Model_3/vf3.
+18:29:09.995 [Info] LaunchBox 'Virtua Fighter 2': no lights on ARCADE_CLONES/vf2o; lit from Sega_Model_2/vf2o.
+18:29:09.995 [Info] LaunchBox 'Otomedius': no lights on ARCADE_CLONES/otomedius; lit from TEKNO_PARROT/OTOMEDIUS.
+18:29:09.995 [Info] LaunchBox 'Rampage': no lights on ARCADE_CLONES/rampage; lit from TEKNO_PARROT/RAMPAGE.
+18:29:09.995 [Info] LaunchBox 'Virtua Fighter 3': no lights on ARCADE_CLONES/vf3a; lit from Sega_Model_3/vf3a.
+18:29:09.995 [Info] LaunchBox 'Virtua Fighter 2': no lights on ARCADE_CLONES/vf2a; lit from Sega_Model_2/vf2a.
+18:29:09.995 [Info] LaunchBox 'Lunar Battle': no lights on ARCADE_CLONES/lunarbat; lit from AAE/lunarbat.
+18:29:09.995 [Info] LaunchBox 'Dynamite Cop!': no lights on ARCADE_CLONES/dynmcopc; lit from Sega_Model_2/dynmcopc.
+18:29:09.996 [Info] 80 LaunchBox games are lit from the same game under another emulator (LEDBlinky has their lights there).
+18:29:11.706 [Info] Read 41,633 games from LaunchBox at D:\LaunchBox.
+18:29:20.315 [Info] Extra colors.ini: C:\Users\Arcade\Downloads\Colors.ini
+18:29:20.544 [Info] LEDBlinky import from C:\LEDBlinky: 37,891 games on 173 platforms, 6,305 with their own or a parent's lights; 30 controls mapped by input code. Files: settings.ini, Color-RGB.ini, LEDBlinkyControls.xml, Colors.ini, C:\Users\Arcade\Downloads\Colors.ini, Controls.ini, LEDBlinkyMinimizedMame.xml, D:\CoinOPS Collections\emulators\Mame02XX\cfg\default.cfg, LEDBlinkyInputMap.xml.
+18:29:20.879 [Info] LaunchBox 'Battle Arena Toshinden 2': no lights on ZiNc/ts2; lit from MAME/ts2.
+18:29:20.879 [Info] LaunchBox 'Hyper Athlete': no lights on ZiNc/hyperath; lit from MAME/hyperath.
+18:29:20.879 [Info] LaunchBox 'Ehrgeiz': no lights on ZiNc/ehrgeiz; lit from MAME/ehrgeiz.
+18:29:20.879 [Info] LaunchBox 'Dunk Mania': no lights on ZiNc/dunkmnia; lit from MAME/dunkmnia.
+18:29:20.879 [Info] LaunchBox 'Tekken 3': no lights on ZiNc/tekken3; lit from MAME/tekken3.
+18:29:20.879 [Info] 5 LaunchBox games are lit from the same game under another emulator (LEDBlinky has their lights there).
+18:29:22.918 [Info] Added 37,306 LaunchBox games that are not in the LEDBlinky data.
+18:29:22.983 [Info] 4,044 LaunchBox games took their button count and control types from MAME's data.
+18:29:22.984 [Warn] Unknown colour 'Whie' (first seen in AAE/demon); the default colour is used.
+18:29:22.984 [Info] 194 MAME games in Colors.ini are overridden by LEDBlinkyControls.xml.
+18:29:22.984 [Info] Extra colors.ini (C:\Users\Arcade\Downloads\Colors.ini): 23 MAME games lit from it; 1,399 already lit by LEDBlinky were left as they are.
+18:29:22.984 [Info] MAME machine list is from MAME 0.287 (unknown).
+18:29:22.985 [Info] Using 59 MAME key assignments from D:\CoinOPS Collections\emulators\Mame02XX\cfg\default.cfg.
+18:29:24.900 [Info] LaunchBox 'Zero Gunner': no lights on Arcade_-_not_used/zerogun; lit from Sega_Model_2/zerogun.
+18:29:24.900 [Info] LaunchBox 'Dead or Alive': no lights on Arcade_-_not_used/doaa; lit from Sega_Model_2/doaa.
+18:29:24.901 [Info] LaunchBox 'Virtua Fighter 3': no lights on ARCADE_CLONES/vf3; lit from Sega_Model_3/vf3.
+18:29:24.901 [Info] LaunchBox 'Virtua Fighter 2': no lights on ARCADE_CLONES/vf2o; lit from Sega_Model_2/vf2o.
+18:29:24.901 [Info] LaunchBox 'Otomedius': no lights on ARCADE_CLONES/otomedius; lit from TEKNO_PARROT/OTOMEDIUS.
+18:29:24.901 [Info] LaunchBox 'Rampage': no lights on ARCADE_CLONES/rampage; lit from TEKNO_PARROT/RAMPAGE.
+18:29:24.901 [Info] LaunchBox 'Virtua Fighter 3': no lights on ARCADE_CLONES/vf3a; lit from Sega_Model_3/vf3a.
+18:29:24.901 [Info] LaunchBox 'Virtua Fighter 2': no lights on ARCADE_CLONES/vf2a; lit from Sega_Model_2/vf2a.
+18:29:24.901 [Info] LaunchBox 'Lunar Battle': no lights on ARCADE_CLONES/lunarbat; lit from AAE/lunarbat.
+18:29:24.901 [Info] LaunchBox 'Dynamite Cop!': no lights on ARCADE_CLONES/dynmcopc; lit from Sega_Model_2/dynmcopc.
+18:29:24.901 [Info] 80 LaunchBox games are lit from the same game under another emulator (LEDBlinky has their lights there).
+18:29:26.494 [Info] Added 5 LaunchBox games that are not in the LEDBlinky data.
+18:29:26.554 [Info] 5 LaunchBox games took their button count and control types from MAME's data.
+18:29:26.578 [Info] Read 41,633 games from LaunchBox at D:\LaunchBox.
+18:29:32.202 [Info] Light source: Game: aafbb
+18:29:33.077 [Info] Light source: Game: a51site4a
+18:29:33.849 [Info] Light source: Game: aafbc
+18:29:36.644 [Info] Light source: Game: agentx4
+18:29:37.458 [Info] Light source: Game: agentx3
+18:29:38.666 [Info] Light source: Game: altbeastj3
+18:29:39.362 [Info] Light source: Game: altbeastj1
+18:29:40.569 [Info] Light source: Game: arkaboot
+18:29:41.121 [Info] Light source: Game: area88r
+18:29:42.305 [Info] Light source: Game: asterock
+18:29:42.864 [Info] Light source: Game: astdelux2
+18:29:47.878 [Info] Light source: Game: attackf
+18:30:09.698 [Info] Output thread stopped.
+18:30:10.112 [Info] LED-Next stopped.

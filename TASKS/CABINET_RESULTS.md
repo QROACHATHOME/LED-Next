@@ -392,3 +392,16 @@ All mappings looked right; nothing was changed by hand. Notable:
   "Rampage" (Arcade Clones, Atari 800/ST) now uses the TeknoParrot "Rampage" entry (same title) — check if wrong.
 - **User: Virtua Cop and Gauntlet Legends (Tekno Parrot) show their LEDBlinky colours.**
 - 114 tests pass.
+
+---
+
+# Visit 6c: extra colors.ini (2026-11-10)
+- No official update of `colors.ini` since LEDBlinky's 2007-11-12 file (the cabinet has that one); newer
+  community versions are shared on the BYOAC and LaunchBox forums.
+- New: **Games → "Extra colors.ini…"** (`GameSettings.ExtraColorsIni`, `cabinet.json` **version 4**, migration
+  3 → 4). The file is read with every LEDBlinky import, after LEDBlinky's own files, and only lights MAME games
+  LEDBlinky has no lights for (source "extra colors.ini"). Cancelling the dialog offers to remove it.
+  Tests `AnExtraColorsIniOnlyLightsGamesLedBlinkyLeavesUnlit`, `AMissingExtraColorsIniIsAWarningNotAFailure`.
+- First try: the button stayed greyed out (not refreshed when the start-up LaunchBox read finished); fixed.
+- At the cabinet the user chose a downloaded `Colors.ini`: "23 MAME games lit from it; 1,399 already lit by
+  LEDBlinky were left as they are". 116 tests pass.

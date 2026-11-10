@@ -335,6 +335,49 @@ public class LedBlinkyImportTests(ITestOutputHelper output)
     }
 
     [Fact]
+    public void AnExtraColorsIniOnlyLightsGamesLedBlinkyLeavesUnlit()
+    {
+        var root = RepoRoot();
+        var extra = Path.Combine(Path.GetTempPath(), $"lednext-extra-{Guid.NewGuid():N}.ini");
+        File.WriteAllText(extra, """
+            [1942]
+            P1_BUTTON1=Blue
+            [zzzextra]
+            P1_BUTTON1=Yellow
+            P1_BUTTON2=Purple
+            [emptysection]
+            """);
+        try
+        {
+            var cabinet = ConfigStore.LoadOrCreate(Path.Combine(root, "cabinet", "cabinet.json"));
+            var r = LedBlinkyImporter.Import(Path.Combine(root, "import-samples", "ledblinky"), cabinet.Panel, cabinet.Wiring,
+                mameFolder: Path.Combine(root, "import-samples", "no-mame-folder"), extraColorsIni: extra);
+
+            var g1942 = GameLightResolver.Resolve(r.Library, "MAME", "1942", r.ControlMap, cabinet.Panel);
+            Assert.Equal(new Rgb(255, 0, 0), g1942.ButtonColors["P1_B1"]);           // LEDBlinky's Colors.ini still wins
+            var added = GameLightResolver.Resolve(r.Library, "MAME", "zzzextra", r.ControlMap, cabinet.Panel);
+            Assert.Equal("game zzzextra", added.From);
+            Assert.Equal(new Rgb(255, 255, 0), added.ButtonColors["P1_B1"]);
+            Assert.Contains(LedBlinkyImporter.ExtraColorsSource, r.Library.GetGame("MAME", "zzzextra")!.Sources);
+            Assert.Contains(r.Notes, n => n.StartsWith("Extra colors.ini") && n.Contains("1 MAME games lit") && n.Contains("1 already lit"));
+        }
+        finally
+        {
+            File.Delete(extra);
+        }
+    }
+
+    [Fact]
+    public void AMissingExtraColorsIniIsAWarningNotAFailure()
+    {
+        var root = RepoRoot();
+        var cabinet = ConfigStore.LoadOrCreate(Path.Combine(root, "cabinet", "cabinet.json"));
+        var r = LedBlinkyImporter.Import(Path.Combine(root, "import-samples", "ledblinky"), cabinet.Panel, cabinet.Wiring,
+            mameFolder: Path.Combine(root, "import-samples", "no-mame-folder"), extraColorsIni: @"C:\does\not\exist\colors.ini");
+        Assert.Contains(r.Warnings, w => w.StartsWith("Extra colors.ini not found"));
+    }
+
+    [Fact]
     public void ControlMapFollowsTheCabinetsInputMap()
     {
         var (r, cab) = Imported.Value;

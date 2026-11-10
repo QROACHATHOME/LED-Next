@@ -253,7 +253,7 @@ public sealed partial class GamesViewModel : ObservableObject
     [ObservableProperty] private string? _previewFrom;
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(ImportCommand), nameof(ReadLaunchBoxCommand), nameof(ChooseLaunchBoxFolderCommand),
+    [NotifyCanExecuteChangedFor(nameof(ImportCommand), nameof(ChooseExtraColorsIniCommand), nameof(ReadLaunchBoxCommand), nameof(ChooseLaunchBoxFolderCommand),
         nameof(PasteSelectedCommand), nameof(PasteAllMatchesCommand), nameof(RevertSelectedCommand),
         nameof(ApplyTemplateToSelectedCommand), nameof(ApplyTemplateToAllCommand))]
     private bool _isBusy;
@@ -990,7 +990,6 @@ public sealed partial class GamesViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanImport))]
     private async Task Import()
     {
-        var db = _session.Games!;
         var last = _session.Config.Games.LedBlinkyFolder;
         var dialog = new Microsoft.Win32.OpenFolderDialog
         {
@@ -998,8 +997,57 @@ public sealed partial class GamesViewModel : ObservableObject
             InitialDirectory = Directory.Exists(last) ? last : Directory.Exists(@"C:\LEDBlinky") ? @"C:\LEDBlinky" : "",
         };
         if (dialog.ShowDialog() != true) return;
-        var folder = dialog.FolderName;
+        await RunImport(dialog.FolderName);
+    }
 
+    /// <summary>Path of the extra colors.ini, or a hint when there is none (for the button's tooltip).</summary>
+    public string ExtraColorsIniTip => _session.Config.Games.ExtraColorsIni is { Length: > 0 } p
+        ? $"Extra colors.ini: {p}\nIt only lights MAME games LEDBlinky has no lights for. Choose again to change it; cancel the dialog to remove it."
+        : "Add a newer or community colors.ini (kept anywhere; it is only read). It only lights MAME games LEDBlinky has no lights for.";
+
+    /// <summary>Chooses (or, on cancel, offers to remove) the extra colors.ini, then imports from LEDBlinky again.</summary>
+    [RelayCommand(CanExecute = nameof(CanImport))]
+    private async Task ChooseExtraColorsIni()
+    {
+        var games = _session.Config.Games;
+        var current = games.ExtraColorsIni;
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = "Choose an extra colors.ini (it is only read, never changed)",
+            Filter = "colors.ini|*.ini|All files|*.*",
+            InitialDirectory = Path.GetDirectoryName(current) is { } dir && Directory.Exists(dir) ? dir : "",
+        };
+        string? chosen;
+        if (dialog.ShowDialog() == true)
+        {
+            chosen = dialog.FileName;
+        }
+        else
+        {
+            if (string.IsNullOrEmpty(current)) return;
+            var answer = System.Windows.MessageBox.Show($"Stop using the extra colors.ini?\n\n{current}", "Extra colors.ini",
+                System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);
+            if (answer != System.Windows.MessageBoxResult.Yes) return;
+            chosen = null;
+        }
+        if (string.Equals(chosen, current, StringComparison.OrdinalIgnoreCase)) return;
+
+        games.ExtraColorsIni = chosen;
+        _session.MarkDirty();
+        OnPropertyChanged(nameof(ExtraColorsIniTip));
+        AppLog.Info(chosen is null ? "Extra colors.ini removed." : $"Extra colors.ini: {chosen}");
+
+        if (string.IsNullOrEmpty(games.LedBlinkyFolder) || !Directory.Exists(games.LedBlinkyFolder))
+        {
+            BusyText = "Saved. Import from LEDBlinky to use it.";
+            return;
+        }
+        await RunImport(games.LedBlinkyFolder);
+    }
+
+    private async Task RunImport(string folder)
+    {
+        var db = _session.Games!;
         // The importer runs on a worker thread, so it gets its own copy of the panel and wiring.
         var snapshot = ConfigStore.Clone(_session.Config);
         IsBusy = true;
@@ -1009,7 +1057,8 @@ public sealed partial class GamesViewModel : ObservableObject
         {
             var result = await Task.Run(() =>
             {
-                var r = LedBlinkyImporter.Import(folder, snapshot.Panel, snapshot.Wiring, progress);
+                var r = LedBlinkyImporter.Import(folder, snapshot.Panel, snapshot.Wiring, progress,
+                    extraColorsIni: snapshot.Games.ExtraColorsIni);
                 ((IProgress<string>)progress).Report("Saving the game library…");
                 db.ReplaceAll(r.Library, folder);
                 return r;

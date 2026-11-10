@@ -50,6 +50,12 @@ public static class ConfigStore
             AppLog.Info("Config upgraded from version 2 to 3 (adds LaunchBox settings).");
             config.Version = 3;
         }
+        if (config.Version < 4)
+        {
+            // v4 added Games.ExtraColorsIni; null (none) by default.
+            AppLog.Info("Config upgraded from version 3 to 4 (adds an extra colors.ini).");
+            config.Version = 4;
+        }
         // The deserializer builds a case-sensitive dictionary; LaunchBox platform names are matched ignoring case.
         config.Games.LaunchBoxPlatformMap = new Dictionary<string, string>(
             config.Games.LaunchBoxPlatformMap ?? new(), StringComparer.OrdinalIgnoreCase);
