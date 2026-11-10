@@ -56,6 +56,14 @@ public sealed partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _sourceName = "";
     [ObservableProperty] private string? _frameStatus;
     [ObservableProperty] private string _boardsSummary = "";
+    /// <summary>What LaunchBox / BigBox last told us (status bar). Null until the pipe is up.</summary>
+    [ObservableProperty] private string? _frontEndStatus;
+
+    /// <summary>
+    /// Set by the window: false while minimized, so the panel and boards previews aren't redrawn for
+    /// nobody (keeps LED-Next near zero CPU while a game runs). The LEDs themselves are unaffected.
+    /// </summary>
+    public bool PreviewVisible { get; set; } = true;
 
     public bool IsHardwareMode
     {
@@ -148,7 +156,8 @@ public sealed partial class MainViewModel : ObservableObject
 
     private void OnFrameRendered(FrameSnapshot frame)
     {
-        // Engine thread. Drop frames while the UI is still drawing the previous one.
+        // Engine thread. Drop frames while the UI is still drawing the previous one, or is minimized.
+        if (!PreviewVisible) return;
         if (Interlocked.Exchange(ref _framePending, 1) == 1) return;
         _dispatcher.BeginInvoke(DispatcherPriority.Background, () =>
         {

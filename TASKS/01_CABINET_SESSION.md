@@ -1,5 +1,35 @@
 # Cabinet session brief (for Claude on the arcade machine)
 
+## Visit 5 (next visit) — live lighting from LaunchBox / BigBox
+The plugin (`src/LedNext.LaunchBox`) was built on the dev PC against `tools/LaunchBoxPluginStubs`, a
+stand-in for LaunchBox's API written from its plugin docs. This visit builds it against the real file.
+1. `git pull`, build, test. Close LaunchBox, BigBox and LED-Next.
+2. **List the real plugin API** (read only), so mismatches with the stand-in are known up front:
+   ```powershell
+   $a = [Reflection.Assembly]::LoadFrom("D:\LaunchBox\Core\Unbroken.LaunchBox.Plugins.dll")
+   ```
+   PowerShell 5.1 may not load a .NET 10 assembly; if so, use a tiny `dotnet` console project with
+   `System.Reflection.Metadata` or `MetadataLoadContext`. Record in the results: the members of
+   `ISystemEventsPlugin`, `IGameLaunchingPlugin`, `IBigBoxThemeElementPlugin`, `PluginHelper`,
+   `IStateManager`, `SystemEventTypes`, and **any interface with "Selection" in its name** (a better
+   selection hook than polling, if LaunchBox 14.1 has one).
+3. Ask the user, then run `powershell -ExecutionPolicy Bypass -File tools\install-launchbox-plugin.ps1`.
+   It builds against `D:\LaunchBox\Core\Unbroken.LaunchBox.Plugins.dll` and writes **only** to
+   `D:\LaunchBox\Plugins\LED-Next\`. Build errors about LaunchBox types = the stand-in differs: fix the
+   plugin and `tools/LaunchBoxPluginStubs/Stubs.cs` to match the real API, rebuild, re-run.
+4. LED-Next: Hardware mode on, then close it. Start **LaunchBox**: LED-Next should start minimized
+   (plugin log `D:\LaunchBox\Plugins\LED-Next\LedNext.LaunchBox.log`; LED-Next's log shows
+   "Front end connected"). Scroll through games: the panel should follow the selection. Launch a game
+   (lights stay on that game), exit (back to the selection), close LaunchBox (all off).
+5. Same in **BigBox**. If selection doesn't follow (log: "Selection watcher stopped", or no "select"
+   in LED-Next's log), add the theme element to the user's BigBox theme — only with the user's OK, and
+   back the view up first (see `LedNextThemeElement.cs` for the two XAML lines).
+6. Note how quickly the panel follows when scrolling fast, and whether anything feels slow in LaunchBox.
+7. Add a "Visit 5" section to `CABINET_RESULTS.md` (API listing, what worked, fixes); commit, ask before
+   pushing. Don't commit LaunchBox's DLLs.
+
+---
+
 ## Visit 4 (next visit) — visit-3 fixes, the fighter template
 1. `git pull`, build, run. The game library upgrades to schema 5 (logged). The window should open fully on
    screen (position now kept in `config/window.json`); move it, restart, check it comes back there.

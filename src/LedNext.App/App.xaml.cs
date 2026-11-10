@@ -2,26 +2,78 @@
 using System.Windows.Threading;
 using LedNext.App.ViewModels;
 using LedNext.Core;
+using LedNext.FrontEnd;
 
 namespace LedNext.App;
 
 public partial class App : Application
 {
+    private const string SingleInstanceName = @"Local\LedNext.App.SingleInstance";
     private AppSession? _session;
+    private FrontEndController? _frontEnd;
+    private Mutex? _singleInstance;
 
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
         DispatcherUnhandledException += OnUnhandledException;
+        bool minimized = e.Args.Any(a => a.Equals("--minimized", StringComparison.OrdinalIgnoreCase));
+
+        // Only one LED-Next may drive the boards. A second start (the user, or the LaunchBox plugin
+        // starting it while it already runs) asks the first one to show itself and exits, before
+        // touching any board.
+        _singleInstance = new Mutex(initiallyOwned: true, SingleInstanceName, out bool first);
+        if (!first)
+        {
+            _singleInstance.Dispose();
+            _singleInstance = null;
+            if (!minimized)
+            {
+                using var client = new FrontEndClient(connectTimeoutMs: 1000);
+                client.Send(new FrontEndMessage(FrontEndEvents.Show, "LED-Next"));
+                client.Dispose(TimeSpan.FromSeconds(2));
+            }
+            Shutdown();
+            return;
+        }
 
         _session = new AppSession();
-        var window = new MainWindow(System.IO.Path.Combine(_session.ConfigDirectory, "window.json")) { DataContext = new MainViewModel(_session) };
+        var vm = new MainViewModel(_session);
+        var window = new MainWindow(System.IO.Path.Combine(_session.ConfigDirectory, "window.json")) { DataContext = vm };
+        window.StateChanged += (_, _) => vm.PreviewVisible = window.WindowState != WindowState.Minimized;
+        if (minimized)
+        {
+            window.WindowState = WindowState.Minimized;
+            vm.PreviewVisible = false;
+            AppLog.Info("Started minimized (by a front-end plugin).");
+        }
         window.Show();
+
+        _frontEnd = new FrontEndController(_session, vm);
+        _frontEnd.ShowRequested += () => BringToFront(window);
+        _frontEnd.Start();
+    }
+
+    private static void BringToFront(Window window)
+    {
+        if (window.WindowState == WindowState.Minimized) window.WindowState = WindowState.Normal;
+        window.Show();
+        window.Activate();
+        // Activate alone may only flash the taskbar button when another app has the focus.
+        window.Topmost = true;
+        window.Topmost = false;
+        window.Focus();
     }
 
     protected override void OnExit(ExitEventArgs e)
     {
+        _frontEnd?.Dispose();
         _session?.Dispose();
+        if (_singleInstance is not null)
+        {
+            try { _singleInstance.ReleaseMutex(); } catch (ApplicationException) { /* not owned */ }
+            _singleInstance.Dispose();
+        }
         base.OnExit(e);
     }
 

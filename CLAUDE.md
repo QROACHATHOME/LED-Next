@@ -35,6 +35,11 @@ starting work. Never commit `PacDrive*.dll` (Ultimarc's file; git-ignored).
 - Boards are identified by a stable key (`PacLED64#<boardId>`), never by USB enumeration order.
 - `cabinet.json` carries a `version` field. Bump it and add a migration when the schema changes.
 - LEDBlinky files are **read-only input**. Never write to a LEDBlinky install.
+- LaunchBox's data is read-only input too. The **only** place LED-Next writes in a LaunchBox install is
+  its own plugin folder `<LaunchBox>\Plugins\LED-Next\`, through `tools/install-launchbox-plugin.ps1`,
+  with the user's OK. Never copy or commit LaunchBox's DLLs (`Unbroken.LaunchBox.Plugins.dll`…).
+- The plugin (`src/LedNext.LaunchBox`) runs inside LaunchBox/BigBox: it must never throw into the host
+  or block its UI thread. Keep it thin (events → pipe); logic belongs in Core on the LED-Next side.
 - Keep the app usable with no hardware attached (Simulator mode). Every feature must work there.
 
 ## Fragile / unverified areas
@@ -42,6 +47,9 @@ starting work. Never commit `PacDrive*.dll` (Ultimarc's file; git-ignored).
   "Verify on the arcade machine"). These were written from memory of the SDK and have not been
   run against real boards yet.
 - Nodify graph bindings (anchors, pending connections) — check after any Nodify upgrade.
+- The LaunchBox plugin's API use (`tools/LaunchBoxPluginStubs` is a stand-in written from LaunchBox's
+  plugin docs, not from the real 14.1 DLL). Selection in BigBox needs the theme element or the
+  `StateManager` poll to work there; check at the cabinet.
 - The LEDBlinky control map (`ControlMapBuilder`) and MAME `cfg/default.cfg` reading: tested on the
   real LEDBlinky files and the cabinet's real `default.cfg` (`import-samples/mame/cfg/`), and matched
   LEDBlinky at the cabinet for 34 games (visit 2). Tests must pass `mameFolder` explicitly so they

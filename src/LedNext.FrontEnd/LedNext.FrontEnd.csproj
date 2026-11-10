@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The pipe protocol between front-end plugins and the LED-Next app. No dependencies, so a plugin
+    loaded into LaunchBox / BigBox (.NET 10 on the cabinet) carries only this small assembly.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

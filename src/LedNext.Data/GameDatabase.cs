@@ -516,6 +516,48 @@ public sealed class GameDatabase : IGameLibrary
         return LaunchBoxSummaries();
     }
 
+    /// <summary>
+    /// The LED-Next platform and game for a game a front end reports: by LaunchBox id (from the last
+    /// Read LaunchBox), then by LaunchBox platform + title, else matched now like a LaunchBox read would
+    /// (a game added to LaunchBox since then). Null when there is no platform to go on.
+    /// </summary>
+    /// <returns>Platform key, game name, and how it was found ("LaunchBox id", "title", "matched now").</returns>
+    public (string Platform, string Game, string How)? FindFrontEndGame(string? id, string? launchBoxPlatform, string? title,
+        string? applicationPath, IReadOnlyDictionary<string, string>? overrides)
+    {
+        using (var c = Connect())
+        {
+            if (!string.IsNullOrWhiteSpace(id))
+            {
+                using var cmd = c.CreateCommand();
+                cmd.CommandText = "SELECT platform, game FROM launchbox_games WHERE id = $id LIMIT 1";
+                cmd.Parameters.AddWithValue("$id", id.Trim());
+                using var r = cmd.ExecuteReader();
+                if (r.Read()) return (r.GetString(0), r.GetString(1), "LaunchBox id");
+            }
+            if (!string.IsNullOrWhiteSpace(launchBoxPlatform) && !string.IsNullOrWhiteSpace(title))
+            {
+                using var cmd = c.CreateCommand();
+                cmd.CommandText = "SELECT platform, game FROM launchbox_games WHERE lb_platform = $p AND title = $t COLLATE NOCASE LIMIT 1";
+                cmd.Parameters.AddWithValue("$p", launchBoxPlatform.Trim());
+                cmd.Parameters.AddWithValue("$t", title.Trim());
+                using var r = cmd.ExecuteReader();
+                if (r.Read()) return (r.GetString(0), r.GetString(1), "title");
+            }
+        }
+        if (string.IsNullOrWhiteSpace(launchBoxPlatform)) return null;
+
+        var key = Core.Import.LaunchBox.PlatformMatcher.Match(launchBoxPlatform, GetPlatformSummaries().Select(p => p.Key), overrides).Key;
+        var path = applicationPath ?? "";
+        var exe = path.Replace('/', '\\').Split('\\').LastOrDefault() ?? "";
+        var rom = Core.Import.LaunchBox.LaunchBoxLibrary.BuiltInEmulatorExes.Contains(exe, StringComparer.OrdinalIgnoreCase)
+            ? "" : Core.Import.LaunchBox.LaunchBoxLibrary.RomName(path);
+        var game = new Core.Import.LaunchBox.LaunchBoxGame(id ?? "", title ?? "", launchBoxPlatform, path, rom, null);
+        var noTitles = new Dictionary<string, IReadOnlyDictionary<string, string>>();
+        var match = Core.Import.LaunchBox.GameMatcher.Match(game, key, this, noTitles);
+        return (match.LedPlatform, match.LedGame, "matched now");
+    }
+
     /// <summary>Per platform: description (normalised) → game name, for matching LaunchBox titles.</summary>
     /// <remarks>
     /// Only imported (LEDBlinky) games: a game added from LaunchBox earlier is not a match target, or an old

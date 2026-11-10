@@ -47,8 +47,10 @@ named templates and smart lists (buttons, players, control type, hide clones). R
 LaunchBox ↔ LEDBlinky platform-name mapping, control map editor.
 
 ### Phase 4 — Front ends (4a done: LaunchBox library, platform mapping, recently added / needs setup)
-- `LedNext.Service` owns hardware; app and plugins are clients over a named pipe
-- LaunchBox / BigBox plugin: selection changed, game launched, game exited, attract mode
+- The LED-Next app owns the hardware; plugins are clients over a named pipe (decided over a separate
+  service: same speed, less to install)
+- LaunchBox / BigBox plugin: selection changed, game launched, game exited (4b first slice built on the
+  dev PC against an API stand-in; to verify at the cabinet), attract mode (later, with animations)
 
 ### Phase 5 — Animations
 - Attract mode, per-event effects, LEDBlinky animation playback

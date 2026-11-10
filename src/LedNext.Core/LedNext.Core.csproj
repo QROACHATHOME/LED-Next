@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\LedNext.FrontEnd\LedNext.FrontEnd.csproj" />
+  </ItemGroup>
+
 </Project>

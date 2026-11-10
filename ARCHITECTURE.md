@@ -4,14 +4,17 @@
 
 | Project | Depends on | Role |
 |---|---|---|
-| `src/LedNext.Core` | nothing | Data model (panel, wiring, config), JSON store, lighting engine, test patterns, board interfaces, logging, game model + light resolver (`Games/`), LEDBlinky importer (`Import/LedBlinky/`) |
+| `src/LedNext.FrontEnd` | nothing | Front-end pipe protocol (`FrontEndMessage`, JSON lines) and `FrontEndClient`; all a plugin carries |
+| `src/LedNext.LaunchBox` | FrontEnd, LaunchBox's plugin API | LaunchBox / BigBox plugin (thin: events → pipe). Built against `<LaunchBox>\Core\Unbroken.LaunchBox.Plugins.dll`, else against `tools/LaunchBoxPluginStubs` (compile-only stand-in) |
+| `src/LedNext.Core` | FrontEnd | Data model (panel, wiring, config), JSON store, lighting engine, test patterns, board interfaces, logging, game model + light resolver (`Games/`), LEDBlinky importer (`Import/LedBlinky/`) |
 | `src/LedNext.Data` | Core, Microsoft.Data.Sqlite | The game library in SQLite (`GameDatabase`, implements `IGameLibrary`) |
 | `src/LedNext.Hardware` | Core | Board drivers: Ultimarc PacLED64 (via PacDrive SDK DLL) and a simulator |
 | `src/LedNext.App` | Core, Data, Hardware | WPF desktop app: panel designer, games browser, Nodify wiring graph, board test view |
 | `tests/LedNext.Tests` | Core, Data | xUnit tests; the importer tests run on the real files in `import-samples/` and `cabinet/` |
 
-Planned (later phases): `LedNext.Service` (background host that owns the hardware),
-`LedNext.LaunchBox` (thin plugin talking to the service over a named pipe).
+Decided (phase 4b): the **LED-Next app** owns the boards while LaunchBox/BigBox run (no separate service).
+It is as fast (same engine, sub-millisecond pipe) and much less to install; a headless host could later
+take the same pipe without changing the plugin.
 
 ## The three layers of data
 
@@ -102,6 +105,35 @@ LEDBlinky folder ──► LedBlinkyImporter ──► InMemoryGameLibrary ─�
   through its clones' LaunchBox entries). Schema 5 added `launchbox_games.genre`.
 - Templates can be tried on the selected game (Templates tab → Try on selected game): the same result as
   applying, shown on the panel, not saved.
+
+## Live lighting from LaunchBox / BigBox (phase 4b)
+
+```
+LaunchBox / BigBox process                      LED-Next app (owns the boards)
+┌──────────────────────────────┐   named pipe   ┌──────────────────────────────────────────────┐
+│ LedNext.LaunchBox plugin     │  "LedNext.     │ FrontEndServer (Core) ─► FrontEndController  │
+│  ISystemEventsPlugin         │   FrontEnd"    │   FrontEndSession: select / launch / exit /  │
+│  IGameLaunchingPlugin        │  JSON lines ─► │   closing → what to light                    │
+│  SelectionWatcher (poll)     │                │   GameDatabase.FindFrontEndGame (LaunchBox id│
+│  LedNextThemeElement (BigBox)│                │   → title → match now) → GameLightResolver   │
+│  FrontEndClient (bg thread)  │                │   → GameLights → engine                      │
+└──────────────────────────────┘                └──────────────────────────────────────────────┘
+```
+
+- **Plugin** (thin, never throws into LaunchBox): start-up → connect, or start LED-Next with `--minimized`
+  (path in `LedNext.LaunchBox.json` next to the DLL); game launching/exited; selection from
+  `PluginHelper.StateManager` polled every 150 ms on the UI thread (LaunchBox), or a BigBox theme element
+  (`LedNextThemeElement`, invisible, added to a theme view). Logs to `LedNext.LaunchBox.log` in its folder.
+- **Client**: background thread; a new "select" replaces one not sent yet (fast scrolling sends the last
+  game only); while LED-Next is away it keeps only the newest selection and retries every 2 s.
+- **Session rules**: select → that game; launch → that game (selections ignored while playing); exit →
+  the selection again; front end closing → all off; a select without a game (platform wheel) keeps the
+  lights. The last front-end event and the user's own clicks in the app (test patterns, Games tab) take
+  turns: whichever came last is shown.
+- **Single instance**: a named mutex; a second LED-Next sends `show` over the pipe (the first one comes
+  to the front) and exits before touching the boards. The pipe is created with `FirstPipeInstance`.
+- **Idle cost**: while minimized the panel/boards previews aren't redrawn (`MainViewModel.PreviewVisible`);
+  the engine writes boards only when a value changes. Measured on the dev PC: ~0 % CPU, ~146 MB.
 
 ## Window placement
 `config/window.json` (per machine, not in cabinet.json) keeps the main window's position. On load the

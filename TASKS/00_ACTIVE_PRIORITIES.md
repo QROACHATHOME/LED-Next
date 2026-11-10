@@ -68,8 +68,17 @@
 ### 4b — Live lighting from LaunchBox / BigBox (needs the arcade machine)
 - [x] Brought back (visit 3): `Unbroken.LaunchBox.Plugins.dll` 14.1.0.5; LaunchBox and BigBox run on
       **.NET 10.0.14** (`net10.0` in both runtimeconfig files). Plan the plugin's target framework for that.
-- [ ] Decide the host: `LedNext.Service` owning the boards (spec) vs. the app listening on a named pipe
-- [ ] Plugin: selection changed (BigBox), game launched, game exited, attract mode → light the panel
+- [x] Decided: the LED-Next app owns the boards and listens on the pipe `LedNext.FrontEnd` (same speed
+      as a service, less to install). Single instance; `--minimized`; previews paused while minimized
+- [x] Built on the dev PC (net8.0 plugin, loads in .NET 10): pipe protocol + client + server, session rules
+      (select / launch / exit / closing), game lookup by LaunchBox id, plugin classes (system events, game
+      launching, selection poll, BigBox theme element), install script. Checked end to end with a fake
+      LaunchBox host calling the real plugin DLL (it started LED-Next, lit by LaunchBox id, launch/exit,
+      closing → off); 107 tests
+- [ ] **Visit 5**: build the plugin against the real `Unbroken.LaunchBox.Plugins.dll` (fix any API
+      differences), install, and check live lighting in LaunchBox and BigBox (see the cabinet brief)
+- [ ] BigBox selection: confirm which works there (StateManager poll or the theme element in a view)
+- [ ] Attract mode / idle lighting in the front end (with animations, phase 5)
 - [ ] Animations (`*.lwax`) — phase 5
 
 ## At the arcade machine — suggested order

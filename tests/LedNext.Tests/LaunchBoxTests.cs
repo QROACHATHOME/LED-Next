@@ -153,6 +153,24 @@ public class LaunchBoxDatabaseTests : IDisposable
     }
 
     [Fact]
+    public void FindsTheGameAFrontEndReports()
+    {
+        var db = Imported();
+        var sf2 = LaunchBoxLibrary.Read(Path.Combine(_root, "LaunchBox"), new List<string>()).Single(g => g.Rom == "sf2");
+        var none = new Dictionary<string, string>();
+
+        // By LaunchBox id (what the plugin sends), even with a wrong title.
+        Assert.Equal(("MAME", "sf2", "LaunchBox id"), db.FindFrontEndGame(sf2.Id, "Arcade", "whatever", null, none));
+        // By platform + title when the id is unknown.
+        Assert.Equal(("MAME", "sf2", "title"), db.FindFrontEndGame("unknown-id", "Arcade", "street fighter ii", null, none));
+        // A game added to LaunchBox after the last read: matched now by rom name.
+        Assert.Equal(("MAME", "1942", "matched now"), db.FindFrontEndGame(null, "Arcade", "Something", @"..\roms\1942.zip", none));
+        // An emulator exe is not a rom name.
+        Assert.Equal(("MAME", "Odd Title", "matched now"), db.FindFrontEndGame(null, "Arcade", "Odd Title", @"..\emu\mame.exe", none));
+        Assert.Null(db.FindFrontEndGame(null, null, "No platform", null, none));
+    }
+
+    [Fact]
     public void LaunchBoxSmartListsAreSeededFirst()
     {
         var db = GameDatabase.Open(_dbPath);

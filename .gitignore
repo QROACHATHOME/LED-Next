@@ -9,3 +9,6 @@ publish/
 # Ultimarc's SDK DLL is not ours to redistribute; each machine gets its own copy.
 src/LedNext.App/native/*.dll
 PacDrive*.dll
+
+# LaunchBox's plugin API DLL is LaunchBox's file (the plugin builds against the install or tools/LaunchBoxPluginStubs).
+Unbroken.LaunchBox*.dll

@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    COMPILE-TIME STAND-IN for LaunchBox's Unbroken.LaunchBox.Plugins.dll, so the plugin builds on a PC
+    without LaunchBox. Only the members the LED-Next plugin uses, written from LaunchBox's plugin docs
+    (not checked against the real 14.1 DLL). Never shipped: the plugin references it with Private=false,
+    and on the cabinet the plugin is built against the real DLL instead (see LedNext.LaunchBox.csproj).
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <AssemblyName>Unbroken.LaunchBox.Plugins</AssemblyName>
+    <RootNamespace>Unbroken.LaunchBox.Plugins</RootNamespace>
+    <!-- Low, so a plugin built against the stand-in would still bind to the real (newer) assembly. -->
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+</Project>

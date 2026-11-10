@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    LaunchBox / BigBox plugin: reports game selected / launched / exited to the LED-Next app over a
+    named pipe. LaunchBox 14.1 runs on .NET 10; a net8.0 plugin loads there and builds with the .NET 8 SDK.
+
+    Building:
+    - On the cabinet, it builds against LaunchBox's real Unbroken.LaunchBox.Plugins.dll
+      ($(LaunchBoxDir)\Core\…, default D:\LaunchBox; override with -p:LaunchBoxDir=…).
+    - Elsewhere it builds against tools\LaunchBoxPluginStubs, a compile-only stand-in.
+    Neither copy of that DLL is ever output or committed (Private=false): LaunchBox provides its own.
+    Install with tools\install-launchbox-plugin.ps1 (copies to <LaunchBox>\Plugins\LED-Next only).
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>LedNext.LaunchBox</RootNamespace>
+    <AssemblyName>LedNext.LaunchBox</AssemblyName>
+    <LaunchBoxDir Condition="'$(LaunchBoxDir)' == ''">D:\LaunchBox</LaunchBoxDir>
+    <LaunchBoxPluginsDll>$(LaunchBoxDir)\Core\Unbroken.LaunchBox.Plugins.dll</LaunchBoxPluginsDll>
+    <UsingRealLaunchBoxApi Condition="Exists('$(LaunchBoxPluginsDll)')">true</UsingRealLaunchBoxApi>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(UsingRealLaunchBoxApi)' == 'true'">
+    <Reference Include="Unbroken.LaunchBox.Plugins">
+      <HintPath>$(LaunchBoxPluginsDll)</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(UsingRealLaunchBoxApi)' != 'true'">
+    <ProjectReference Include="..\..\tools\LaunchBoxPluginStubs\LaunchBoxPluginStubs.csproj" Private="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LedNext.FrontEnd\LedNext.FrontEnd.csproj" />
+  </ItemGroup>
+
+  <Target Name="ReportLaunchBoxApi" BeforeTargets="Build">
+    <Message Importance="high" Condition="'$(UsingRealLaunchBoxApi)' == 'true'" Text="LedNext.LaunchBox: built against the real LaunchBox API at $(LaunchBoxPluginsDll)" />
+    <Message Importance="high" Condition="'$(UsingRealLaunchBoxApi)' != 'true'" Text="LedNext.LaunchBox: built against the compile-only stand-in (no LaunchBox at $(LaunchBoxDir)). Do not install this build." />
+  </Target>
+
+  <!-- Install script reads this to refuse a stand-in build. -->
+  <Target Name="WriteBuildInfo" AfterTargets="Build">
+    <WriteLinesToFile File="$(OutDir)LedNext.LaunchBox.buildinfo" Lines="api=$([MSBuild]::ValueOrDefault('$(UsingRealLaunchBoxApi)', 'stand-in'))" Overwrite="true" />
+  </Target>
+
+</Project>

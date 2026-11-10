@@ -49,7 +49,10 @@
         <!-- Status bar -->
         <Border DockPanel.Dock="Bottom" Background="{StaticResource AppSurface}" BorderBrush="{StaticResource AppBorder}" BorderThickness="0,1,0,0" Padding="10,4">
             <DockPanel>
-                <TextBlock DockPanel.Dock="Right" Text="{Binding ConfigPath}" Foreground="{StaticResource AppTextDim}" />
+                <TextBlock DockPanel.Dock="Right" Text="{Binding ConfigPath}" Foreground="{StaticResource AppTextDim}"
+                           TextTrimming="CharacterEllipsis" MaxWidth="420" ToolTip="{Binding ConfigPath}" />
+                <TextBlock DockPanel.Dock="Right" Text="{Binding FrontEndStatus}" Foreground="{StaticResource AppAccent}"
+                           Margin="0,0,18,0" ToolTip="Last event from the LaunchBox / BigBox plugin" />
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="{Binding BoardsSummary}" />
                     <TextBlock Text="  ·  " Foreground="{StaticResource AppTextDim}" />
