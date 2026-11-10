@@ -188,3 +188,50 @@ All mappings looked right; nothing was changed by hand. Notable:
 - `Arcade.xml` is 25.8 MB (and `Arcade Clones.xml` 48.5 MB): **not copied** (over the ~20 MB limit). Neo Geo MVS is
   the MAME-based sample instead. Checked the copies: no user paths, e-mail addresses or keys.
 - [x] `cabinet/led-next.log` updated
+
+---
+
+# Visit 4: visit-3 fixes and the fighter template (2026-11-10)
+
+## Setup
+- Pulled `bf797c9`. Build clean, 98 tests pass (99 after the fix below). Hardware mode, both boards found.
+- Game library upgraded schema 4 → 5 (logged, wording now right). LaunchBox read at start-up: 41,633 games.
+
+## Window position
+- First start (no `window.json`): opened at x 240–1680, y 110–970 on the 1920×1080 screen, fully visible.
+- User moved/resized it to the top-left and closed the app: `window.json` saved `Left -4, Top 4, 1000×600`.
+  Next start: restored at x 0, y 4, 1000×600, logged "Window was partly off-screen (x -4–996 …); moved to x 0–1000".
+  **Correct.** (−4 is the usual invisible window border of a window snapped/dragged to the edge; nudging it by
+  4 px is harmless.)
+
+## Cave / ZiNc
+- Log: "Platforms Cave, ZiNc now use MAME's game data: 34 of 63 games lit from it." **Correct.**
+- "4,040 LaunchBox games took their button count and control types from MAME's data."
+
+## Inter Stellar Zangus — not fixed by `bf797c9` alone; fixed here
+- After the pull, `Inter Stellar Zangus` (and `Cave / Mushihime-Sama Matsuri`, `SNK Neo Geo MVS / Bang Bang
+  Busters 2`, all launched with a `mame.exe`) still matched game `mame`, now **by title**. Cause: visit 3 had
+  added library rows `(Laser_Disc, mame, "Inter Stellar Zangus")` etc. (sources `LaunchBox`), and `TitleIndex`
+  included LaunchBox-added rows, so the new title fallback found the stale row.
+- Fix (`src/LedNext.Data/GameDatabase.cs`):
+  - `TitleIndex` only uses imported games (`sources <> 'LaunchBox'`).
+  - New `RemoveStaleLaunchBoxGames` (first step of `MergeLaunchBoxGames`): deletes LaunchBox-added games no
+    `launchbox_games` row points at, unless the user customized them. **Behaviour change:** games removed from
+    LaunchBox now also leave LED-Next's list (customized ones stay).
+  - Test `AnOldWronglyNamedLaunchBoxGameIsReplacedNotMatchedByTitle` (fails without the fix).
+- At the cabinet: "Removed 8 games added from LaunchBox earlier…", "Added 8…"; all three now listed under their
+  titles, no game named `mame` left.
+- Also fixed: `FillFromMameData` matched `games.players = 0` even when MAME's row also has 0 players, so it
+  rewrote 3,706 rows (and logged it) on every start. Now `(games.players = 0 AND m.players > 0)`. Next start was
+  quiet (no fill/remove/add lines).
+
+## Fighter template
+- Smart list **6-button fighting games: 402 games** ("6-button games": 472; the "5,000+" seen in visit 3 was
+  before button counts were filled properly).
+- 6-button fighter on **Street Fighter Zero 2 Alpha** (`sfz2al`), Hardware mode: **kicks (buttons 4-6) are the
+  bottom row** on the real panel for P1 and P2. Confirmed by the user.
+- Note: the log shows "Pasted all lights of template 6-button fighter onto 1 games", so it was applied to the
+  selected game (saved), not only tried. `sfz2al` and `fatfury2` (visit 3) are the cabinet's two customized games.
+
+## Files brought back
+- [x] `cabinet/led-next.log` updated

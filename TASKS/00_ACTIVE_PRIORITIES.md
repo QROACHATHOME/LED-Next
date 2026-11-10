@@ -11,7 +11,7 @@
 - [x] **Verify on the arcade machine** (below). Done 2026-11-10; see `TASKS/CABINET_RESULTS.md`
 - [x] Replace the default 4-player layout with the real panel layout and wiring (`cabinet/cabinet.json`)
 - [x] Main window position saved in `config/window.json` and moved onto the nearest monitor at start
-      (dev PC: checked with off-screen and two-monitor positions; check once on the cabinet)
+      (dev PC: checked with off-screen and two-monitor positions; cabinet visit 4: restored, correct)
 
 ## Phase 3 — Game database
 - [x] Game model, logical control names, inheritance resolver (game → parent → platform → MAME)
@@ -40,8 +40,8 @@
       (re-import an older library to fill them)
 - [x] Narrower lists: LaunchBox genre filter + smart list "6-button fighting games"; Templates tab →
       **Try on selected game** shows the result on the panel without saving
-- [ ] Next visit: "6-button fighter" on the real panel via Try on selected game (are buttons 4-6 the
-      bottom row?). Note how many games "6-button fighting games" lists on the cabinet
+- [x] Visit 4: "6-button fighter" on Street Fighter Zero 2 Alpha: kicks (buttons 4-6) are the bottom row on
+      the real panel. "6-button fighting games" lists 402 games on the cabinet ("6-button games": 472)
 - [ ] Control map editor (today it is rebuilt on import; re-import after re-wiring)
 - [x] Platform name mapping LaunchBox ↔ LEDBlinky (`Sega Genesis` ↔ `Sega_Genesis`, `Arcade` → MAME),
       changeable in Games tab → LaunchBox (done in phase 4a)
@@ -61,6 +61,9 @@
       exe (Emulators.xml + built-in list) is never a rom name; schema log line fixed (schema 5: genre)
 - [x] LaunchBox-only games lit from MAME data get MAME's button count / control types / players, so the
       button and control smart lists find them (they were 0 before: Neo Geo MVS, Arcade Clones)
+- [x] Visit 4 fixes (cabinet): title matching ignores games added from LaunchBox (an old `mame` row was found
+      again by title); stale LaunchBox-only games are removed on each read unless customized; the MAME
+      fill-in no longer rewrites games whose MAME row has 0 players on every start
 
 ### 4b — Live lighting from LaunchBox / BigBox (needs the arcade machine)
 - [x] Brought back (visit 3): `Unbroken.LaunchBox.Plugins.dll` 14.1.0.5; LaunchBox and BigBox run on

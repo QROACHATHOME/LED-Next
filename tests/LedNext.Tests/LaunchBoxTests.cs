@@ -196,6 +196,38 @@ public class LaunchBoxDatabaseTests : IDisposable
     }
 
     [Fact]
+    public void AnOldWronglyNamedLaunchBoxGameIsReplacedNotMatchedByTitle()
+    {
+        // The cabinet's library from before the emulator fix: Zangus was added as game "mame", and on the
+        // next read the title lookup found that row again. Also a customized LaunchBox game must survive.
+        WriteCaveAndLaserDisc();
+        var db = Imported(expectedGames: 8);
+        using (var c = new SqliteConnection($"Data Source={_dbPath}"))
+        {
+            c.Open();
+            using var cmd = c.CreateCommand();
+            cmd.CommandText = """
+                DELETE FROM games WHERE platform = 'Laser_Disc' AND name = 'Inter Stellar Zangus';
+                INSERT INTO games(platform, name, description, parent, players, info, sources, lighting, buttons, tags)
+                VALUES('Laser_Disc', 'mame', 'Inter Stellar Zangus', NULL, 0, '', 'LaunchBox', 0, 0, ''),
+                      ('Laser_Disc', 'gone', 'Removed From LaunchBox', NULL, 0, '', 'LaunchBox', 0, 0, ''),
+                      ('Laser_Disc', 'kept', 'Customized But Removed', NULL, 0, '', 'LaunchBox', 0, 0, '');
+                """;
+            cmd.ExecuteNonQuery();
+        }
+        db.SaveUserLights("Laser_Disc", "kept", new LightProfile { Customized = true });
+
+        db.ImportLaunchBox(LaunchBoxLibrary.Read(Path.Combine(_root, "LaunchBox"), new List<string>()),
+            new Dictionary<string, string>(), Path.Combine(_root, "LaunchBox"));
+
+        Assert.NotNull(db.GetGame("Laser_Disc", "Inter Stellar Zangus"));
+        Assert.Null(db.GetGame("Laser_Disc", "mame"));
+        Assert.Null(db.GetGame("Laser_Disc", "gone"));
+        Assert.NotNull(db.GetGame("Laser_Disc", "kept"));
+        Assert.Equal(2, db.LaunchBoxSummaries().Single(s => s.LaunchBoxPlatform == "Laser Disc").New); // not "title"
+    }
+
+    [Fact]
     public void CaveUsesMameDataAndOlderLibrariesAreUpgraded()
     {
         WriteCaveAndLaserDisc();

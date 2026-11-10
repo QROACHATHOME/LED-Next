@@ -467,3 +467,50 @@
 12:13:35.726 [Info] Light source: Game: Fatal Fury 2
 12:14:07.880 [Info] Edited Fatal Fury 2: P1_BUTTON5 → off
 12:14:07.883 [Info] Light source: Game: Fatal Fury 2
+12:44:01.107 [Info] Output thread stopped.
+12:44:01.520 [Info] LED-Next stopped.
+13:28:07.411 [Info] LED-Next starting (64-bit). Config: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\cabinet.json
+13:28:07.453 [Info] Loaded C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\PacDrive64.dll
+13:28:07.570 [Info] PacDrive SDK reports 2 Ultimarc device(s).
+13:28:07.570 [Info]   device 0: VID D209 PID 1401 type 5 version 25
+13:28:07.576 [Info]   device 1: VID D209 PID 1402 type 5 version 25
+13:28:07.577 [Info] PacLED64: 2 board(s): PacLED64#1, PacLED64#2
+13:28:07.578 [Info] Output thread started.
+13:28:07.599 [Info] Read LaunchBox again to fill the genre filter (new in schema 5).
+13:28:07.599 [Info] Game library upgraded from schema 4 to 5.
+13:28:07.613 [Info] Game library: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\games.db (75,258 games)
+13:28:12.923 [Info] Platforms Cave, ZiNc now use MAME's game data: 34 of 63 games lit from it.
+13:28:12.948 [Info] Added 15 LaunchBox games that are not in the LEDBlinky data.
+13:28:13.016 [Info] 4,040 LaunchBox games took their button count and control types from MAME's data.
+13:28:13.039 [Info] Read 41,633 games from LaunchBox at D:\LaunchBox.
+13:31:06.537 [Info] Output thread stopped.
+13:31:06.952 [Info] LED-Next stopped.
+13:31:21.513 [Info] LED-Next starting (64-bit). Config: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\cabinet.json
+13:31:21.553 [Info] Loaded C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\PacDrive64.dll
+13:31:21.669 [Info] PacDrive SDK reports 2 Ultimarc device(s).
+13:31:21.670 [Info]   device 0: VID D209 PID 1401 type 5 version 25
+13:31:21.675 [Info]   device 1: VID D209 PID 1402 type 5 version 25
+13:31:21.676 [Info] PacLED64: 2 board(s): PacLED64#1, PacLED64#2
+13:31:21.677 [Info] Output thread started.
+13:31:21.702 [Info] Game library: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\games.db (75,273 games)
+13:31:22.110 [Info] Window was partly off-screen (x -4–996, y 4–604 px); moved to x 0–1000, y 4–604 px.
+13:31:25.196 [Info] Removed 8 games added from LaunchBox earlier that no LaunchBox game uses now.
+13:31:26.770 [Info] Added 8 LaunchBox games that are not in the LEDBlinky data.
+13:31:26.830 [Info] 3,706 LaunchBox games took their button count and control types from MAME's data.
+13:31:26.854 [Info] Read 41,633 games from LaunchBox at D:\LaunchBox.
+14:03:56.029 [Info] Light source: Template: 6-button fighter
+14:04:22.254 [Info] Light source: Game: Street Fighter EX2 Plus (Europe 990611)
+14:04:24.580 [Info] Light source: Game: Street Fighter Zero 2 Alpha (Asia 960826)
+14:04:36.423 [Info] Pasted all lights of template 6-button fighter onto 1 games.
+14:04:36.425 [Info] Light source: Game: Street Fighter Zero 2 Alpha (Asia 960826)
+14:05:25.644 [Info] Output thread stopped.
+14:05:26.057 [Info] LED-Next stopped.
+14:05:29.200 [Info] LED-Next starting (64-bit). Config: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\cabinet.json
+14:05:29.241 [Info] Loaded C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\PacDrive64.dll
+14:05:29.356 [Info] PacDrive SDK reports 2 Ultimarc device(s).
+14:05:29.357 [Info]   device 0: VID D209 PID 1401 type 5 version 25
+14:05:29.363 [Info]   device 1: VID D209 PID 1402 type 5 version 25
+14:05:29.364 [Info] PacLED64: 2 board(s): PacLED64#1, PacLED64#2
+14:05:29.365 [Info] Output thread started.
+14:05:29.390 [Info] Game library: C:\MyProjects\LED-Next\src\LedNext.App\bin\Debug\net8.0-windows\config\games.db (75,273 games)
+14:05:34.740 [Info] Read 41,633 games from LaunchBox at D:\LaunchBox.

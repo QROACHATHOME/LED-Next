@@ -517,12 +517,16 @@ public sealed class GameDatabase : IGameLibrary
     }
 
     /// <summary>Per platform: description (normalised) → game name, for matching LaunchBox titles.</summary>
+    /// <remarks>
+    /// Only imported (LEDBlinky) games: a game added from LaunchBox earlier is not a match target, or an old
+    /// wrong name (a game named "mame" after its emulator, before that was fixed) would be found again by title.
+    /// </remarks>
     private Dictionary<string, IReadOnlyDictionary<string, string>> TitleIndex()
     {
         var index = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
         using var c = Connect();
         using var cmd = c.CreateCommand();
-        cmd.CommandText = "SELECT platform, name, description FROM games WHERE parent IS NULL";
+        cmd.CommandText = "SELECT platform, name, description FROM games WHERE parent IS NULL AND sources <> 'LaunchBox'";
         using var r = cmd.ExecuteReader();
         while (r.Read())
         {
@@ -538,9 +542,28 @@ public sealed class GameDatabase : IGameLibrary
     /// </summary>
     private void MergeLaunchBoxGames()
     {
+        RemoveStaleLaunchBoxGames();
         UseMameDataForArcadePlatforms();
         AddMissingLaunchBoxGames();
         FillFromMameData();
+    }
+
+    /// <summary>
+    /// Removes games added from LaunchBox that no LaunchBox game points at any more (removed from LaunchBox,
+    /// or matched differently now), unless you have customized them.
+    /// </summary>
+    private void RemoveStaleLaunchBoxGames()
+    {
+        using var c = Connect();
+        using var cmd = c.CreateCommand();
+        cmd.CommandText = """
+            DELETE FROM games
+            WHERE sources = 'LaunchBox'
+              AND NOT EXISTS(SELECT 1 FROM launchbox_games lb WHERE lb.platform = games.platform AND lb.game = games.name)
+              AND NOT EXISTS(SELECT 1 FROM user_profiles u WHERE u.platform = games.platform AND u.game = games.name)
+            """;
+        int n = cmd.ExecuteNonQuery();
+        if (n > 0) AppLog.Info($"Removed {n:N0} games added from LaunchBox earlier that no LaunchBox game uses now.");
     }
 
     /// <summary>
@@ -558,7 +581,7 @@ public sealed class GameDatabase : IGameLibrary
             WHERE games.sources = 'LaunchBox' AND games.lighting > 0
               AND m.platform = 'MAME' AND m.name = games.name AND games.platform <> 'MAME'
               AND games.platform IN (SELECT key FROM platforms WHERE uses_mame = 1)
-              AND (games.buttons <> m.buttons OR games.tags <> m.tags OR games.players = 0)
+              AND (games.buttons <> m.buttons OR games.tags <> m.tags OR (games.players = 0 AND m.players > 0))
             """;
         int n = cmd.ExecuteNonQuery();
         if (n > 0) AppLog.Info($"{n:N0} LaunchBox games took their button count and control types from MAME's data.");
