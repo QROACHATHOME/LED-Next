@@ -115,4 +115,32 @@ public class LampTests
         Assert.Equal(Rgb.Black, frame.ButtonColors["P1_START"]);
         Assert.Equal(0, overlay.LitLamps);
     }
+
+    [Fact]
+    public void ReadsMamesNetworkLines()
+    {
+        var p = new OutputLineParser();
+        Assert.Null(p.Feed("led0 = 1"));                                    // before the start: dropped
+        Assert.Equal(new OutputLine.Start("galaga", "MAME"), p.Feed("mame_start = galaga"));
+        Assert.Equal(new OutputLine.Value("led0", 1), p.Feed("led0 = 1"));
+        Assert.Equal(new OutputLine.Value("lamp10", 10), p.Feed("lamp10 = 10")); // decimal
+        Assert.Null(p.Feed("pause = 1"));
+        Assert.Null(p.Feed("garbage"));
+        Assert.IsType<OutputLine.Stop>(p.Feed("mame_stop = 1"));
+        Assert.Null(p.Game);
+        Assert.Null(p.Feed("led0 = 0"));
+    }
+
+    [Fact]
+    public void ReadsFlycastsNetworkLines()
+    {
+        // Flycast (core/network/output.h): "game = id" before the first value, hexadecimal values, no stop message.
+        var p = new OutputLineParser();
+        Assert.Equal(new OutputLine.Start("SEGA MARINE FISHING JAPAN", "Flycast"), p.Feed("game = SEGA MARINE FISHING JAPAN"));
+        Assert.Equal(new OutputLine.Value("lamp0", 1), p.Feed("lamp0 = 1"));
+        Assert.Equal(new OutputLine.Value("lamp0", 16), p.Feed("lamp0 = 10"));        // hex
+        Assert.Equal(new OutputLine.Value("lamp1", -1), p.Feed("lamp1 = ffffffff"));  // on
+        Assert.Null(p.Feed("game = SEGA MARINE FISHING JAPAN"));                      // the same game again: no new start
+        Assert.Equal("SEGA MARINE FISHING JAPAN", p.Game);
+    }
 }

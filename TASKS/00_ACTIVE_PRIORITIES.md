@@ -139,8 +139,14 @@
       output (port 8000; Flycast), mapped by LEDBlinky's MameOutputs.ini, drawn over the game's lights; a Start
       lamp also blinks that player's button 1 (Start/Coin have no LEDs yet). Checked with a fake MAME speaking both
       protocols (written from MAME's source); not yet with real MAME
-- [ ] **Visit 7**: real MAME lamps (needs `output windows` in mame.ini), Supermodel, TeknoParrot via Output Blaster,
-      Flycast network output (see the cabinet brief)
+- [x] **Visit 7**: MAME lamps work on the panel (Galaga, Dig Dug over network; Chase H.Q. over Windows messages).
+      28 of 33 mame.ini still `output auto` (no lamps). Supermodel `Outputs = none`. TeknoParrot: no Output Blaster
+      installed, no lamps. Flycast sent nothing LED-Next understood
+- [x] Flycast's dialect (found in its source): `game = id` instead of `mame_start`, hex values, no stop message.
+      Now read (`OutputLineParser`); checked with a fake Flycast
+- [ ] Visit 8: Sega Marine Fishing (Flycast) again; note the outputs it reports
+- [ ] TeknoParrot lamps: find how "Enable Outputs" sends them without Output Blaster (shared memory? its own
+      protocol?) before writing a reader
 - [ ] After Start/Coin LEDs are wired: re-run the wiring wizard for them; consider turning `lamps.startLampsOnButton1` off
 - [ ] Attract mode / idle lighting in the front end (with animations, phase 5)
 - [ ] Animations (`*.lwax`) — phase 5

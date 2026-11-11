@@ -178,7 +178,10 @@ MAME (output network) / Flycast ──TCP 8000 lines───────► Net
   into named outputs. Id 1 is "pause" and is ignored. Asks wait at most 500 ms (`SMTO_ABORTIFHUNG`); a rom MAME
   was too busy to name is asked again on the next update, and updates wait for it.
 - **Network** (`Lamps/NetworkOutputs`, MAME's `network.cpp`): TCP to `[::1]` then `127.0.0.1` port 8000 every 2 s
-  while nothing listens; lines `name = value` ending in a carriage return (CR); `mame_start = rom` first, `mame_stop = 1` at the end.
+  while nothing listens; lines `name = value` read by `OutputLineParser` (Core, tested), two dialects. MAME:
+  `mame_start = rom` first, decimal values, CR endings, `mame_stop = 1` at the end. Flycast (`core/network/output.h`,
+  IPv4 only): `game = <id>` before the first value (Naomi's name, e.g. "SEGA MARINE FISHING JAPAN", not a MAME rom),
+  **hexadecimal** values, LF endings, no stop message (the game ended when the connection closes).
 - **MAME needs `output windows` (or `network`) in mame.ini.** `auto`, the default, picks MAME's "none" module, so
   nothing is sent (LEDBlinky's `UpdateMameIniOutput` sets it). LED-Next never edits emulator files.
 - **Mapping** (`MameOutputMap`): LEDBlinky's `MameOutputs.ini` in the LEDBlinky folder (re-read for every game):

@@ -4,13 +4,13 @@ using System.Net.Sockets;
 using System.Text;
 using System.Windows.Threading;
 using LedNext.Core;
+using LedNext.Core.Outputs;
 
 namespace LedNext.App.Lamps;
 
 /// <summary>
-/// MAME's network output ("output network" in mame.ini; src/osd/modules/output/network.cpp), also Flycast's
-/// network output: the emulator listens on TCP port 8000 and sends lines "name = value" ending in '\r'.
-/// "mame_start = rom" comes first (also to a client that connects later), "mame_stop = 1" at the end.
+/// MAME's network output ("output network" in mame.ini) and Flycast's ("Network Output"): the emulator listens
+/// on TCP port 8000 and sends lines "name = value"; <see cref="OutputLineParser"/> reads both dialects.
 /// A background thread tries to connect every 2 s while nothing listens; nothing is ever sent.
 /// </summary>
 public sealed class NetworkOutputs(int port, Dispatcher dispatcher) : IEmulatorOutputs
@@ -44,7 +44,7 @@ public sealed class NetworkOutputs(int port, Dispatcher dispatcher) : IEmulatorO
                 continue;
             }
             _client = client;
-            string? rom = null;
+            var parser = new OutputLineParser();
             try
             {
                 using var stream = client.GetStream();
@@ -59,7 +59,7 @@ public sealed class NetworkOutputs(int port, Dispatcher dispatcher) : IEmulatorO
                         char ch = (char)buffer[i];
                         if (ch is '\r' or '\n')
                         {
-                            if (line.Length > 0) HandleLine(line.ToString(), ref rom);
+                            if (line.Length > 0) Handle(parser.Feed(line.ToString()));
                             line.Clear();
                         }
                         else if (line.Length < 512) line.Append(ch);
@@ -75,7 +75,8 @@ public sealed class NetworkOutputs(int port, Dispatcher dispatcher) : IEmulatorO
                 client.Dispose();
                 _client = null;
             }
-            if (rom is not null) Raise(() => Stopped?.Invoke(Via));
+            // Flycast has no stop message: the game ended when it closed the connection.
+            if (parser.Game is not null) Raise(() => Stopped?.Invoke(Via));
             if (!ct.IsCancellationRequested) ct.WaitHandle.WaitOne(TimeSpan.FromMilliseconds(500));
         }
     }
@@ -100,28 +101,19 @@ public sealed class NetworkOutputs(int port, Dispatcher dispatcher) : IEmulatorO
         return null;
     }
 
-    private void HandleLine(string line, ref string? rom)
+    private void Handle(OutputLine? line)
     {
-        int eq = line.IndexOf('=');
-        if (eq <= 0) return;
-        var name = line[..eq].Trim();
-        var value = line[(eq + 1)..].Trim();
-        switch (name)
+        switch (line)
         {
-            case "mame_start":
-                if (rom is not null) { Raise(() => Stopped?.Invoke(Via)); }
-                rom = value;
-                var started = value;
-                Raise(() => Started?.Invoke(started, Via));
+            case OutputLine.Start start:
+                AppLog.Info($"Lamps: {start.Emulator} on {Via} reports game '{start.Game}'.");
+                Raise(() => Started?.Invoke(start.Game, Via));
                 break;
-            case "mame_stop":
-                if (rom is not null) Raise(() => Stopped?.Invoke(Via));
-                rom = null;
+            case OutputLine.Stop:
+                Raise(() => Stopped?.Invoke(Via));
                 break;
-            case "pause":
-                break;
-            default:
-                if (rom is not null && int.TryParse(value, out var v)) Raise(() => Output?.Invoke(name, v));
+            case OutputLine.Value v:
+                Raise(() => Output?.Invoke(v.Name, v.Number));
                 break;
         }
     }

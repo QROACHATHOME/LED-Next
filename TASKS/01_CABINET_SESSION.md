@@ -1,5 +1,19 @@
 # Cabinet session brief (for Claude on the arcade machine)
 
+## Visit 8 (next visit) — Flycast lamps again
+Flycast's network output turned out to differ from MAME's (`game = id`, hex values, no stop message); LED-Next
+now reads it. Checked only with a fake Flycast.
+1. `git pull`, build, test.
+2. LED-Next running (Hardware mode). In LaunchBox start **Sega Marine Fishing** (its emu.cfg section has
+   `NetworkOutput = yes`). The log should show "Lamps: Flycast on network port 8000 reports game '…'" and then
+   "reports <output>" lines. Play a little, exit; the log lists every output it reported.
+3. Note the game id Flycast reports and the output names. They are not in MameOutputs.ini yet, so nothing on the
+   panel changes unless the user wants a mapping: a `[<game id>]` section in MameOutputs.ini is LEDBlinky's file,
+   so ask before editing it (or note the mapping for the dev PC).
+4. Add a "Visit 8" section to `CABINET_RESULTS.md`; commit, ask before pushing.
+
+---
+
 ## Visit 7 (next visit) — live lamps from emulators
 LED-Next now listens for emulators' lamp outputs (ARCHITECTURE "Live lamps from emulators"). Built from MAME's
 source and checked only with a fake MAME on the dev PC. Close LEDBlinky first if it runs (it may listen too).
