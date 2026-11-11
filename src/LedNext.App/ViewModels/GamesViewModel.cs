@@ -13,6 +13,9 @@ namespace LedNext.App.ViewModels;
 
 public sealed record PlatformItem(string? Key, string Display);
 
+/// <summary>A LaunchBox picture shown next to the panel (control panel photo, controls card). Click opens the file.</summary>
+public sealed record ReferencePicture(string Caption, ImageSource Image, string Path);
+
 public sealed partial class GameRow(GameInfo game, string platformName) : ObservableObject
 {
     public GameInfo Game { get; private set; } = game;
@@ -137,8 +140,18 @@ public sealed partial class GamesViewModel : ObservableObject
 
         RefreshLibrary();
         RefreshLaunchBoxInfo();
-        // Pick up games added to LaunchBox since last time (quietly; skipped if no folder is set yet).
-        _ = ReadLaunchBoxFrom(session.Config.Games.LaunchBoxFolder, askIfMissing: false);
+        RefreshBannerInfo();
+        _ = StartUpReads();
+    }
+
+    /// <summary>
+    /// Picks up games added to LaunchBox since last time (quietly; skipped if no folder is set yet), then banners
+    /// added or changed since last time (one after the other: both use the busy state).
+    /// </summary>
+    private async Task StartUpReads()
+    {
+        await ReadLaunchBoxFrom(_session.Config.Games.LaunchBoxFolder, askIfMissing: false);
+        await ReadBanners(_session.Config.Games.ButtonBannersFolder, onlyIfChanged: true);
     }
 
     public bool IsAvailable => _session.Games is not null;
@@ -253,9 +266,18 @@ public sealed partial class GamesViewModel : ObservableObject
     [ObservableProperty] private string? _previewTitle;
     [ObservableProperty] private string? _previewSubtitle;
     [ObservableProperty] private string? _previewFrom;
+    /// <summary>The previewed game's button banner (button names), if there is a banners folder and a picture for it.</summary>
+    [ObservableProperty] private ImageSource? _bannerImage;
+    [ObservableProperty] private string _bannerInfo = "";
+    /// <summary>The previewed game's LaunchBox control panel / controls information pictures.</summary>
+    public ObservableCollection<ReferencePicture> Pictures { get; } = new();
+    /// <summary>True when there is a banner or a picture to show beside the panel.</summary>
+    [ObservableProperty] private bool _hasSidePictures;
+    private LedNext.Core.Import.LaunchBox.LaunchBoxImages? _launchBoxImages;
+    private int _pictureRequest;
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(ImportCommand), nameof(ChooseExtraColorsIniCommand), nameof(ReadLaunchBoxCommand), nameof(ChooseLaunchBoxFolderCommand),
+    [NotifyCanExecuteChangedFor(nameof(ImportCommand), nameof(ChooseExtraColorsIniCommand), nameof(ChooseBannersFolderCommand), nameof(ReadLaunchBoxCommand), nameof(ChooseLaunchBoxFolderCommand),
         nameof(PasteSelectedCommand), nameof(PasteAllMatchesCommand), nameof(RevertSelectedCommand),
         nameof(ApplyTemplateToSelectedCommand), nameof(ApplyTemplateToAllCommand))]
     private bool _isBusy;
@@ -376,6 +398,8 @@ public sealed partial class GamesViewModel : ObservableObject
         if (info?.AddedToLaunchBox is { } added) sub.Add($"added to LaunchBox {added.LocalDateTime:yyyy-MM-dd}");
         PreviewSubtitle = string.Join("  ·  ", sub);
         PreviewFrom = $"Lit from {lights.From}" + (info is null ? "" : $"  ·  data: {info.Sources}");
+        BannerImage = game is null ? null : FindBanner(db, platform, game) is { } banner ? ButtonBannerReader.Load(banner) : null;
+        _ = LoadPictures(db, platform, game);
         IsCustomized = db.IsCustomized(platform, game);
 
         Controls.Clear();
@@ -930,6 +954,7 @@ public sealed partial class GamesViewModel : ObservableObject
     /// <summary>Reads the LaunchBox library (read only) and matches it to the game library.</summary>
     private async Task ReadLaunchBoxFrom(string? folder, bool askIfMissing)
     {
+        _launchBoxImages = null; // list LaunchBox's picture folders again (pictures may have been added)
         var db = _session.Games;
         if (db is null) return;
         if (folder is null || !LedNext.Core.Import.LaunchBox.LaunchBoxLibrary.LooksLikeLaunchBox(folder))
@@ -1004,6 +1029,178 @@ public sealed partial class GamesViewModel : ObservableObject
         };
         if (dialog.ShowDialog() != true) return;
         await RunImport(dialog.FolderName);
+    }
+
+    // ---- Button banners ---------------------------------------------------------------------
+
+    /// <summary>The banner file for a game: its own rom's, else the nearest parent's (also through MAME's data).</summary>
+    private string? FindBanner(Core.Games.IGameLibrary db, string platform, string game)
+    {
+        var folder = _session.Config.Games.ButtonBannersFolder;
+        if (string.IsNullOrEmpty(folder) || !Directory.Exists(folder)) return null;
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var p in new[] { platform, "MAME" })
+            for (string? name = game; name is not null && seen.Count < 32 && seen.Add(p + "/" + name); name = db.GetGame(p, name)?.Parent)
+            {
+                var file = Path.Combine(folder, name + ".png");
+                if (name.IndexOfAny(Path.GetInvalidFileNameChars()) < 0 && File.Exists(file)) return file;
+            }
+        return null;
+    }
+
+    /// <summary>
+    /// Looks up the game's LaunchBox pictures (its own LaunchBox entries, else its parent's) on a worker thread;
+    /// a newer preview replaces the result of an older one.
+    /// </summary>
+    private async Task LoadPictures(LedNext.Data.GameDatabase db, string platform, string? game)
+    {
+        int request = ++_pictureRequest;
+        Pictures.Clear();
+        HasSidePictures = BannerImage is not null;
+        var folder = _session.Config.Games.LaunchBoxFolder;
+        if (game is null || string.IsNullOrEmpty(folder) || !Directory.Exists(folder)) return;
+        try
+        {
+            var images = _launchBoxImages is { } li && string.Equals(li.LaunchBoxFolder, folder, StringComparison.OrdinalIgnoreCase) ? li : null;
+            var found = await Task.Run(() =>
+            {
+                images ??= new LedNext.Core.Import.LaunchBox.LaunchBoxImages(folder);
+                var result = new List<ReferencePicture>();
+                foreach (var (type, caption) in new[]
+                         {
+                             (LedNext.Core.Import.LaunchBox.LaunchBoxImages.ControlPanel, "Control panel"),
+                             (LedNext.Core.Import.LaunchBox.LaunchBoxImages.ControlsInformation, "Controls information"),
+                         })
+                {
+                    var (file, count, where) = FindPicture(db, images, platform, game, type);
+                    if (file is null || ButtonBannerReader.Load(file, 600) is not { } image) continue;
+                    var name = where is null ? "" : $" ({where})";
+                    result.Add(new ReferencePicture($"{caption}{name}{(count > 1 ? $" · 1 of {count}" : "")}", image, file));
+                }
+                return result;
+            });
+            _launchBoxImages = images;
+            if (request != _pictureRequest) return;
+            foreach (var p in found) Pictures.Add(p);
+            HasSidePictures = BannerImage is not null || Pictures.Count > 0;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException)
+        {
+            AppLog.Warn($"LaunchBox pictures for {game}: {ex.Message}");
+        }
+    }
+
+    /// <summary>The first picture of this type for the game's LaunchBox entries, else its parent's (also through MAME).</summary>
+    private static (string? File, int Count, string? Where) FindPicture(LedNext.Data.GameDatabase db,
+        LedNext.Core.Import.LaunchBox.LaunchBoxImages images, string platform, string game, string mediaType)
+    {
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var p in new[] { platform, "MAME" })
+            for (string? name = game; name is not null && seen.Count < 32 && seen.Add(p + "/" + name); name = db.GetGame(p, name)?.Parent)
+                foreach (var (lbPlatform, title) in db.LaunchBoxEntries(p, name, orMameDataPlatforms: p == "MAME"))
+                {
+                    var files = images.Find(lbPlatform, title, mediaType);
+                    if (files.Count > 0)
+                        return (files[0], files.Count, string.Equals(name, game, StringComparison.OrdinalIgnoreCase) ? lbPlatform : $"{lbPlatform}, {title}");
+                }
+        return (null, 0, null);
+    }
+
+    /// <summary>Opens a picture in Windows' default viewer (read only).</summary>
+    public static void OpenPicture(string path)
+    {
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(path) { UseShellExecute = true });
+        }
+        catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or IOException or InvalidOperationException)
+        {
+            AppLog.Warn($"Could not open {path}: {ex.Message}");
+        }
+    }
+
+    private void RefreshBannerInfo()
+    {
+        var folder = _session.Config.Games.ButtonBannersFolder;
+        int n = _session.Games?.BannerCount() ?? 0;
+        BannerInfo = string.IsNullOrEmpty(folder) ? "Button banners: none"
+            : $"Button banners: {n:N0} game{(n == 1 ? "" : "s")}";
+        OnPropertyChanged(nameof(BannerTip));
+    }
+
+    public string BannerTip => _session.Config.Games.ButtonBannersFolder is { Length: > 0 } f
+        ? $"Button banners from {f}\nShown next to the panel; MAME games without lights of their own light as many buttons as " +
+          "their banner uses. Choose again to change the folder; cancel the dialog to stop using it."
+        : "Choose a folder of \"6 button layout\" banners (<rom>.png; only read). They are shown next to the panel, and MAME " +
+          "games without lights of their own light as many buttons as their banner uses.";
+
+    [RelayCommand(CanExecute = nameof(CanImport))]
+    private async Task ChooseBannersFolder()
+    {
+        var games = _session.Config.Games;
+        var current = games.ButtonBannersFolder;
+        var dialog = new Microsoft.Win32.OpenFolderDialog
+        {
+            Title = "Choose the button banners folder (<rom>.png; it is only read, never changed)",
+            InitialDirectory = Directory.Exists(current) ? current : "",
+        };
+        string? chosen;
+        if (dialog.ShowDialog() == true) chosen = dialog.FolderName;
+        else
+        {
+            if (string.IsNullOrEmpty(current)) return;
+            var answer = System.Windows.MessageBox.Show($"Stop using the button banners?\n\n{current}", "Button banners",
+                System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);
+            if (answer != System.Windows.MessageBoxResult.Yes) return;
+            chosen = null;
+        }
+        games.ButtonBannersFolder = chosen;
+        _session.MarkDirty();
+        AppLog.Info(chosen is null ? "Button banners removed." : $"Button banners folder: {chosen}");
+        await ReadBanners(chosen, onlyIfChanged: false);
+    }
+
+    /// <summary>Reads the banners on a worker thread and stores the button counts. Null folder: removes them.</summary>
+    private async Task ReadBanners(string? folder, bool onlyIfChanged)
+    {
+        var db = _session.Games;
+        if (db is null || IsBusy) return;
+        try
+        {
+            if (string.IsNullOrEmpty(folder))
+            {
+                if (db.BannerCount() > 0) db.ReplaceBannerButtons(new Dictionary<string, IReadOnlyList<int>>(), null, null);
+                return;
+            }
+            if (!Directory.Exists(folder)) { AppLog.Warn($"Button banners folder not found: {folder}"); return; }
+            var stamp = await Task.Run(() => ButtonBannerReader.Stamp(folder));
+            if (onlyIfChanged && db.Meta("banner_folder") == folder && db.Meta("banner_stamp") == stamp) return;
+
+            IsBusy = true;
+            BusyText = "Reading button banners…";
+            var progress = new Progress<string>(s => BusyText = s);
+            int skipped = 0;
+            var banners = await Task.Run(() =>
+            {
+                var r = ButtonBannerReader.Read(folder, progress, out skipped);
+                db.ReplaceBannerButtons(r, folder, stamp);
+                return r;
+            });
+            var msg = $"Button banners: {banners.Count:N0} read from {folder}" + (skipped > 0 ? $"; {skipped:N0} skipped (not a banner)." : ".");
+            AppLog.Info(msg);
+            BusyText = msg;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException)
+        {
+            AppLog.Error("Reading button banners failed", ex);
+            BusyText = $"Reading button banners failed: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+            RefreshBannerInfo();
+            if (_platform is not null) Preview(_platform, _game, _title);
+        }
     }
 
     /// <summary>Path of the extra colors.ini, or a hint when there is none (for the button's tooltip).</summary>

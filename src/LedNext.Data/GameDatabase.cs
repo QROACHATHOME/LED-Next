@@ -18,8 +18,9 @@ public sealed record PlatformSummary(string Key, string Name, int Games, int Lit
 /// </remarks>
 public sealed class GameDatabase : IGameLibrary
 {
-    /// <summary>2: user edits · 3: games.buttons / tags · 4: launchbox_games · 5: launchbox_games.genre · 6: launchbox_games.emulator.</summary>
-    public const int SchemaVersion = 6;
+    /// <summary>2: user edits · 3: games.buttons / tags · 4: launchbox_games · 5: launchbox_games.genre · 6: launchbox_games.emulator
+    /// · 7: button_banners.</summary>
+    public const int SchemaVersion = 7;
     private const string GameColumns = """
         g.platform, g.name, g.description, g.parent, g.players, g.info, g.sources, g.lighting,
         EXISTS(SELECT 1 FROM user_profiles u WHERE u.platform = g.platform AND u.game = g.name), g.buttons, g.tags,
@@ -29,6 +30,7 @@ public sealed class GameDatabase : IGameLibrary
     private readonly object _cacheLock = new();
     private Dictionary<string, LightProfile?> _lightCache = new(StringComparer.OrdinalIgnoreCase);
     private Dictionary<string, PlatformInfo>? _platforms;
+    private Dictionary<string, int>? _bannerButtons;
 
     private GameDatabase(string path)
     {
@@ -80,6 +82,8 @@ public sealed class GameDatabase : IGameLibrary
                 matched_by TEXT NOT NULL, platform_how TEXT NOT NULL, genre TEXT NOT NULL DEFAULT '', emulator TEXT NOT NULL DEFAULT '');
             CREATE INDEX IF NOT EXISTS launchbox_games_game ON launchbox_games(platform, game);
             CREATE INDEX IF NOT EXISTS launchbox_games_added ON launchbox_games(date_added);
+            CREATE TABLE IF NOT EXISTS button_banners(
+                rom TEXT PRIMARY KEY COLLATE NOCASE, buttons INTEGER NOT NULL, positions TEXT NOT NULL);
             """);
 
         var oldVersion = ReadMeta(c, "schema_version");
@@ -419,6 +423,72 @@ public sealed class GameDatabase : IGameLibrary
         return r.Read() ? ReadGame(r) : null;
     }
 
+    // ---- Button banners --------------------------------------------------------------------------
+
+    /// <summary>Buttons a MAME rom uses according to its button banner (null: no banner read for it).</summary>
+    public int? GetBannerButtons(string rom)
+    {
+        Dictionary<string, int>? all;
+        lock (_cacheLock) all = _bannerButtons;
+        if (all is null)
+        {
+            all = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            using var c = Connect();
+            using var cmd = c.CreateCommand();
+            cmd.CommandText = "SELECT rom, buttons FROM button_banners";
+            using var r = cmd.ExecuteReader();
+            while (r.Read()) all[r.GetString(0)] = r.GetInt32(1);
+            lock (_cacheLock) _bannerButtons = all;
+        }
+        return all.TryGetValue(rom, out var n) ? n : null;
+    }
+
+    public int BannerCount()
+    {
+        GetBannerButtons("");
+        lock (_cacheLock) return _bannerButtons?.Count ?? 0;
+    }
+
+    /// <summary>
+    /// Replaces the button banners read from <paramref name="folder"/> (rom → used positions 1-6). An empty map
+    /// with a null folder removes them. <paramref name="stamp"/> lets start-up skip reading an unchanged folder.
+    /// </summary>
+    public void ReplaceBannerButtons(IReadOnlyDictionary<string, IReadOnlyList<int>> banners, string? folder, string? stamp)
+    {
+        using (var c = Connect())
+        using (var tx = c.BeginTransaction())
+        {
+            Exec(c, "DELETE FROM button_banners", tx);
+            using var cmd = c.CreateCommand();
+            cmd.Transaction = tx;
+            cmd.CommandText = "INSERT OR REPLACE INTO button_banners(rom, buttons, positions) VALUES($r, $b, $p)";
+            var pr = cmd.Parameters.Add("$r", SqliteType.Text);
+            var pb = cmd.Parameters.Add("$b", SqliteType.Integer);
+            var pp = cmd.Parameters.Add("$p", SqliteType.Text);
+            foreach (var (rom, positions) in banners)
+            {
+                pr.Value = rom;
+                pb.Value = positions.Count;
+                pp.Value = string.Join(",", positions);
+                cmd.ExecuteNonQuery();
+            }
+            SetMeta(c, "banner_folder", folder, tx);
+            SetMeta(c, "banner_stamp", stamp, tx);
+            tx.Commit();
+        }
+        lock (_cacheLock) _bannerButtons = null;
+    }
+
+    private static void SetMeta(SqliteConnection c, string key, string? value, SqliteTransaction tx)
+    {
+        using var cmd = c.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = value is null ? "DELETE FROM meta WHERE key = $k" : "INSERT OR REPLACE INTO meta(key, value) VALUES($k, $v)";
+        cmd.Parameters.AddWithValue("$k", key);
+        if (value is not null) cmd.Parameters.AddWithValue("$v", value);
+        cmd.ExecuteNonQuery();
+    }
+
     public LightProfile? GetLights(string platform, string? game)
     {
         var key = InMemoryGameLibrary.Key(platform, game);
@@ -564,6 +634,30 @@ public sealed class GameDatabase : IGameLibrary
         var noTitles = new Dictionary<string, IReadOnlyDictionary<string, string>>();
         var match = Core.Import.LaunchBox.GameMatcher.Match(game, key, this, noTitles);
         return (match.LedPlatform, match.LedGame, "matched now");
+    }
+
+    /// <summary>
+    /// The LaunchBox games matched to this LED-Next game (platform and title as LaunchBox has them). With
+    /// <paramref name="orMameDataPlatforms"/>, also the same rom on platforms that use MAME's data (a MAME game
+    /// LaunchBox lists under Neo Geo or Cave).
+    /// </summary>
+    public List<(string LaunchBoxPlatform, string Title)> LaunchBoxEntries(string platform, string game, bool orMameDataPlatforms = false)
+    {
+        var list = new List<(string, string)>();
+        using var c = Connect();
+        using var cmd = c.CreateCommand();
+        cmd.CommandText = """
+            SELECT lb_platform, title FROM launchbox_games
+            WHERE game = $g AND (platform = $p OR ($m = 1 AND platform IN (SELECT key FROM platforms WHERE uses_mame = 1)))
+            GROUP BY lb_platform, title
+            ORDER BY MIN(platform <> $p), lb_platform, title
+            """;
+        cmd.Parameters.AddWithValue("$m", orMameDataPlatforms ? 1 : 0);
+        cmd.Parameters.AddWithValue("$p", platform);
+        cmd.Parameters.AddWithValue("$g", game);
+        using var r = cmd.ExecuteReader();
+        while (r.Read()) list.Add((r.GetString(0), r.GetString(1)));
+        return list;
     }
 
     /// <summary>

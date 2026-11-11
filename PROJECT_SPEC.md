@@ -43,7 +43,9 @@ Done so far: SQLite library, inheritance game → parent ROM → platform defaul
 LEDBlinky import (everything above except animations), control map from the LEDBlinky input map,
 Games tab with platform filter, search and live preview, per-game and per-platform editing
 (kept on re-import, Revert to imported), bulk copy/paste onto selected games or all search matches,
-named templates and smart lists (buttons, players, control type, hide clones). Remaining for phase 3:
+named templates and smart lists (buttons, players, control type, hide clones). Button banners: a
+folder of per-game "6 button layout" pictures is shown next to the panel and gives unlit MAME games
+their button count. Remaining for phase 3:
 LaunchBox ↔ LEDBlinky platform-name mapping, control map editor.
 
 ### Phase 4 — Front ends (4a done: LaunchBox library, platform mapping, recently added / needs setup)

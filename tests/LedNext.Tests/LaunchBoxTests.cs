@@ -171,6 +171,17 @@ public class LaunchBoxDatabaseTests : IDisposable
     }
 
     [Fact]
+    public void ListsTheLaunchBoxEntriesOfAGame()
+    {
+        var db = Imported();
+        var (lbPlatform, title) = Assert.Single(db.LaunchBoxEntries("MAME", "sf2"));
+        Assert.Equal("Arcade", lbPlatform);
+        Assert.Contains("Street Fighter", title, StringComparison.OrdinalIgnoreCase);
+        Assert.Empty(db.LaunchBoxEntries("MAME", "sor2", orMameDataPlatforms: true)); // Genesis doesn't use MAME's data
+        Assert.Single(db.LaunchBoxEntries("Sega_Genesis", "sor2"));
+    }
+
+    [Fact]
     public void FindsThePlatformAFrontEndReports()
     {
         var db = Imported();

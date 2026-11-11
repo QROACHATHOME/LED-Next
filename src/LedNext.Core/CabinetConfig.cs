@@ -24,9 +24,9 @@ public sealed class CabinetConfig
     /// <summary>
     /// 1 = phase 1. 2 = adds <see cref="ControlMap"/> and <see cref="Games"/> (both default to empty,
     /// so a version 1 file loads unchanged). 3 = adds the LaunchBox folder and platform map to Games.
-    /// 4 = adds Games.ExtraColorsIni.
+    /// 4 = adds Games.ExtraColorsIni. 5 = adds Games.ButtonBannersFolder.
     /// </summary>
-    public const int CurrentVersion = 4;
+    public const int CurrentVersion = 5;
 
     public int Version { get; set; } = CurrentVersion;
     public PanelLayout Panel { get; set; } = new();
@@ -51,4 +51,9 @@ public sealed class GameSettings
     /// import; it only lights MAME games LEDBlinky has no lights for. Added in config version 4.
     /// </summary>
     public string? ExtraColorsIni { get; set; }
+    /// <summary>
+    /// Folder of "6 button layout" banners (<c>&lt;rom&gt;.png</c>, read only): shown in the Games tab, and MAME games
+    /// without lights of their own light as many buttons as their banner uses. Added in config version 5.
+    /// </summary>
+    public string? ButtonBannersFolder { get; set; }
 }

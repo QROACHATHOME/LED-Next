@@ -67,6 +67,8 @@ public interface IGameLibrary
     GameInfo? GetGame(string platform, string name);
     /// <summary>A game's own lights, or the platform default when <paramref name="game"/> is null.</summary>
     LightProfile? GetLights(string platform, string? game);
+    /// <summary>How many buttons a MAME rom uses according to its button banner (<see cref="ButtonBanners"/>), if one was read.</summary>
+    int? GetBannerButtons(string rom) => null;
 }
 
 /// <summary>An in-memory library: the importer's output, and the test double.</summary>
@@ -89,4 +91,7 @@ public sealed class InMemoryGameLibrary : IGameLibrary
     public PlatformInfo? GetPlatform(string key) => Platforms.GetValueOrDefault(key);
     public GameInfo? GetGame(string platform, string name) => Games.GetValueOrDefault(Key(platform, name));
     public LightProfile? GetLights(string platform, string? game) => Lights.GetValueOrDefault(Key(platform, game));
+    /// <summary>MAME rom → buttons used, from button banners.</summary>
+    public Dictionary<string, int> BannerButtons { get; } = new(Cmp);
+    public int? GetBannerButtons(string rom) => BannerButtons.TryGetValue(rom, out var n) ? n : null;
 }

@@ -51,6 +51,7 @@ public static class GameLightResolver
 
         // A customized profile counts even when empty: the user turned everything off on purpose.
         int activeIndex = levels.FindIndex(l => l.Profile.Controls.Count > 0 || l.Profile.Customized);
+        UseButtonBanner(library, platform, game, levels, ref activeIndex, defaultActive);
         var controls = new List<ResolvedControl>();
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -136,6 +137,45 @@ public static class GameLightResolver
             if (lights is not null) levels.Add(new Level(lights, $"{p.Name} default{Custom(lights)}", true));
         }
         return levels;
+    }
+
+    /// <summary>
+    /// A MAME game with no lights of its own (its platform default decides) lights as many buttons as its button
+    /// banner shows in use (the rom's banner, else its parent's), in the default-active colour, instead of the
+    /// platform default's buttons. A customized platform default is left alone.
+    /// </summary>
+    private static void UseButtonBanner(IGameLibrary library, string platform, string? game, List<Level> levels,
+        ref int activeIndex, Rgb defaultActive)
+    {
+        if (string.IsNullOrWhiteSpace(game)) return;
+        if (activeIndex >= 0 && (!levels[activeIndex].IsPlatformDefault || levels[activeIndex].Profile.Customized)) return;
+        var platforms = PlatformChain(library, platform);
+        bool mame = string.Equals(platform, Mame, StringComparison.OrdinalIgnoreCase) || platforms.Any(p => p.UsesMameData);
+        if (!mame) return;
+
+        int? buttons = null;
+        string? from = null;
+        int players = 0;
+        var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var p in new[] { platform, Mame })
+        {
+            for (string? name = game; name is not null && buttons is null && visited.Count < 32 && visited.Add(p + "/" + name);
+                 name = library.GetGame(p, name)?.Parent)
+            {
+                var info = library.GetGame(p, name);
+                if (players == 0 && info is { Players: > 0 }) players = info.Players;
+                if (library.GetBannerButtons(name) is { } n) { buttons = n; from = name; }
+            }
+            if (buttons is not null) break;
+        }
+        if (buttons is not { } count) return;
+
+        var basis = activeIndex >= 0 ? levels[activeIndex] : null;
+        var profile = ButtonBanners.Apply(basis?.Profile, count, players > 0 ? players : 2, defaultActive);
+        var what = $"button banner {from} ({count} button{(count == 1 ? "" : "s")})";
+        var level = new Level(profile, basis is null ? what : $"{basis.Description} + {what}", true);
+        if (activeIndex < 0) { levels.Insert(0, level); activeIndex = 0; }
+        else levels.Insert(activeIndex, level);
     }
 
     private static void AddGameChain(IGameLibrary library, List<Level> levels, string platform, string game, bool own)

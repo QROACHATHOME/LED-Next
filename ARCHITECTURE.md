@@ -82,6 +82,25 @@ LEDBlinky folder ──► LedBlinkyImporter ──► InMemoryGameLibrary ─�
   Filters use `games.buttons` (highest `Pn_BUTTONm` lit by the game or its parent, else Controls.ini
   `P1NumButtons`) and `games.tags` (`ControlTags`: from lit controls and the control description),
   both computed on import. Schema 3 added these columns; an older file gets them empty until re-import.
+- **Button banners** (`ButtonBanners`, Games → "Button banners…", `GameSettings.ButtonBannersFolder`,
+  config v5, table `button_banners`, schema 7): "6 button layout" pictures, `<rom>.png` (800 x 480, two rows
+  of three buttons, used ones in colour, names under them). The app decodes them (`ButtonBannerReader`,
+  WPF) on a worker thread when the folder is chosen and at start-up when the folder changed (meta
+  `banner_stamp`); Core only sees pixels. The picture is shown next to the panel (the game's, else its
+  parent's). A MAME (or MAME-data) game whose lights come from a platform default lights buttons
+  1..n for each player (n = buttons the banner uses, its own or its parent's) in the default-active
+  colour, keeping the rest of the default (stick, always-active). Only the count is used: the pictures
+  place functions on a 6-button panel, not by MAME button number (JoJo's 4th button is bottom-left).
+  Games with lights of their own and customized platform defaults are left alone; such games still count
+  as "needs setup".
+- **LaunchBox pictures** (`LaunchBoxImages`, read only): under the banner the Games tab shows the game's
+  "Arcade - Control Panel" and "Arcade - Controls Information" pictures from the LaunchBox folder, for setting
+  colours by hand. Folder per platform and media type from `Data\Platforms.xml` (else
+  `Images\<platform>\<type>`), region subfolders included; files are matched to the LaunchBox title by letters
+  and digits only (LaunchBox replaces `:` `'`… in file names; `-01` and a `.<guid>` are dropped). Titles come from
+  `launchbox_games` (the game's, else its parent's; a MAME rom also through MAME-data platforms such as Neo Geo).
+  Listings are cached per folder and dropped when LaunchBox is read again. Clicking a picture opens it in
+  Windows' viewer.
 
 ## LaunchBox (phase 4a)
 

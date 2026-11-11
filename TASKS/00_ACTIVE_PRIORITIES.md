@@ -93,6 +93,17 @@
       TeknoParrot → Model 2 / MAME, Arcade → AAE…). Verified at the panel
 - [x] Extra colors.ini (Games → "Extra colors.ini…", config v4): lights MAME games LEDBlinky leaves unlit;
       23 more at the cabinet from a downloaded file
+- [x] Button banners (Games → "Button banners…", config v5, schema 7): a folder of "6 button layout" pictures
+      (`<rom>.png`) is shown next to the panel, and MAME games without lights of their own light as many
+      buttons as their banner uses (596 banners on the dev PC; 226 have no LEDBlinky colours). Only the count is
+      used, not the positions
+- [x] LaunchBox pictures in the Games tab: the game's "Arcade - Control Panel" and "Arcade - Controls Information"
+      images (read only, from the folders in LaunchBox's Platforms.xml), next to the panel; click opens full size.
+      Dev PC: checked with a stand-in LaunchBox folder only
+- [ ] At the cabinet: check LaunchBox's real pictures show for a few games (Arcade, Neo Geo, a clone), that the
+      title matching finds them, and that browsing stays quick
+- [ ] At the cabinet: choose the banners folder, check a few games lit only by the MAME default (e.g. 64th
+      Street, Batsugun, Armed Formation) light buttons 1..n
 - [x] Minimize to the system tray (tray icon: open / exit; the plugin's `--minimized` starts in the tray)
 - [x] **Each MAME install's own keys** (built at the cabinet; Downhill Bikers in Mame02XX Race verified at the panel): the cabinet
       has 33 MAME installs; the control map came from `Mame02XX` only. A game now lights by the keys of the

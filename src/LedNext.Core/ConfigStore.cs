@@ -56,6 +56,12 @@ public static class ConfigStore
             AppLog.Info("Config upgraded from version 3 to 4 (adds an extra colors.ini).");
             config.Version = 4;
         }
+        if (config.Version < 5)
+        {
+            // v5 added Games.ButtonBannersFolder; null (none) by default.
+            AppLog.Info("Config upgraded from version 4 to 5 (adds a button banners folder).");
+            config.Version = 5;
+        }
         // The deserializer builds a case-sensitive dictionary; LaunchBox platform names are matched ignoring case.
         config.Games.LaunchBoxPlatformMap = new Dictionary<string, string>(
             config.Games.LaunchBoxPlatformMap ?? new(), StringComparer.OrdinalIgnoreCase);

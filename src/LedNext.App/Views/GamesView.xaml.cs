@@ -9,6 +9,16 @@ public partial class GamesView : UserControl
 {
     public GamesView() => InitializeComponent();
 
+    /// <summary>A LaunchBox picture: opens it full size in Windows' viewer.</summary>
+    private void OnPictureClick(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is FrameworkElement { DataContext: ReferencePicture p })
+        {
+            GamesViewModel.OpenPicture(p.Path);
+            e.Handled = true;
+        }
+    }
+
     private void OnPreviewButtonClick(object sender, MouseButtonEventArgs e)
     {
         if (sender is FrameworkElement { DataContext: PreviewButton b } && DataContext is GamesViewModel vm)
