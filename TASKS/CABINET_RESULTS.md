@@ -437,3 +437,38 @@ TeknoParrot (`D:\CoinOPS Collections\emulators\Teknoparrot2024`, 639 user profil
 "Ultimarc I-PAC 4X" keyboard. Of 1,146 keyboard button bindings, 391 were on the same-named panel button, 451 on
 another button, 304 on a key no panel button sends. LED-Next now lights TeknoParrot games from their profile's keys
 (287 games change). **Verified at the panel:** Virtua Fighter 5 R (button 4 = P1_B7).
+
+# Visit 7: live lamps from emulators (2026-11-11)
+
+LED-Next started both listeners: MAME Windows messages and network output on port 8000.
+
+**`output` in each MAME install's mame.ini:**
+- `network`: `Mame02XX` and `ddr573-mame`.
+- `windows`: `mame Current Race`.
+- `auto`: the other 28, including `mame0251`, `Mame02XX Race`, `Mame02XX Flight`, `mame Current Spin`, `MameGun` and the AES install.
+  `auto` sends nothing unless a plugin asks for outputs.
+
+**At the panel:**
+| Game | Emulator / path | Result |
+|---|---|---|
+| Galaga | Mame02XX, network | Connected. `led0 → P1_START`. **P1 button 1 blinked (user confirmed).** |
+| Dig Dug | Mame02XX, network | The same: `led0 → P1_START`. |
+| Chase H.Q. | mame Current Race, windows | Connected. Reported `genout0`–`genout3` and `Orientation(\.\DISPLAY7)`. None are in MameOutputs.ini, so nothing changed (as expected). |
+| Terminator 2 | MameGun, auto | No lamps (as expected for `auto`). |
+| Chase H.Q. 2 | TeknoParrot, profile "Enable Outputs"=1 | **No lamps.** Nothing connected and nothing lit in game. |
+| Sega Marine Fishing | Sega Naomi (Flycast), per-game `network.NetworkOutput = yes` | **No lamps.** Nothing connected on port 8000 and nothing lit in game. It ran for about 70 s and exited normally. |
+
+**Read-only checks of other emulators:**
+- Supermodel (`D:\CoinOPS Collections\emulators\Sega Model 3\Config\Supermodel.ini`) has `Outputs = none`, so it sends nothing.
+- Flycast (`D:\CoinOPS Collections\emulators\Flycast\emu.cfg`) has `[network] NetworkOutput = no` globally. Only
+  `[SEGA MARINE FISHING JAPAN]` turns it on. Every other Flycast folder is `no`.
+- TeknoParrot has no Output Blaster install in either TeknoParrot folder. 34 profiles have "Enable Outputs"=1 (ChaseHQ2,
+  Daytona3, ID6–ID8, WMMT5/6, SR3, Transformers…).
+
+**Open questions (dev PC):**
+- TeknoParrot's "Enable Outputs" probably sends outputs through its own channel (Output Blaster/shared memory), not
+  MAME's Windows messages, so LED-Next would need a separate reader for it.
+- Sega Marine Fishing: check whether Flycast's per-game section name matches the game that LaunchBox launches, and
+  whether Flycast's network output is a server LED-Next connects to (like MAME) or a client.
+- Not tried: LEDBlinky's MAMEOutputTest, Supermodel with `Outputs = win`, and changing any `mame.ini` from `auto`.
+  Changing an emulator file is the user's call.
