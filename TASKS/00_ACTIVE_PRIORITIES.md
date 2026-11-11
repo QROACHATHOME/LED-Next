@@ -100,10 +100,12 @@
 - [x] LaunchBox pictures in the Games tab: the game's "Arcade - Control Panel" and "Arcade - Controls Information"
       images (read only, from the folders in LaunchBox's Platforms.xml), next to the panel; click opens full size.
       Dev PC: checked with a stand-in LaunchBox folder only
-- [ ] At the cabinet: check LaunchBox's real pictures show for a few games (Arcade, Neo Geo, a clone), that the
-      title matching finds them, and that browsing stays quick
+- [x] At the cabinet (2026-11-11): LaunchBox's real pictures show for 10-Yard Fight (Arcade), Kizuna Encounter
+      (Neo Geo MVS) and 1000 Miglia (Arcade Clones). Most platforms have none; Arcade Clones has ~2,000 of each kind
 - [ ] At the cabinet: choose the banners folder, check a few games lit only by the MAME default (e.g. 64th
-      Street, Batsugun, Armed Formation) light buttons 1..n
+      Street, Batsugun, Armed Formation) light buttons 1..n. **Skipped 2026-11-11: the banners are not on the
+      cabinet** (looked in D:\CoinOPS Collections\collections and D:\LaunchBox, the only places they would be; the
+      596 banners seem to be on the dev PC only). Copy them to the cabinet first
 - [x] Minimize to the system tray (tray icon: open / exit; the plugin's `--minimized` starts in the tray)
 - [x] **Each MAME install's own keys** (built at the cabinet; Downhill Bikers in Mame02XX Race verified at the panel): the cabinet
       has 33 MAME installs; the control map came from `Mame02XX` only. A game now lights by the keys of the
