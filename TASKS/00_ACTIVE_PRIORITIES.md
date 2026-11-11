@@ -135,6 +135,13 @@
       each wheel change ("Wheel: …")
 - [x] The plugin's `started` message is kept while LED-Next starts; the client connects as soon as it listens
       (visit 6: connected ~1 s after LED-Next listened, before any scrolling)
+- [x] Live lamps from emulators (dev PC 2026-11-11, config v6): MAME's Windows output messages and network
+      output (port 8000; Flycast), mapped by LEDBlinky's MameOutputs.ini, drawn over the game's lights; a Start
+      lamp also blinks that player's button 1 (Start/Coin have no LEDs yet). Checked with a fake MAME speaking both
+      protocols (written from MAME's source); not yet with real MAME
+- [ ] **Visit 7**: real MAME lamps (needs `output windows` in mame.ini), Supermodel, TeknoParrot via Output Blaster,
+      Flycast network output (see the cabinet brief)
+- [ ] After Start/Coin LEDs are wired: re-run the wiring wizard for them; consider turning `lamps.startLampsOnButton1` off
 - [ ] Attract mode / idle lighting in the front end (with animations, phase 5)
 - [ ] Animations (`*.lwax`) — phase 5
 

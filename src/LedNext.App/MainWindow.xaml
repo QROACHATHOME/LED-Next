@@ -53,6 +53,8 @@
                            TextTrimming="CharacterEllipsis" MaxWidth="420" ToolTip="{Binding ConfigPath}" />
                 <TextBlock DockPanel.Dock="Right" Text="{Binding FrontEndStatus}" Foreground="{StaticResource AppAccent}"
                            Margin="0,0,18,0" ToolTip="Last event from the LaunchBox / BigBox plugin" />
+                <TextBlock DockPanel.Dock="Right" Text="{Binding LampStatus}" Foreground="{StaticResource AppAccent}"
+                           Margin="0,0,18,0" ToolTip="Live lamps from the running emulator (MAME outputs)" />
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="{Binding BoardsSummary}" />
                     <TextBlock Text="  ·  " Foreground="{StaticResource AppTextDim}" />

@@ -11,6 +11,7 @@ public partial class App : Application
     private const string SingleInstanceName = @"Local\LedNext.App.SingleInstance";
     private AppSession? _session;
     private FrontEndController? _frontEnd;
+    private Lamps.LampController? _lamps;
     private Mutex? _singleInstance;
 
     protected override void OnStartup(StartupEventArgs e)
@@ -61,6 +62,9 @@ public partial class App : Application
         _frontEnd = new FrontEndController(_session, vm);
         _frontEnd.ShowRequested += () => BringToFront(window);
         _frontEnd.Start();
+
+        _lamps = new Lamps.LampController(_session, vm);
+        _lamps.Start();
     }
 
     private TrayIcon? _tray;
@@ -80,6 +84,7 @@ public partial class App : Application
     protected override void OnExit(ExitEventArgs e)
     {
         _tray?.Dispose();
+        _lamps?.Dispose();
         _frontEnd?.Dispose();
         _session?.Dispose();
         if (_singleInstance is not null)

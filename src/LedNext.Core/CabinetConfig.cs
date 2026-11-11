@@ -24,9 +24,9 @@ public sealed class CabinetConfig
     /// <summary>
     /// 1 = phase 1. 2 = adds <see cref="ControlMap"/> and <see cref="Games"/> (both default to empty,
     /// so a version 1 file loads unchanged). 3 = adds the LaunchBox folder and platform map to Games.
-    /// 4 = adds Games.ExtraColorsIni. 5 = adds Games.ButtonBannersFolder.
+    /// 4 = adds Games.ExtraColorsIni. 5 = adds Games.ButtonBannersFolder. 6 = adds <see cref="Lamps"/>.
     /// </summary>
-    public const int CurrentVersion = 5;
+    public const int CurrentVersion = 6;
 
     public int Version { get; set; } = CurrentVersion;
     public PanelLayout Panel { get; set; } = new();
@@ -36,6 +36,21 @@ public sealed class CabinetConfig
     public OutputSettings Output { get; set; } = new();
     public HardwareSettings Hardware { get; set; } = new();
     public GameSettings Games { get; set; } = new();
+    /// <summary>Emulators' live lamp outputs (MAME, Supermodel, TeknoParrot via Output Blaster, Flycast). Version 6.</summary>
+    public LampSettings Lamps { get; set; } = new();
+}
+
+/// <summary>Live lamps from emulators (MAME's output system). Added in config version 6.</summary>
+public sealed class LampSettings
+{
+    public bool Enabled { get; set; } = true;
+    /// <summary>MAME's Windows messages ("output windows" in mame.ini; also Supermodel, Output Blaster).</summary>
+    public bool WindowMessages { get; set; } = true;
+    /// <summary>MAME's network output ("output network"; also Flycast's network output), on <see cref="NetworkPort"/>.</summary>
+    public bool Network { get; set; } = true;
+    public int NetworkPort { get; set; } = 8000;
+    /// <summary>A player's Start lamp also blinks that player's button 1 while it blinks (for Start buttons without LEDs).</summary>
+    public bool StartLampsOnButton1 { get; set; } = true;
 }
 
 public sealed class GameSettings

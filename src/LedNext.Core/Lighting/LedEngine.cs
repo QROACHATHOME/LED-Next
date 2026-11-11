@@ -59,6 +59,9 @@ public sealed class LedEngine : IDisposable
         get { lock (_outputLock) return _boards.ToArray(); }
     }
 
+    /// <summary>Renders the next frame now (a live source such as an emulator's lamps changed).</summary>
+    public void Refresh() => _wake.Set();
+
     public void ApplyConfig(CabinetConfig config) => _snapshot = PanelSnapshot.From(config);
 
     /// <summary>

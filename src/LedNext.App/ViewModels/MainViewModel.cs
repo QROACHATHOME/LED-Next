@@ -58,6 +58,8 @@ public sealed partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _boardsSummary = "";
     /// <summary>What LaunchBox / BigBox last told us (status bar). Null until the pipe is up.</summary>
     [ObservableProperty] private string? _frontEndStatus;
+    /// <summary>The running game's live lamps ("Lamps: galaga · 1 on"), or null.</summary>
+    [ObservableProperty] private string? _lampStatus;
 
     /// <summary>
     /// Set by the window: false while minimized, so the panel and boards previews aren't redrawn for

@@ -162,6 +162,39 @@ LaunchBox / BigBox process                      LED-Next app (owns the boards)
 - **Idle cost**: while minimized the panel/boards previews aren't redrawn (`MainViewModel.PreviewVisible`);
   the engine writes boards only when a value changes. Measured on the dev PC: ~0 % CPU, ~146 MB.
 
+## Live lamps from emulators (phase 5, first part)
+
+```
+MAME / Supermodel / Output Blaster ──Windows messages──► MameWindowOutputs ┐
+MAME (output network) / Flycast ──TCP 8000 lines───────► NetworkOutputs    ┴► LampController (App, UI thread)
+                                                            MameOutputMap (LEDBlinky MameOutputs.ini) ──► MameOutputSession
+                                                            LampOverlay(game lights + lamps) ──► engine (Refresh = render now)
+```
+
+- **Windows messages** (`Lamps/MameWindowOutputs`, MAME's `win32_output.h`): a hidden *top-level* window (MAME's
+  start/stop are broadcasts, which message-only windows don't get). On "MAMEOutputStart" (or a "MAMEOutput" window
+  already open) it registers, asks for id 0 (the rom) and each new output id's name ("MAMEOutputGetIDString",
+  answered as WM_COPYDATA, `dwData` 1, `{uint id; char name[]}`), and turns "MAMEOutputUpdateState" (id, value)
+  into named outputs. Id 1 is "pause" and is ignored. Asks wait at most 500 ms (`SMTO_ABORTIFHUNG`); a rom MAME
+  was too busy to name is asked again on the next update, and updates wait for it.
+- **Network** (`Lamps/NetworkOutputs`, MAME's `network.cpp`): TCP to `[::1]` then `127.0.0.1` port 8000 every 2 s
+  while nothing listens; lines `name = value` ending in a carriage return (CR); `mame_start = rom` first, `mame_stop = 1` at the end.
+- **MAME needs `output windows` (or `network`) in mame.ini.** `auto`, the default, picks MAME's "none" module, so
+  nothing is sent (LEDBlinky's `UpdateMameIniOutput` sets it). LED-Next never edits emulator files.
+- **Mapping** (`MameOutputMap`): LEDBlinky's `MameOutputs.ini` in the LEDBlinky folder (re-read for every game):
+  `[rom]` (or a parent's), else `[default]`; control names only (`LED0=Start1` → `P1_START`); hardware ports,
+  Pixelcade and web requests are skipped. No file → LED0 → P1_START, LED1 → P2_START.
+- **Session** (`MameOutputSession`, pure): 0 = off, anything else = on; a control is on while any of its outputs
+  is. **Overlay** (`LampOverlay`): wraps what the panel shows (the front end's playing game; else the rom's own
+  lights from the MAME library when the shown game isn't that rom). An on lamp shows the game's colour for that
+  button, else white; off = dark. `lamps.startLampsOnButton1` (default on, for Start buttons without LEDs): while
+  a player's Start lamp is blinking (changed in the last 1.5 s) that player's button 1 blinks with it, then shows
+  the game's colour again. When the game ends the previous lights come back, unless something replaced them.
+  The log lists each output a game reports once, with what it drives (like LEDBlinky's MAMEOutputTest), and
+  all outputs at the end.
+- Settings: `cabinet.json` `lamps` (config v6): `enabled`, `windowMessages`, `network`, `networkPort`,
+  `startLampsOnButton1`. Status bar: "Lamps: galaga · 1 on".
+
 ## Window placement
 `config/window.json` (per machine, not in cabinet.json) keeps the main window's position. On load the
 window is moved/shrunk into the work area of the nearest monitor, in physical pixels

@@ -62,6 +62,13 @@ public static class ConfigStore
             AppLog.Info("Config upgraded from version 4 to 5 (adds a button banners folder).");
             config.Version = 5;
         }
+        if (config.Version < 6)
+        {
+            // v6 added Lamps (emulators' live lamp outputs); on by default.
+            AppLog.Info("Config upgraded from version 5 to 6 (adds live lamps from emulators).");
+            config.Version = 6;
+        }
+        config.Lamps ??= new LampSettings();
         // The deserializer builds a case-sensitive dictionary; LaunchBox platform names are matched ignoring case.
         config.Games.LaunchBoxPlatformMap = new Dictionary<string, string>(
             config.Games.LaunchBoxPlatformMap ?? new(), StringComparer.OrdinalIgnoreCase);

@@ -55,6 +55,8 @@ LaunchBox ↔ LEDBlinky platform-name mapping, control map editor.
   dev PC against an API stand-in; to verify at the cabinet), attract mode (later, with animations)
 
 ### Phase 5 — Animations
+- Live lamps from emulators (first part, built): MAME's output system (Windows messages and network), also
+  Supermodel, TeknoParrot via Output Blaster, Flycast; mapped by LEDBlinky's MameOutputs.ini
 - Attract mode, per-event effects, LEDBlinky animation playback
 
 ### Later

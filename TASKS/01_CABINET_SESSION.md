@@ -1,5 +1,30 @@
 # Cabinet session brief (for Claude on the arcade machine)
 
+## Visit 7 (next visit) — live lamps from emulators
+LED-Next now listens for emulators' lamp outputs (ARCHITECTURE "Live lamps from emulators"). Built from MAME's
+source and checked only with a fake MAME on the dev PC. Close LEDBlinky first if it runs (it may listen too).
+1. `git pull`, build, test. Config upgrades to version 6 (logged). The log at start shows "Lamps: listening for
+   MAME's Windows output messages" and "watching for emulator network output on port 8000".
+2. **mame.ini check (read only):** list the `output` line of every MAME install's mame.ini (Mame02XX, mame0251, the
+   others under D:\CoinOPS Collections\emulators, E:\Emulators\mamePC, F:\Collections\…). `auto` (the default)
+   sends **nothing**; lamps need `output windows`. Record the list in the results. Changing a mame.ini is the
+   user's call: ask first, back the file up, change only that one line.
+3. **MAME:** Hardware mode on. In LaunchBox start **Galaga** (Mame02XX) and insert a coin. The log should show
+   "Lamps: galaga started (Windows messages)" and "reports led0 → P1_START"; P1 button 1 should blink with the
+   Start lamp, then light normally once the game starts. Ask the user what the panel does. Exit: the log lists
+   all outputs; lights go back to the selection. Try 2-3 more (Dig Dug, a driving game with lamps, Terminator 2).
+4. **Supermodel** (if installed): needs `-outputs=win` (check its ini / LaunchBox command line, read only). Same check.
+5. **TeknoParrot:** look for Output Blaster in the TeknoParrot folder and the game profile's "Enable Outputs"
+   setting (read only). If present, try a game it supports (Outrun 2 SP); note what the log shows (the rom name
+   Output Blaster reports is not a MAME name, so the base lights stay the front end's).
+6. **Flycast:** check for standalone Flycast and its "Network Output" setting (emu.cfg, read only). Try a Naomi
+   game; the log should show "started (network port 8000)". Note any freeze (reported on some Naomi games).
+7. If something doesn't connect: note what the log shows and whether LEDBlinky's MAMEOutputTest sees outputs.
+8. Add a "Visit 7" section to `CABINET_RESULTS.md` (the mame.ini list, each emulator's result, the outputs games
+   reported); commit, ask before pushing.
+
+---
+
 ## Visit 6 (next visit) — timing, platform wheel, early connect
 1. `git pull`, build, test. Close LaunchBox, BigBox and LED-Next. Re-install the plugin (ask the user first):
    `powershell -ExecutionPolicy Bypass -File tools\install-launchbox-plugin.ps1`.
