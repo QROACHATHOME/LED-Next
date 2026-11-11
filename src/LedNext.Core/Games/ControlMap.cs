@@ -7,6 +7,12 @@ public sealed class ControlMapping
     public List<string> Buttons { get; set; } = new();
     /// <summary>How the mapping was found, e.g. "input code KEYCODE_C", for display.</summary>
     public string Source { get; set; } = "";
+    /// <summary>
+    /// The control is on no panel button (its key is one no button sends), so it is not lit, instead of
+    /// falling back to the naming convention. Only set for one game's map (a MAME install's own keys); never saved.
+    /// </summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    public bool NotOnPanel { get; set; }
 }
 
 /// <summary>
@@ -27,6 +33,7 @@ public sealed class ControlMap
         var explicitMap = Find(control);
         if (explicitMap is not null)
         {
+            if (explicitMap.NotOnPanel) return (Array.Empty<string>(), explicitMap.Source);
             var existing = explicitMap.Buttons.Where(id => panel.Find(id) is not null).ToList();
             if (existing.Count > 0) return (existing, explicitMap.Source);
         }

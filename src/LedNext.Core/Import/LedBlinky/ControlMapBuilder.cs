@@ -120,7 +120,7 @@ public static class ControlMapBuilder
     }
 
     /// <summary>Input codes reaching each LED-Next button, through LEDBlinky port → LED-Next pin binding.</summary>
-    private static Dictionary<string, HashSet<string>> CollectButtonCodes(IReadOnlyList<InputMapPort> ports, WiringMap wiring, List<string> notes)
+    public static Dictionary<string, HashSet<string>> CollectButtonCodes(IReadOnlyList<InputMapPort> ports, WiringMap wiring, List<string> notes)
     {
         var result = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal);
         var unsupported = new HashSet<string>();

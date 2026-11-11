@@ -142,13 +142,16 @@ public sealed class FrontEndController : IDisposable
             _main.FrontEndStatus = $"{source}: {g.Title} (not in the game library)";
             return null;
         }
-        var lights = GameLightResolver.Resolve(db, f.Platform, f.Game, config.ControlMap, config.Panel);
+        // The game's own MAME install may put its buttons on other keys than the cabinet's map assumes.
+        var (map, keys) = _session.ControlMapFor(f.Platform, f.Game, g.GameId);
+        var lights = GameLightResolver.Resolve(db, f.Platform, f.Game, map, config.Panel);
+        if (keys is not null) lights = lights with { From = $"{lights.From}; {keys}" };
         var verb = playing ? "playing" : "browsing";
         var light = new GameLights(lights, $"{source} ({verb}): {g.Title}");
         _main.FrontEndStatus = $"{source} · {verb} {g.Title}";
         // Selections arrive while scrolling; log them briefly, launches in full.
         if (playing) AppLog.Info($"{source}: playing '{g.Title}' → {f.Platform}/{f.Game} ({f.How}); {lights.From}.");
-        else AppLog.Info($"{source}: '{g.Title}' → {f.Platform}/{f.Game} ({f.How}).");
+        else AppLog.Info($"{source}: '{g.Title}' → {f.Platform}/{f.Game} ({f.How})" + (keys is null ? "." : $"; {keys}."));
         return light;
     }
 

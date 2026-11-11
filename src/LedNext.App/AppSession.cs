@@ -1,6 +1,9 @@
 using System.IO;
 using System.Windows.Threading;
 using LedNext.Core;
+using LedNext.Core.Games;
+using LedNext.Core.Import.LedBlinky;
+using LedNext.Core.Import.Mame;
 using LedNext.Core.Lighting;
 using LedNext.Data;
 using LedNext.Hardware;
@@ -53,7 +56,72 @@ public sealed class AppSession : IDisposable
     {
         Engine.ApplyConfig(Config);
         MarkDirty();
-        if (structural) StructureChanged?.Invoke();
+        if (structural)
+        {
+            ResetKeyLayouts();
+            StructureChanged?.Invoke();
+        }
+    }
+
+    // ---- MAME installs' own keys -----------------------------------------------------------------
+
+    private MameKeyLayouts? _keyLayouts;
+    private bool _keyLayoutsLoaded;
+
+    /// <summary>Forget the panel's keys (wiring, panel or LEDBlinky import changed); read again when next needed.</summary>
+    public void ResetKeyLayouts()
+    {
+        _keyLayouts = null;
+        _keyLayoutsLoaded = false;
+    }
+
+    /// <summary>
+    /// The control map for one game: the cabinet's map, with the controls that the game's MAME install (the emulator
+    /// LaunchBox runs it with) or its own cfg puts on other buttons moved. The cabinet's map when that is unknown.
+    /// </summary>
+    /// <param name="launchBoxId">The LaunchBox game, when a front end reported it (the same game can be in LaunchBox twice).</param>
+    public (ControlMap Map, string? Note) ControlMapFor(string platform, string? game, string? launchBoxId = null)
+    {
+        var baseMap = Config.ControlMap;
+        if (Games is null || (game is null && launchBoxId is null)) return (baseMap, null);
+        try
+        {
+            var emulator = Games.LaunchBoxEmulator(launchBoxId, platform, game);
+            var folder = MameKeyLayouts.MameFolderOf(emulator?.Emulator);
+            if (emulator is not { } e || folder is null || KeyLayouts() is not { } layouts) return (baseMap, null);
+            var rom = e.Rom.Length > 0 ? e.Rom : game;
+            var layout = layouts.For(baseMap, Config.Panel, folder, rom);
+            return (layout.Map, layout.Note);
+        }
+        catch (Exception ex)
+        {
+            AppLog.Warn($"Could not read the MAME keys for {platform}/{game}: {ex.Message}");
+            return (baseMap, null);
+        }
+    }
+
+    private MameKeyLayouts? KeyLayouts()
+    {
+        if (_keyLayoutsLoaded) return _keyLayouts;
+        _keyLayoutsLoaded = true;
+        var folder = Config.Games.LedBlinkyFolder;
+        var inputMap = string.IsNullOrEmpty(folder) ? null : Path.Combine(folder, "LEDBlinkyInputMap.xml");
+        if (inputMap is null || !File.Exists(inputMap))
+        {
+            AppLog.Info("MAME installs' own keys are not used: LEDBlinky's input map (which key each button sends) was not found.");
+            return null;
+        }
+        try
+        {
+            var codes = ControlMapBuilder.CollectButtonCodes(LedBlinkyInputMap.Load(inputMap), Config.Wiring, new List<string>());
+            _keyLayouts = new MameKeyLayouts(codes);
+            AppLog.Info($"MAME installs' own keys: {codes.Count} panel buttons with keys (from {inputMap}).");
+        }
+        catch (Exception ex)
+        {
+            AppLog.Warn($"Could not read {inputMap}: {ex.Message}. MAME installs' own keys are not used.");
+        }
+        return _keyLayouts;
     }
 
     /// <summary>Raised after pin bindings change (no buttons added or removed).</summary>
@@ -63,6 +131,7 @@ public sealed class AppSession : IDisposable
     {
         Engine.ApplyConfig(Config);
         MarkDirty();
+        ResetKeyLayouts();
         WiringChanged?.Invoke();
     }
 

@@ -94,6 +94,16 @@
 - [x] Extra colors.ini (Games → "Extra colors.ini…", config v4): lights MAME games LEDBlinky leaves unlit;
       23 more at the cabinet from a downloaded file
 - [x] Minimize to the system tray (tray icon: open / exit; the plugin's `--minimized` starts in the tray)
+- [x] **Each MAME install's own keys** (built at the cabinet; Downhill Bikers in Mame02XX Race verified at the panel): the cabinet
+      has 33 MAME installs; the control map came from `Mame02XX` only. A game now lights by the keys of the
+      emulator LaunchBox runs it with (game's own emulator, else the platform default; `launchbox_games.emulator`,
+      DB schema 6): `ctrlr` file from mame.ini → `cfg/default.cfg` → `cfg/<rom>.cfg`, each key followed to the
+      panel button that sends it (LEDBlinky input map). Only player buttons/start/coin the install sets to a key,
+      and that land elsewhere than the cabinet's map, change; a key no button sends = not lit.
+      Dry run on the cabinet: Mame02XX Race (19) / Flight (12) remap P1–P2 (button 1 = P1_B4…); mame Current
+      Race (133) and Spin (48) swap buttons 7/8; Gun installs and bemani: buttons not on the panel go dark;
+      Mame02XX changes only 12 games (their own cfg), mame0251 1. Shown in the Games tab "Lit from …" line and
+      the front-end log ("keys of …")
 - [ ] ~15 games not matched because LEDBlinky's title differs ("Virtua Fighter 2.1"…); a manual link or
       looser title rule could cover them
 - [ ] BigBox playlists on the wheel (most of the cabinet's wheel: Cinematronics, Gaelco, Taito B System…)

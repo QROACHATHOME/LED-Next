@@ -18,8 +18,8 @@ public sealed record PlatformSummary(string Key, string Name, int Games, int Lit
 /// </remarks>
 public sealed class GameDatabase : IGameLibrary
 {
-    /// <summary>2: user edits · 3: games.buttons / tags · 4: launchbox_games · 5: launchbox_games.genre.</summary>
-    public const int SchemaVersion = 5;
+    /// <summary>2: user edits · 3: games.buttons / tags · 4: launchbox_games · 5: launchbox_games.genre · 6: launchbox_games.emulator.</summary>
+    public const int SchemaVersion = 6;
     private const string GameColumns = """
         g.platform, g.name, g.description, g.parent, g.players, g.info, g.sources, g.lighting,
         EXISTS(SELECT 1 FROM user_profiles u WHERE u.platform = g.platform AND u.game = g.name), g.buttons, g.tags,
@@ -77,7 +77,7 @@ public sealed class GameDatabase : IGameLibrary
             CREATE TABLE IF NOT EXISTS launchbox_games(
                 id TEXT NOT NULL, title TEXT NOT NULL, lb_platform TEXT NOT NULL COLLATE NOCASE, app_path TEXT NOT NULL,
                 rom TEXT NOT NULL, date_added TEXT, platform TEXT NOT NULL COLLATE NOCASE, game TEXT NOT NULL COLLATE NOCASE,
-                matched_by TEXT NOT NULL, platform_how TEXT NOT NULL, genre TEXT NOT NULL DEFAULT '');
+                matched_by TEXT NOT NULL, platform_how TEXT NOT NULL, genre TEXT NOT NULL DEFAULT '', emulator TEXT NOT NULL DEFAULT '');
             CREATE INDEX IF NOT EXISTS launchbox_games_game ON launchbox_games(platform, game);
             CREATE INDEX IF NOT EXISTS launchbox_games_added ON launchbox_games(date_added);
             """);
@@ -92,6 +92,12 @@ public sealed class GameDatabase : IGameLibrary
         {
             Exec(c, "ALTER TABLE launchbox_games ADD COLUMN genre TEXT NOT NULL DEFAULT '';");
             AppLog.Info("Read LaunchBox again to fill the genre filter (new in schema 5).");
+        }
+        // Schema 6 added launchbox_games.emulator: the program that runs the game, for its MAME install's keys.
+        if (!HasColumn(c, "launchbox_games", "emulator"))
+        {
+            Exec(c, "ALTER TABLE launchbox_games ADD COLUMN emulator TEXT NOT NULL DEFAULT '';");
+            AppLog.Info("Read LaunchBox again to learn each game's emulator (new in schema 6).");
         }
         var newVersion = SchemaVersion.ToString(CultureInfo.InvariantCulture);
         if (oldVersion is not null && oldVersion != newVersion)
@@ -481,10 +487,11 @@ public sealed class GameDatabase : IGameLibrary
             using var cmd = c.CreateCommand();
             cmd.Transaction = tx;
             cmd.CommandText = """
-                INSERT INTO launchbox_games(id, title, lb_platform, app_path, rom, date_added, platform, game, matched_by, platform_how, genre)
-                VALUES($id, $t, $lp, $ap, $rom, $d, $p, $g, $m, $h, $genre)
+                INSERT INTO launchbox_games(id, title, lb_platform, app_path, rom, date_added, platform, game, matched_by, platform_how, genre, emulator)
+                VALUES($id, $t, $lp, $ap, $rom, $d, $p, $g, $m, $h, $genre, $emu)
                 """;
             var genre = cmd.Parameters.Add("$genre", SqliteType.Text);
+            var emu = cmd.Parameters.Add("$emu", SqliteType.Text);
             var id = cmd.Parameters.Add("$id", SqliteType.Text);
             var t = cmd.Parameters.Add("$t", SqliteType.Text);
             var lp = cmd.Parameters.Add("$lp", SqliteType.Text);
@@ -500,7 +507,7 @@ public sealed class GameDatabase : IGameLibrary
                 var g = match.Game;
                 id.Value = g.Id; t.Value = g.Title; lp.Value = g.Platform; ap.Value = g.ApplicationPath; rom.Value = g.Rom;
                 d.Value = g.DateAdded is { } date ? ToUtc(date) : DBNull.Value;
-                pl.Value = match.LedPlatform; gm.Value = match.LedGame; m.Value = match.MatchedBy; h.Value = how; genre.Value = g.Genre;
+                pl.Value = match.LedPlatform; gm.Value = match.LedGame; m.Value = match.MatchedBy; h.Value = how; genre.Value = g.Genre; emu.Value = g.EmulatorPath;
                 cmd.ExecuteNonQuery();
             }
             using (var meta = c.CreateCommand())
@@ -579,6 +586,35 @@ public sealed class GameDatabase : IGameLibrary
         var keys = GetPlatformSummaries().Select(p => p.Key).ToList();
         var (key, how) = Core.Import.LaunchBox.PlatformMatcher.Match(name, keys, overrides);
         return keys.Contains(key, StringComparer.OrdinalIgnoreCase) ? (key, how) : null;
+    }
+
+    /// <summary>
+    /// The emulator program LaunchBox runs a game with, and its rom name: the LaunchBox game with this id, else the
+    /// LaunchBox games matched to this LED-Next game (the most common emulator among them). Null when LaunchBox has none.
+    /// </summary>
+    public (string Emulator, string Rom)? LaunchBoxEmulator(string? launchBoxId, string platform, string? game)
+    {
+        if (string.IsNullOrWhiteSpace(game) && string.IsNullOrWhiteSpace(launchBoxId)) return null;
+        using var c = Connect();
+        using var cmd = c.CreateCommand();
+        if (!string.IsNullOrWhiteSpace(launchBoxId))
+        {
+            cmd.CommandText = "SELECT emulator, rom FROM launchbox_games WHERE id = $id AND emulator <> '' LIMIT 1";
+            cmd.Parameters.AddWithValue("$id", launchBoxId.Trim());
+            using var r = cmd.ExecuteReader();
+            if (r.Read()) return (r.GetString(0), r.GetString(1));
+        }
+        if (string.IsNullOrWhiteSpace(game)) return null;
+        cmd.Parameters.Clear();
+        cmd.CommandText = """
+            SELECT emulator, MAX(rom) FROM launchbox_games WHERE platform = $p AND game = $g AND emulator <> ''
+            GROUP BY emulator ORDER BY COUNT(*) DESC, emulator LIMIT 1
+            """;
+        cmd.Parameters.AddWithValue("$p", platform);
+        cmd.Parameters.AddWithValue("$g", game);
+        using (var r = cmd.ExecuteReader())
+            if (r.Read()) return (r.GetString(0), r.GetString(1));
+        return null;
     }
 
     /// <summary>Per platform: description (normalised) → game name, for matching LaunchBox titles.</summary>

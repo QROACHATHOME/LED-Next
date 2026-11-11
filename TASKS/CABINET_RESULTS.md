@@ -415,3 +415,17 @@ All mappings looked right; nothing was changed by hand. Notable:
   restores it (maximized if it was); "Exit" closes it. `--minimized` (the LaunchBox plugin) starts in the tray.
   The window's ✕ still exits. No setting to keep it on the taskbar.
 - **User: works.** 116 tests pass.
+
+# Visit 6e: each MAME install's own keys (2026-11-10)
+
+The cabinet has 33 MAME installs (D:\CoinOPS Collections\emulators\…, E:\Emulators\mamePC, F:\Collections\…);
+LEDBlinky and the cabinet's control map read only `Mame02XX`. Comparing each install's `ctrlr` file + `cfg/default.cfg`
+with the keys the panel sends (LEDBlinkyInputMap.xml):
+- `Mame02XX` and `mame0251` (MAME (Clones)) match the panel exactly (~11,000 LaunchBox games).
+- `Mame02XX Race` / `Mame02XX Flight` remap P1/P2: game button 1 = P1_B4, 2 = P1_B5, 3 = P1_B6, 6 = P1_B3, 7 = P1_B1,
+  8 = P1_B2, 5 = the coin key (no panel button).
+- Most others leave P3/P4 buttons 1–2 at MAME's built-in keys (Right Ctrl/Shift, keypad), which the panel doesn't send;
+  buttons 7/8 swapped. 53 games in Mame02XX have their own cfg with key changes.
+
+LED-Next now lights each game by the keys of the emulator LaunchBox runs it with (see 00_ACTIVE_PRIORITIES).
+**Verified at the panel:** Downhill Bikers (Mame02XX Race) lights the right buttons.

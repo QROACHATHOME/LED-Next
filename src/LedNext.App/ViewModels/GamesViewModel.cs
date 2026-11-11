@@ -118,6 +118,8 @@ public sealed partial class GamesViewModel : ObservableObject
     private string? _game;
     private string _title = "";
     private ResolvedLights? _lights;
+    /// <summary>The control map the previewed game was lit with (its MAME install's keys), for "which control is this button".</summary>
+    private ControlMap? _map;
     private string? _selectedButtonId;
 
     public GamesViewModel(AppSession session, MainViewModel main)
@@ -357,7 +359,11 @@ public sealed partial class GamesViewModel : ObservableObject
         _platform = platform;
         _game = game;
         _title = title;
-        var lights = GameLightResolver.Resolve(db, platform, game, config.ControlMap, config.Panel);
+        // The game's own MAME install (the emulator LaunchBox runs it with) may use other keys than the cabinet's map.
+        var (map, keys) = _session.ControlMapFor(platform, game);
+        _map = map;
+        var lights = GameLightResolver.Resolve(db, platform, game, map, config.Panel);
+        if (keys is not null) lights = lights with { From = $"{lights.From}; {keys}" };
         _lights = lights;
 
         PreviewTitle = title;
@@ -426,7 +432,7 @@ public sealed partial class GamesViewModel : ObservableObject
                 return;
             }
             var config = _session.Config;
-            var control = GameLightEditor.ControlForButton(_selectedButtonId, _lights, config.ControlMap, config.Panel);
+            var control = GameLightEditor.ControlForButton(_selectedButtonId, _lights, _map ?? config.ControlMap, config.Panel);
             SelectedControl = control;
             if (control is null)
             {
@@ -1066,6 +1072,7 @@ public sealed partial class GamesViewModel : ObservableObject
 
             _session.Config.ControlMap = result.ControlMap;
             _session.Config.Games.LedBlinkyFolder = folder;
+            _session.ResetKeyLayouts();
             _session.MarkDirty();
 
             ImportReport.Clear();

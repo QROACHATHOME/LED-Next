@@ -8,8 +8,23 @@ namespace LedNext.Core.Import.LaunchBox;
 /// <summary>One game in the LaunchBox library (read from Data\Platforms\*.xml).</summary>
 /// <param name="Rom">File name of ApplicationPath without extension ("sf2"), the usual key for MAME-style platforms.</param>
 /// <param name="Genre">LaunchBox's genre text, e.g. "Fighting" or "Platform; Shooter" (may be empty).</param>
+/// <param name="EmulatorId">The game's own emulator (LaunchBox id), empty when it uses its platform's default.</param>
+/// <param name="EmulatorPath">Full path of the emulator program that runs the game (its own, else the platform's default); empty if unknown.</param>
 public sealed record LaunchBoxGame(string Id, string Title, string Platform, string ApplicationPath, string Rom, DateTimeOffset? DateAdded,
-    string Genre = "");
+    string Genre = "", string EmulatorId = "", string EmulatorPath = "");
+
+/// <summary>LaunchBox's emulators (Data\Emulators.xml): id → full program path, and each platform's default emulator id.</summary>
+public sealed record LaunchBoxEmulators(IReadOnlyDictionary<string, string> Paths, IReadOnlyDictionary<string, string> PlatformDefaults)
+{
+    public static readonly LaunchBoxEmulators None = new(new Dictionary<string, string>(), new Dictionary<string, string>());
+
+    /// <summary>The program that runs a game: its own emulator, else its platform's default.</summary>
+    public string PathFor(string emulatorId, string platform)
+    {
+        if (emulatorId.Length > 0 && Paths.TryGetValue(emulatorId, out var own)) return own;
+        return PlatformDefaults.TryGetValue(platform, out var id) && Paths.TryGetValue(id, out var path) ? path : "";
+    }
+}
 
 /// <summary>A LaunchBox game matched to an LED-Next platform and game name.</summary>
 /// <param name="MatchedBy">"rom name", "title", or "new" (not in the LED-Next library yet).</param>
@@ -32,9 +47,10 @@ public static class LaunchBoxLibrary
         if (!Directory.Exists(dir)) throw new DirectoryNotFoundException($"No LaunchBox platform data at {dir}. Is this the LaunchBox folder?");
         var games = new List<LaunchBoxGame>();
         var emulators = EmulatorExeNames(launchBoxFolder, warnings);
+        var programs = ReadEmulators(launchBoxFolder, warnings);
         foreach (var file in Directory.EnumerateFiles(dir, "*.xml").Order(StringComparer.OrdinalIgnoreCase))
         {
-            try { games.AddRange(ReadPlatformFile(file, emulators)); }
+            try { games.AddRange(ReadPlatformFile(file, emulators).Select(g => g with { EmulatorPath = programs.PathFor(g.EmulatorId, g.Platform) })); }
             catch (Exception ex) when (ex is XmlException or IOException or UnauthorizedAccessException)
             {
                 warnings.Add($"Could not read {Path.GetFileName(file)}: {ex.Message}");
@@ -76,6 +92,52 @@ public static class LaunchBoxLibrary
         return set;
     }
 
+    /// <summary>
+    /// Every emulator's program (relative paths are relative to the LaunchBox folder) and each platform's default
+    /// emulator, from <c>Data\Emulators.xml</c>. Empty when the file is missing or unreadable.
+    /// </summary>
+    public static LaunchBoxEmulators ReadEmulators(string launchBoxFolder, List<string>? warnings = null)
+    {
+        var file = Path.Combine(launchBoxFolder, "Data", "Emulators.xml");
+        if (!File.Exists(file)) return LaunchBoxEmulators.None;
+        var paths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var defaults = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        try
+        {
+            using var reader = XmlReader.Create(file, new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, IgnoreComments = true });
+            reader.MoveToContent();
+            while (!reader.EOF)
+            {
+                if (reader.NodeType == XmlNodeType.Element && reader.Name is "Emulator" or "EmulatorPlatform")
+                {
+                    var e = (XElement)XNode.ReadFrom(reader);
+                    string V(string name) => e.Element(name)?.Value.Trim() ?? "";
+                    if (e.Name == "Emulator")
+                    {
+                        if (V("ID").Length > 0 && V("ApplicationPath").Length > 0)
+                            paths[V("ID")] = FullPath(launchBoxFolder, V("ApplicationPath"));
+                    }
+                    else if (V("Default").Equals("true", StringComparison.OrdinalIgnoreCase) && V("Platform").Length > 0)
+                    {
+                        defaults[V("Platform")] = V("Emulator");
+                    }
+                }
+                else reader.Read();
+            }
+        }
+        catch (Exception ex) when (ex is XmlException or IOException or UnauthorizedAccessException)
+        {
+            warnings?.Add($"Could not read Emulators.xml: {ex.Message}");
+        }
+        return new LaunchBoxEmulators(paths, defaults);
+    }
+
+    private static string FullPath(string baseFolder, string path)
+    {
+        try { return Path.GetFullPath(Path.Combine(baseFolder, path)); }
+        catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException) { return path; }
+    }
+
     public static IEnumerable<LaunchBoxGame> ReadPlatformFile(string file, IReadOnlySet<string>? emulatorExes = null)
     {
         emulatorExes ??= new HashSet<string>(BuiltInEmulatorExes, StringComparer.OrdinalIgnoreCase);
@@ -95,7 +157,7 @@ public static class LaunchBoxLibrary
                 // A game that points at the emulator itself ("…\mame.exe") has no rom name; it is matched by title.
                 var rom = emulatorExes.Contains(FileName(path)) ? "" : RomName(path);
                 list.Add(new LaunchBoxGame(V("ID"), title, V("Platform") is { Length: > 0 } p ? p : fallbackPlatform, path,
-                    rom, ParseDate(V("DateAdded")), V("Genre")));
+                    rom, ParseDate(V("DateAdded")), V("Genre"), V("Emulator")));
             }
             else reader.Read();
         }
