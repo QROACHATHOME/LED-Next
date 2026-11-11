@@ -86,9 +86,17 @@ public sealed class AppSession : IDisposable
         if (Games is null || (game is null && launchBoxId is null)) return (baseMap, null);
         try
         {
-            var emulator = Games.LaunchBoxEmulator(launchBoxId, platform, game);
-            var folder = MameKeyLayouts.MameFolderOf(emulator?.Emulator);
-            if (emulator is not { } e || folder is null || KeyLayouts() is not { } layouts) return (baseMap, null);
+            if (Games.LaunchBoxEmulator(launchBoxId, platform, game) is not { } e) return (baseMap, null);
+            // A TeknoParrot game: LaunchBox launches its profile, which holds the game's keys.
+            var profile = LaunchBoxPath(e.AppPath);
+            if (TeknoParrotProfile.IsProfilePath(profile))
+            {
+                if (KeyLayouts() is not { } tp) return (baseMap, null);
+                var t = tp.ForTeknoParrot(baseMap, Config.Panel, profile!);
+                return (t.Map, t.Note);
+            }
+            var folder = MameKeyLayouts.MameFolderOf(e.Emulator);
+            if (folder is null || KeyLayouts() is not { } layouts) return (baseMap, null);
             var rom = e.Rom.Length > 0 ? e.Rom : game;
             var layout = layouts.For(baseMap, Config.Panel, folder, rom);
             return (layout.Map, layout.Note);
@@ -98,6 +106,19 @@ public sealed class AppSession : IDisposable
             AppLog.Warn($"Could not read the MAME keys for {platform}/{game}: {ex.Message}");
             return (baseMap, null);
         }
+    }
+
+    /// <summary>A LaunchBox application path made absolute (relative paths are relative to the LaunchBox folder).</summary>
+    private string? LaunchBoxPath(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path)) return null;
+        try
+        {
+            if (Path.IsPathRooted(path)) return path;
+            var lb = Config.Games.LaunchBoxFolder;
+            return string.IsNullOrEmpty(lb) ? null : Path.GetFullPath(Path.Combine(lb, path));
+        }
+        catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException) { return null; }
     }
 
     private MameKeyLayouts? KeyLayouts()

@@ -592,28 +592,28 @@ public sealed class GameDatabase : IGameLibrary
     /// The emulator program LaunchBox runs a game with, and its rom name: the LaunchBox game with this id, else the
     /// LaunchBox games matched to this LED-Next game (the most common emulator among them). Null when LaunchBox has none.
     /// </summary>
-    public (string Emulator, string Rom)? LaunchBoxEmulator(string? launchBoxId, string platform, string? game)
+    public (string Emulator, string Rom, string AppPath)? LaunchBoxEmulator(string? launchBoxId, string platform, string? game)
     {
         if (string.IsNullOrWhiteSpace(game) && string.IsNullOrWhiteSpace(launchBoxId)) return null;
         using var c = Connect();
         using var cmd = c.CreateCommand();
         if (!string.IsNullOrWhiteSpace(launchBoxId))
         {
-            cmd.CommandText = "SELECT emulator, rom FROM launchbox_games WHERE id = $id AND emulator <> '' LIMIT 1";
+            cmd.CommandText = "SELECT emulator, rom, app_path FROM launchbox_games WHERE id = $id LIMIT 1";
             cmd.Parameters.AddWithValue("$id", launchBoxId.Trim());
             using var r = cmd.ExecuteReader();
-            if (r.Read()) return (r.GetString(0), r.GetString(1));
+            if (r.Read()) return (r.GetString(0), r.GetString(1), r.GetString(2));
         }
         if (string.IsNullOrWhiteSpace(game)) return null;
         cmd.Parameters.Clear();
         cmd.CommandText = """
-            SELECT emulator, MAX(rom) FROM launchbox_games WHERE platform = $p AND game = $g AND emulator <> ''
+            SELECT emulator, MAX(rom), MAX(app_path) FROM launchbox_games WHERE platform = $p AND game = $g
             GROUP BY emulator ORDER BY COUNT(*) DESC, emulator LIMIT 1
             """;
         cmd.Parameters.AddWithValue("$p", platform);
         cmd.Parameters.AddWithValue("$g", game);
         using (var r = cmd.ExecuteReader())
-            if (r.Read()) return (r.GetString(0), r.GetString(1));
+            if (r.Read()) return (r.GetString(0), r.GetString(1), r.GetString(2));
         return null;
     }
 

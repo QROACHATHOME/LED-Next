@@ -183,9 +183,87 @@ public class MameKeyLayoutTests : IDisposable
         db.ReplaceAll(lib, "test");
         db.ImportLaunchBox(games, new Dictionary<string, string>(), lb);
 
-        Assert.Equal((Path.Combine(emu, "Mame02XX Race", "mame.exe"), "outrun"), db.LaunchBoxEmulator("g2", "MAME", null));
-        Assert.Equal((Path.Combine(emu, "Mame02XX Race", "mame.exe"), "outrun"), db.LaunchBoxEmulator(null, "MAME", "outrun"));
-        Assert.Equal((Path.Combine(emu, "Mame02XX", "mame.exe"), "sf2"), db.LaunchBoxEmulator("unknown", "MAME", "sf2"));
+        Assert.Equal((Path.Combine(emu, "Mame02XX Race", "mame.exe"), "outrun", @"..\roms\outrun.zip"), db.LaunchBoxEmulator("g2", "MAME", null));
+        Assert.Equal((Path.Combine(emu, "Mame02XX Race", "mame.exe"), "outrun", @"..\roms\outrun.zip"), db.LaunchBoxEmulator(null, "MAME", "outrun"));
+        Assert.Equal((Path.Combine(emu, "Mame02XX", "mame.exe"), "sf2", @"..\roms\sf2.zip"), db.LaunchBoxEmulator("unknown", "MAME", "sf2"));
         Assert.Null(db.LaunchBoxEmulator(null, "MAME", "notinlaunchbox"));
     }
+
+    private static string TpButton(string name, string mapping, string binding) =>
+        $"<JoystickButtons><ButtonName>{name}</ButtonName><InputMapping>{mapping}</InputMapping>{binding}</JoystickButtons>";
+
+    private static string TpProfile(string api, params string[] buttons) => $"""
+        <?xml version="1.0" encoding="utf-8"?>
+        <GameProfile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <ProfileName>game</ProfileName>
+          <ConfigValues><FieldInformation><CategoryName>General</CategoryName><FieldName>Input API</FieldName><FieldValue>{api}</FieldValue></FieldInformation></ConfigValues>
+          <JoystickButtons>{string.Join("", buttons)}</JoystickButtons>
+        </GameProfile>
+        """;
+
+    private static string Di(string key) =>
+        $"<DirectInputButton><Button>1</Button><JoystickGuid>6f1d2b61-d5a0-11cf-bfc7-444553540000</JoystickGuid></DirectInputButton><BindName>Keyboard Button {key}</BindName>";
+
+    private static string Ri(string key, string device = "Keyboard") =>
+        $"<RawInputButton><DevicePath>x</DevicePath><DeviceType>{device}</DeviceType><MouseButton>None</MouseButton><KeyboardKey>{key}</KeyboardKey></RawInputButton><BindNameRi>Ultimarc I-PAC 4X {key}</BindNameRi>";
+
+    [Fact]
+    public void ATeknoParrotProfilesKeysMoveTheButtons()
+    {
+        var dir = Path.Combine(_root, "TeknoParrot", "UserProfiles");
+        Directory.CreateDirectory(dir);
+        var di = Path.Combine(dir, "vf5.xml");
+        File.WriteAllText(di, TpProfile("DirectInput",
+            TpButton("Punch", "P1Button1", Di("LeftControl")),   // same as the cabinet: unchanged
+            TpButton("Kick", "P1Button2", Di("LeftShift")),      // panel button 4
+            TpButton("Guard", "P1Button3", Di("D3")),            // a key no button sends: not lit
+            TpButton("Up", "P1ButtonUp", Di("105")),             // directions are not buttons
+            TpButton("Pad", "P1Button4", "<DirectInputButton><Button>3</Button></DirectInputButton><BindName>Gamepad Button 3</BindName>")));
+        Assert.True(TeknoParrotProfile.IsProfilePath(di));
+
+        var layout = Layouts().ForTeknoParrot(new ControlMap(), Panel(), di);
+        var panel = Panel();
+        Assert.Equal(new[] { "P1_B1" }, layout.Map.Lookup("P1_BUTTON1", panel).Buttons);
+        Assert.Equal(new[] { "P1_B4" }, layout.Map.Lookup("P1_BUTTON2", panel).Buttons);
+        Assert.Empty(layout.Map.Lookup("P1_BUTTON3", panel).Buttons);
+        Assert.Equal(new[] { "P1_B4" }, layout.Map.Lookup("P1_BUTTON4", panel).Buttons); // gamepad: cabinet's map (by name)
+        Assert.Contains("TeknoParrot vf5", layout.Note);
+
+        var ri = Path.Combine(dir, "bbcf.xml");
+        File.WriteAllText(ri, TpProfile("RawInput",
+            TpButton("A", "P1Button1", Ri("Z")),
+            TpButton("Start", "P1ButtonStart", Ri("D1")),
+            TpButton("Gun", "P1Button2", Ri("Space", device: "Mouse"))));
+        var rawLayout = Layouts().ForTeknoParrot(new ControlMap(), Panel(), ri);
+        Assert.Equal(new[] { "P1_B5" }, rawLayout.Map.Lookup("P1_BUTTON1", panel).Buttons);
+        Assert.Equal(new[] { "P1_B2" }, rawLayout.Map.Lookup("P1_BUTTON2", panel).Buttons);
+        Assert.Equal(new[] { "P1_START" }, rawLayout.Map.Lookup("P1_START", panel).Buttons);
+
+        var cabinet = new ControlMap();
+        var missing = Layouts().ForTeknoParrot(cabinet, Panel(), Path.Combine(dir, "missing.xml"));
+        Assert.Same(cabinet, missing.Map);
+        Assert.Null(missing.Note);
+        Assert.False(TeknoParrotProfile.IsProfilePath(@"..\roms\sf2.zip"));
+    }
+
+    [Theory]
+    [InlineData("LeftControl", "KEYCODE_LCONTROL")]
+    [InlineData("ControlKey", "KEYCODE_LCONTROL")]
+    [InlineData("Menu", "KEYCODE_LALT")]
+    [InlineData("D5", "KEYCODE_5")]
+    [InlineData("q", "KEYCODE_Q")]
+    [InlineData("RightBracket", "KEYCODE_CLOSEBRACE")]
+    [InlineData("OemCloseBrackets", "KEYCODE_CLOSEBRACE")]
+    [InlineData("Period", "KEYCODE_STOP")]
+    [InlineData("105", null)]
+    public void TeknoParrotKeyNames(string key, string? expected) => Assert.Equal(expected, TeknoParrotProfile.KeyCode(key));
+
+    [Theory]
+    [InlineData("P1Button1", "P1_BUTTON1")]
+    [InlineData("P2Button6", "P2_BUTTON6")]
+    [InlineData("P2ButtonStart", "START2")]
+    [InlineData("Coin1", "COIN1")]
+    [InlineData("P1ButtonUp", null)]
+    [InlineData("JvsTwoP1Button1", null)]
+    public void TeknoParrotInputs(string mapping, string? expected) => Assert.Equal(expected, TeknoParrotProfile.PortType(mapping));
 }

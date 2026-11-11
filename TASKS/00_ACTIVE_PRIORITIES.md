@@ -104,6 +104,12 @@
       Race (133) and Spin (48) swap buttons 7/8; Gun installs and bemani: buttons not on the panel go dark;
       Mame02XX changes only 12 games (their own cfg), mame0251 1. Shown in the Games tab "Lit from …" line and
       the front-end log ("keys of …")
+- [x] **TeknoParrot profiles' keys** (built at the cabinet; Virtua Fighter 5 R verified at the panel): LaunchBox
+      launches a TeknoParrot game by its profile (`Teknoparrot2024\UserProfiles\<game>.xml`); its keyboard bindings
+      (DirectInput `BindName` "Keyboard Button LeftControl", RawInput `KeyboardKey` "ControlKey" on the I-PAC 4X)
+      are turned into MAME key codes and applied like a MAME install's keys. Gamepad/wheel/gun/XInput bindings keep
+      the cabinet's map. Dry run: 758 LaunchBox games launch a profile, 287 light differently (VF5 R: button 4 =
+      P1_B7; Project DIVA: buttons 1/2 swapped…), 8 profiles missing
 - [ ] ~15 games not matched because LEDBlinky's title differs ("Virtua Fighter 2.1"…); a manual link or
       looser title rule could cover them
 - [ ] BigBox playlists on the wheel (most of the cabinet's wheel: Cinematronics, Gaelco, Taito B System…)

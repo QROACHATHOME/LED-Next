@@ -55,6 +55,44 @@ public sealed partial class MameKeyLayouts
     public MameKeyLayout For(ControlMap baseMap, PanelLayout panel, string mameFolder, string? rom)
     {
         var assigned = Assignments(mameFolder, rom, out var sources);
+        return Apply(baseMap, panel, assigned, sources);
+    }
+
+    /// <summary>
+    /// The same for a TeknoParrot game: the keyboard keys bound in its TeknoParrot profile
+    /// (<c>UserProfiles\&lt;game&gt;.xml</c>). Inputs bound to a gamepad, wheel or gun keep the cabinet's mapping.
+    /// </summary>
+    public MameKeyLayout ForTeknoParrot(ControlMap baseMap, PanelLayout panel, string profilePath)
+    {
+        Dictionary<string, List<string>>? keys;
+        DateTime stamp;
+        try
+        {
+            if (!File.Exists(profilePath)) return new MameKeyLayout(baseMap, null);
+            stamp = File.GetLastWriteTimeUtc(profilePath);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException) { return new MameKeyLayout(baseMap, null); }
+        lock (_lock)
+            keys = _profiles.TryGetValue(profilePath, out var cached) && cached.Stamp == stamp ? cached.Keys : null;
+        if (keys is null)
+        {
+            try { keys = TeknoParrotProfile.ReadKeys(profilePath); }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Xml.XmlException)
+            {
+                AppLog.Warn($"Could not read the TeknoParrot profile {profilePath}: {ex.Message}");
+                return new MameKeyLayout(baseMap, null);
+            }
+            lock (_lock) _profiles[profilePath] = (stamp, keys);
+        }
+        var label = $"TeknoParrot {Path.GetFileNameWithoutExtension(profilePath)}";
+        var assigned = keys.ToDictionary(k => k.Key, k => (k.Value, label), StringComparer.OrdinalIgnoreCase);
+        return Apply(baseMap, panel, assigned, new List<string> { label });
+    }
+
+    private readonly Dictionary<string, (DateTime Stamp, Dictionary<string, List<string>> Keys)> _profiles = new(StringComparer.OrdinalIgnoreCase);
+
+    private MameKeyLayout Apply(ControlMap baseMap, PanelLayout panel, Dictionary<string, (List<string> Codes, string Source)> assigned, List<string> sources)
+    {
         if (assigned.Count == 0 || _buttonCodes.Count == 0) return new MameKeyLayout(baseMap, null);
 
         var map = new ControlMap { Mappings = baseMap.Mappings.ToList() };

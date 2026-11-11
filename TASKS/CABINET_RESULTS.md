@@ -429,3 +429,11 @@ with the keys the panel sends (LEDBlinkyInputMap.xml):
 
 LED-Next now lights each game by the keys of the emulator LaunchBox runs it with (see 00_ACTIVE_PRIORITIES).
 **Verified at the panel:** Downhill Bikers (Mame02XX Race) lights the right buttons.
+
+# Visit 6f: TeknoParrot profiles' keys (2026-11-10)
+
+TeknoParrot (`D:\CoinOPS Collections\emulators\Teknoparrot2024`, 639 user profiles) keeps each game's bindings in
+`UserProfiles\<game>.xml`, which LaunchBox launches directly (758 games). The panel appears there as the
+"Ultimarc I-PAC 4X" keyboard. Of 1,146 keyboard button bindings, 391 were on the same-named panel button, 451 on
+another button, 304 on a key no panel button sends. LED-Next now lights TeknoParrot games from their profile's keys
+(287 games change). **Verified at the panel:** Virtua Fighter 5 R (button 4 = P1_B7).
