@@ -472,3 +472,27 @@ LED-Next started both listeners: MAME Windows messages and network output on por
   whether Flycast's network output is a server LED-Next connects to (like MAME) or a client.
 - Not tried: LEDBlinky's MAMEOutputTest, Supermodel with `Outputs = win`, and changing any `mame.ini` from `auto`.
   Changing an emulator file is the user's call.
+
+# Visit 8: Flycast lamps again (2026-11-11)
+
+Built 22ecbd6 (155 tests pass) and played **Sega Marine Fishing** twice. **No lamps:** LED-Next never got a connection.
+
+- **Visit 7 read the wrong Flycast.** LaunchBox runs this game with the emulator **"Flycast Race Atomiswave_Naomi"**
+  (`D:\CoinOPS Collections\emulators\Flycastrace\flycast.exe`, ROM `collections\Sega Naomi Race\roms\smarinef.zip`).
+  The Naomi platform default (the main `Flycast` folder, 97 games) is used by most Naomi games, but not this one.
+- Flycast Race's `emu.cfg` already has `[network] NetworkOutput = yes` for every game (no per-game section). It is
+  Flycast `v2.7-1-g44e4c7b50`. Its exe contains the string "NetworkOutput". The folder also has ReShade and an FFB plugin.
+- `flycast.log` reports the game id as `SEGA MARINE FISHING JAPAN`, and says nothing about network output.
+- **While the game was running, flycast.exe had no TCP socket at all** (checked with `Get-NetTCPConnection` and
+  `netstat -ano`). Nothing listened on port 8000. Windows has not reserved port 8000 (only 27339), and MAME used it
+  earlier the same day.
+- Flycast's source (v2.7 and master): `naomi.cpp` calls `networkOutput.reset()` on every hard reset. `init()` binds
+  `INADDR_ANY:8000`, and returns early only if `config::NetworkOutput` is off or the board is a slave. A bind failure
+  only goes to `perror` (stderr), not to the log.
+
+**So:** at run time Flycast Race doesn't have NetworkOutput on, or this build differs from upstream v2.7. LED-Next's
+new Flycast reader is still untested against a real Flycast.
+
+**Next (user's call, emulator settings):** open Flycast Race's own settings (Settings → Network) and see whether
+"Network Output" shows as on. Or try a Naomi game that uses the main `Flycast` folder after turning its global
+`NetworkOutput` on (back up `emu.cfg` first, change one line).
