@@ -519,3 +519,25 @@ Debug build's log (118 times), so they are not new. The Debug build folder and i
 It now has a separate config, so changes made in one aren't seen by the other.
 
 Flycast (visit 8) not retried: Flycast Race's Network Output setting has not been checked yet.
+
+# Visit 10: first GitHub release, v0.1.0 (2026-11-12)
+
+- `git checkout v0.1.0`, then `tools\build-plugin-release.ps1` built `dist\LED-Next-LaunchBox-plugin-0.1.0.zip`
+  (34,670 bytes) against LaunchBox 14.1.0.5. It holds `LaunchBox plugin\` with `LedNext.LaunchBox.dll`,
+  `LedNext.FrontEnd.dll`, their pdbs, `LedNext.LaunchBox.buildinfo` and `BUILT-WITH.txt`. None of LaunchBox's DLLs.
+- **Installed the release as a user would** (with the user's OK):
+  - downloaded `LED-Next-0.1.0-win-x64.zip` (1,706,402 bytes) from the release and unzipped it to a new folder;
+  - unzipped the plugin zip into that folder;
+  - closed LED-Next and ran the release's `tools\install.ps1`.
+
+  It reported "Installing LED-Next 0.1.0 from this release folder", "Kept your settings in D:\LED-Next\config", and
+  installed the plugin into `D:\LaunchBox\Plugins\LED-Next` (`ledNextExe` = `D:\LED-Next\LED-Next.exe`).
+  The installed exe and both plugin DLLs are byte-for-byte the release's files.
+  Note: Expand-Archive keeps the zip's file times, so the exe's date is the build time, not the install time.
+- **BigBox:**
+  - started the release exe in the tray;
+  - both boards found (PacDrive SDK: VID D209 PID 1401/1402) and 75,202 games loaded;
+  - lights followed the selection (11 changes, plus the Arcade platform), with no errors.
+- **Plugin zip attached to the release** (with the user's OK) through Claude in Chrome: Edit release, upload,
+  Update release. The GitHub API lists all three downloads as "uploaded". The built-in browser can't upload local
+  files; Claude in Chrome can, once the extension is installed and signed in.
