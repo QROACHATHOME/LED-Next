@@ -496,3 +496,26 @@ new Flycast reader is still untested against a real Flycast.
 **Next (user's call, emulator settings):** open Flycast Race's own settings (Settings → Network) and see whether
 "Network Output" shows as on. Or try a Naomi game that uses the main `Flycast` folder after turning its global
 `NetworkOutput` on (back up `emu.cfg` first, change one line).
+
+# Visit 9: installed to D:\LED-Next (2026-11-12)
+
+With LED-Next, LaunchBox and BigBox closed, `tools\install.ps1` (no options) ran cleanly:
+- `D:\LED-Next\LED-Next.exe` (3.2 MB, single file). `PacDrive64.dll` copied from the Debug build. `config\` (cabinet.json
+  v6, games.db 35 MB, window.json) copied from the Debug build. Hardware mode. `pacDriveDllPath` null, so no warning.
+- Start menu shortcut `LED-Next.lnk`.
+- Plugin rebuilt against the real `Unbroken.LaunchBox.Plugins.dll`. `LedNext.LaunchBox.json` names
+  `D:\LED-Next\LED-Next.exe`.
+
+**BigBox:**
+- Started the installed exe in the tray. Confirmed by `D:\LED-Next\logs\led-next.log`, config path
+  `D:\LED-Next\config\cabinet.json`, and the process path.
+- Both boards were found (PacLED64#1, PacLED64#2). The game library loaded (75,202 games).
+- Live lighting followed the wheel and the selection.
+- **Galaga:** "MAME on network port 8000 reports game 'galaga'", then `led0 → P1_START`, "Galaga + lamps", and the end on exit,
+  the same as visit 7.
+
+"No LED-Next platform for 'Bally / Midway' / 'Data East' / …" warnings for BigBox wheel categories also appear in the
+Debug build's log (118 times), so they are not new. The Debug build folder and its config are left in place as a fallback.
+It now has a separate config, so changes made in one aren't seen by the other.
+
+Flycast (visit 8) not retried: Flycast Race's Network Output setting has not been checked yet.
