@@ -3,6 +3,56 @@
 A modern replacement for LEDBlinky: visual arcade panel layout, node-graph LED wiring,
 multiple LED boards per PC, and per-game lighting for LaunchBox/BigBox.
 
+> **Still in development.** LED-Next is used and tested on one real cabinet (4 players, two PacLED64 boards,
+> LaunchBox/BigBox), but it is not finished: expect rough edges and changes, and check
+> [`TASKS/00_ACTIVE_PRIORITIES.md`](TASKS/00_ACTIVE_PRIORITIES.md) for what is being worked on.
+
+## Screenshots
+**Games:** each game's lights are previewed on your panel (and on the real boards), and can be edited.
+![Games tab: Super Street Fighter II lit on the panel](docs/screenshots/games.png)
+
+**Panel:** a visual designer for your control panel. The panel shows what the boards are lighting right now.
+![Panel tab: a 4-player panel with trackball](docs/screenshots/panel.png)
+
+**Wiring:** drag each button's red, green and blue to board pins, or let the wiring wizard find them.
+![Wiring tab: node graph from buttons to PacLED64 pins](docs/screenshots/wiring.png)
+
+**Boards:** the live output of every pin on every board. Click a pin to find its LED.
+![Boards tab: two PacLED64 boards, 64 pins each](docs/screenshots/boards.png)
+
+## What LED-Next improves on LEDBlinky
+LED-Next reads LEDBlinky's data, so your existing setup carries over, and then adds:
+- **One app for everything.** Panel layout, wiring, game lights, testing and live lighting live in one window,
+  not spread across separate configuration tools.
+- **See your panel.** A visual panel designer (with your panel photo behind it) and a node-graph wiring editor,
+  so you can see which button goes to which pin and colour.
+- **A wiring wizard** that lights one pin at a time on the real boards: click the button that lit and the colour it
+  showed, and the wiring is built for you.
+- **Live preview.** Selecting a game lights it on screen and on the real panel at once, and every edit shows live.
+- **Edit lights safely.** Your colour changes per game or per platform are stored apart from the imported data and
+  are kept when you re-import LEDBlinky. One click reverts a game to its imported lights.
+- **Light many games at once.** Templates, copy and paste of lights (all of them or one button) to selected games
+  or to every match, and saved smart lists (platform, genre, button count, "6-button fighting games"…).
+- **Lights follow your real key bindings:**
+  - for **every MAME install** (each one's `ctrlr` file, `default.cfg` and per-game cfg), not just one;
+  - for **TeknoParrot** games, from each game's own profile.
+
+  So a racing or flight MAME build that remaps buttons lights the buttons the game really uses.
+- **Knows your LaunchBox library.** It reads LaunchBox's games and platforms. Games that LEDBlinky has no data
+  for still light from MAME's data or the platform default. You can filter for games recently added to LaunchBox
+  or still needing setup. LaunchBox's control-panel pictures show beside each game.
+- **Live BigBox lighting.** The plugin sends every selection, platform-wheel move, launch and exit straight
+  to LED-Next. Each change is timed in the log, so slow spots are easy to find.
+- **Live emulator lamps.** MAME's network output and Windows messages are both supported (for example, Start blinks
+  while a game waits for a coin), and every output a game sends is logged.
+- **Several boards, the same order every time.** Boards are found by their board id, not USB order, so unplugging
+  one doesn't shuffle your wiring.
+- **Works without hardware.** Simulator mode lets you set up and test everything away from the cabinet.
+- **Stays out of the way.** It starts in the system tray with LaunchBox/BigBox, and installs to one exe plus your
+  settings folder.
+- **Read-only towards other tools.** LED-Next never writes to LEDBlinky's or LaunchBox's files. The only exception is
+  its own plugin folder inside LaunchBox.
+
 ## What it supports
 Tested on a 4-player cabinet with two Ultimarc PacLED64 boards, LaunchBox/BigBox 14.1 and LEDBlinky's data.
 
