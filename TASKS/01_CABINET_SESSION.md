@@ -1,5 +1,23 @@
 # Cabinet session brief (for Claude on the arcade machine)
 
+## Visit 9 (next visit) — install to D:\LED-Next
+LED-Next now has an installer (`Install LED-Next.cmd` → `tools\install.ps1`, README "Install"). It publishes
+one `LED-Next.exe` to D:\LED-Next, copies config\ and PacDrive64.dll from the Debug build folder the cabinet
+has been running, adds a Start menu shortcut and re-installs the plugin pointed at the new exe. Tested on the
+dev PC with a fake old install and without LaunchBox, so the plugin step and hardware mode are untested.
+1. `git pull`. Close LED-Next, LaunchBox and BigBox. Ask the user, then run `Install LED-Next.cmd`. Record its
+   output. D:\LaunchBox\Plugins\LED-Next\LedNext.LaunchBox.json should now name D:\LED-Next\LED-Next.exe.
+2. Start LaunchBox: it should start the installed LED-Next (log at D:\LED-Next\logs\led-next.log, config path
+   D:\LED-Next\config\cabinet.json). Check Hardware mode lights the boards, the Games tab has its games, and
+   live lighting follows the selection. Start Galaga: lamps as in visit 7.
+3. If anything fails, the old Debug build still has its own config and works as before. Note it and leave the
+   user on whichever works.
+4. Flycast (from visit 8), only if the user has checked Flycast Race's Network Output setting: retry Sega
+   Marine Fishing.
+5. Add a "Visit 9" section to `CABINET_RESULTS.md`; commit, ask before pushing.
+
+---
+
 ## Visit 8 (next visit) — Flycast lamps again
 Flycast's network output turned out to differ from MAME's (`game = id`, hex values, no stop message); LED-Next
 now reads it. Checked only with a fake Flycast.
