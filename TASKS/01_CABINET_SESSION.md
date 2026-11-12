@@ -1,5 +1,24 @@
 # Cabinet session brief (for Claude on the arcade machine)
 
+## Visit 10 (next visit) — LaunchBox plugin for the first release
+LED-Next now has GitHub releases (README "Making a release"). GitHub builds the two LED-Next zips. It can't
+build the plugin, because that needs LaunchBox's own DLL.
+1. `git pull`, then `git checkout v0.1.0` (the release's tag) so the plugin matches the release.
+2. Run `powershell -ExecutionPolicy Bypass -File tools\build-plugin-release.ps1`. It only builds, and changes
+   nothing in LaunchBox. Record its output. It writes `dist\LED-Next-LaunchBox-plugin-0.1.0.zip`.
+3. Test the release as a user would. Ask the user first, because it replaces the installed exe and plugin.
+   - Download `LED-Next-0.1.0-win-x64.zip` from https://github.com/QROACHATHOME/LED-Next/releases/tag/v0.1.0
+     and unzip it to a new folder. Unzip the plugin zip into that folder.
+   - Close LED-Next, LaunchBox and BigBox, then run `Install LED-Next.cmd`.
+   - It should say "from this release folder", keep D:\LED-Next\config, and install the plugin from the
+     "LaunchBox plugin" folder.
+   - Start BigBox and check that the lights follow the selection.
+4. Attach the plugin zip to the release. The user can do it, or you can with the browser if it's signed in
+   to GitHub: Edit release, then drag in the zip. Ask the user first, because this publishes it.
+5. `git checkout main`. Add a "Visit 10" section to `CABINET_RESULTS.md`; commit, ask before pushing.
+
+---
+
 ## Visit 9 (next visit) — install to D:\LED-Next
 LED-Next now has an installer (`Install LED-Next.cmd` → `tools\install.ps1`, README "Install"). It publishes
 one `LED-Next.exe` to D:\LED-Next, copies config\ and PacDrive64.dll from the Debug build folder the cabinet

@@ -18,3 +18,7 @@ Unbroken.LaunchBox*.dll
 import-samples/ledblinky/
 import-samples/launchbox/**
 !import-samples/launchbox/README.md
+
+# Release build output (build/Build-Release.ps1, tools/build-plugin-release.ps1).
+out/
+dist/

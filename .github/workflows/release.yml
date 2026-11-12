@@ -1,0 +1,47 @@
+# Builds and publishes a release when a version tag is pushed:
+#   git tag v0.1.0
+#   git push origin v0.1.0
+# The release gets LED-Next-x.y.z-win-x64.zip (needs the .NET 8 Desktop Runtime) and
+# LED-Next-x.y.z-win-x64-self-contained.zip (no .NET needed), both built by build/Build-Release.ps1,
+# and release notes generated from the commits since the previous tag.
+# The LaunchBox plugin zip is built on a PC with LaunchBox (tools/build-plugin-release.ps1) and attached by hand.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write   # create the release and upload the zips
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # LEDBlinky's sample files aren't in the repository, so the tests that need them are skipped here.
+      - name: Test
+        run: dotnet test -c Release
+
+      - name: Build release zips
+        shell: pwsh
+        run: ./build/Build-Release.ps1 -Version '${{ github.ref_name }}'
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/LED-Next-*-win-x64.zip
+            dist/LED-Next-*-win-x64-self-contained.zip
+          generate_release_notes: true
+          body: |
+            **Install:** download one zip, unzip it, close LED-Next, LaunchBox and BigBox, then double-click `Install LED-Next.cmd`. It installs to `D:\LED-Next` (or `C:\LED-Next`) and keeps your settings when updating.
+            - `LED-Next-*-win-x64.zip`: small, needs the [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0) (x64).
+            - `LED-Next-*-win-x64-self-contained.zip`: bigger, needs nothing else.
+            - `LED-Next-LaunchBox-plugin-*.zip` (for LaunchBox/BigBox, added after the build): unzip it into the same folder before running the installer.
+
+            PacLED64 boards also need Ultimarc's `PacDrive64.dll` in the install folder (from Ultimarc's PacDrive SDK).

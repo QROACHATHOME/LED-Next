@@ -19,6 +19,8 @@ param(
     # The LED-Next the plugin starts (minimized) when LaunchBox/BigBox start. Default: this repo's build.
     [string]$LedNextExe = "",
     [switch]$NoAutoStart,
+    # A folder with an already built plugin (a release's "LaunchBox plugin" folder): copied, not built.
+    [string]$Prebuilt = "",
     [switch]$Uninstall
 )
 $ErrorActionPreference = "Stop"
@@ -39,20 +41,25 @@ if ($Uninstall) {
 if (-not $LedNextExe) { $LedNextExe = Join-Path $repo "src\LedNext.App\bin\Debug\net8.0-windows\LED-Next.exe" }
 if (-not (Test-Path $LedNextExe)) { Write-Warning "LED-Next.exe not found at $LedNextExe (build the app first, or pass -LedNextExe). Installing anyway." }
 
-"Building the plugin against $LaunchBox\Core\Unbroken.LaunchBox.Plugins.dll ..."
-$project = Join-Path $repo "src\LedNext.LaunchBox\LedNext.LaunchBox.csproj"
-& dotnet build $project -c Release -nologo -v q "-p:LaunchBoxDir=$LaunchBox"
-if ($LASTEXITCODE -ne 0) { throw "Build failed. If the errors are about LaunchBox types, the real plugin API differs from tools\LaunchBoxPluginStubs: fix the plugin (and the stand-in) to match." }
-
-# Built against the real API the plugin targets net10.0-windows (LaunchBox's DLL needs System.Runtime 10).
-$out = Join-Path $repo "src\LedNext.LaunchBox\bin\Release\net10.0-windows"
+if ($Prebuilt) {
+    $out = $Prebuilt
+} else {
+    "Building the plugin against $LaunchBox\Core\Unbroken.LaunchBox.Plugins.dll ..."
+    $project = Join-Path $repo "src\LedNext.LaunchBox\LedNext.LaunchBox.csproj"
+    & dotnet build $project -c Release -nologo -v q "-p:LaunchBoxDir=$LaunchBox"
+    if ($LASTEXITCODE -ne 0) { throw "Build failed. If the errors are about LaunchBox types, the real plugin API differs from tools\LaunchBoxPluginStubs: fix the plugin (and the stand-in) to match." }
+    # Built against the real API the plugin targets net10.0-windows (LaunchBox's DLL needs System.Runtime 10).
+    $out = Join-Path $repo "src\LedNext.LaunchBox\bin\Release\net10.0-windows"
+}
 $info = Get-Content (Join-Path $out "LedNext.LaunchBox.buildinfo") -ErrorAction SilentlyContinue
-if ($info -ne "api=true") { throw "The build used the compile-only stand-in, not LaunchBox's API ($info). Not installing." }
-if (Test-Path (Join-Path $out "Unbroken.LaunchBox.Plugins.dll")) { throw "Unbroken.LaunchBox.Plugins.dll ended up in the output; it must come from LaunchBox. Not installing." }
+if ($info -ne "api=true") { throw "The plugin in $out was built against the compile-only stand-in, not LaunchBox's API ($info). Not installing." }
+if (Test-Path (Join-Path $out "Unbroken.LaunchBox.Plugins.dll")) { throw "Unbroken.LaunchBox.Plugins.dll is in $out; it must come from LaunchBox. Not installing." }
 
 New-Item -ItemType Directory -Force $target | Out-Null
 foreach ($f in "LedNext.LaunchBox.dll", "LedNext.LaunchBox.pdb", "LedNext.FrontEnd.dll", "LedNext.FrontEnd.pdb") {
-    Copy-Item (Join-Path $out $f) $target -Force
+    $src = Join-Path $out $f
+    if (Test-Path $src) { Copy-Item $src $target -Force }
+    elseif ($f -like "*.dll") { throw "$f is missing in $out." }
 }
 $settings = [ordered]@{
     ledNextExe     = (Resolve-Path -LiteralPath $LedNextExe -ErrorAction SilentlyContinue).Path

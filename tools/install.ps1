@@ -17,8 +17,10 @@
   Also: a Start menu shortcut, and tools\install-launchbox-plugin.ps1 pointed at the installed exe
   (skipped with -NoPlugin, or when no LaunchBox is found). LED-Next, LaunchBox and BigBox must be closed.
 
-  Needs the .NET 8 SDK to build. The installed exe needs the .NET 8 Desktop Runtime, unless -SelfContained
-  (bigger exe, no .NET needed on that PC).
+  From a release zip (LED-Next.exe next to this tools\ folder) nothing is built: the release's exe, and its
+  "LaunchBox plugin" folder if you unzipped the plugin zip into it, are installed. From the source code it
+  needs the .NET 8 SDK. The installed exe needs the .NET 8 Desktop Runtime, unless it is the self-contained
+  build (-SelfContained, or the release's "-self-contained" zip).
 
 .EXAMPLE
   powershell -ExecutionPolicy Bypass -File tools\install.ps1
@@ -43,6 +45,9 @@ $ErrorActionPreference = "Stop"
 $repo = Split-Path -Parent $PSScriptRoot
 if (-not $InstallDir) { $InstallDir = if (Test-Path "D:\") { "D:\LED-Next" } else { "C:\LED-Next" } }
 if (-not $From) { $From = Join-Path $repo "src\LedNext.App\bin\Debug\net8.0-windows" }
+# Run from an unzipped release (LED-Next.exe next to tools\, no source code) or from the source code.
+$fromRelease = (Test-Path (Join-Path $repo "LED-Next.exe")) -and -not (Test-Path (Join-Path $repo "src"))
+$releaseVersion = (Get-Content (Join-Path $repo "VERSION.txt") -ErrorAction SilentlyContinue | Select-Object -First 1)
 $exe = Join-Path $InstallDir "LED-Next.exe"
 $shortcut = Join-Path ([Environment]::GetFolderPath("Programs")) "LED-Next.lnk"
 $pluginScript = Join-Path $PSScriptRoot "install-launchbox-plugin.ps1"
@@ -86,17 +91,25 @@ if ($Uninstall) {
     return
 }
 
-# 1. Build one exe into the repo's publish\ folder (git-ignored).
-$stage = Join-Path $repo "publish\LED-Next"
-if (Test-Path $stage) { Remove-Item -Recurse -Force $stage }
-$sc = if ($SelfContained) { "true" } else { "false" }
-"Building LED-Next (Release, win-x64, single file$(if ($SelfContained) { ', self-contained' }))..."
-& dotnet publish (Join-Path $repo "src\LedNext.App\LedNext.App.csproj") -c Release -r win-x64 --self-contained $sc `
-    -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=$sc `
-    -p:DebugType=embedded -o $stage -nologo -v q
-if ($LASTEXITCODE -ne 0) { throw "Build failed." }
-$built = Get-ChildItem $stage -File
-if ($built.Count -ne 1 -or $built[0].Name -ne "LED-Next.exe") { throw "Expected only LED-Next.exe in $stage, got: $($built.Name -join ', ')" }
+# 1. A release zip already has the exe next to this script's folder; from the source code, build it into
+#    the repo's publish\ folder (git-ignored).
+if ($fromRelease) {
+    $stage = $repo
+    "Installing LED-Next $(if ($releaseVersion) { "$releaseVersion " })from this release folder."
+    if ($SelfContained) { "(-SelfContained only applies when building from the source code; this release's exe is used as it is.)" }
+} else {
+    $stage = Join-Path $repo "publish\LED-Next"
+    if (Test-Path $stage) { Remove-Item -Recurse -Force $stage }
+    $sc = if ($SelfContained) { "true" } else { "false" }
+    "Building LED-Next (Release, win-x64, single file$(if ($SelfContained) { ', self-contained' }))..."
+    & dotnet publish (Join-Path $repo "src\LedNext.App\LedNext.App.csproj") -c Release -r win-x64 --self-contained $sc `
+        -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=$sc `
+        -p:DebugType=embedded -p:SatelliteResourceLanguages=en -o $stage -nologo -v q
+    if ($LASTEXITCODE -ne 0) { throw "Build failed." }
+    $built = Get-ChildItem $stage -File
+    if ($built.Count -ne 1 -or $built[0].Name -ne "LED-Next.exe") { throw "Expected only LED-Next.exe in $stage, got: $($built.Name -join ', ')" }
+}
+if ((Resolve-Path $InstallDir -ErrorAction SilentlyContinue).Path -eq (Resolve-Path $stage).Path) { throw "Unzip the release somewhere else than the install folder ($InstallDir)." }
 
 # 2. Install / update the exe and clean the folder.
 $firstInstall = -not (Test-Path (Join-Path $InstallDir "config\cabinet.json"))
@@ -138,6 +151,11 @@ if (-not $NoShortcut) {
 # 6. LaunchBox/BigBox plugin, pointed at the installed exe.
 if ($NoPlugin) { "Plugin skipped (-NoPlugin)." }
 elseif (-not $hasLaunchBox) { "No LaunchBox at $LaunchBox; plugin skipped (pass -LaunchBox <folder> to install it)." }
+elseif ($fromRelease) {
+    $prebuilt = Join-Path $repo "LaunchBox plugin"
+    if (Test-Path (Join-Path $prebuilt "LedNext.LaunchBox.dll")) { & $pluginScript -LaunchBox $LaunchBox -LedNextExe $exe -Prebuilt $prebuilt }
+    else { Write-Warning "This release folder has no 'LaunchBox plugin' folder. Download LED-Next-LaunchBox-plugin-*.zip from the same release, unzip it into this folder and run the installer again." }
+}
 else { & $pluginScript -LaunchBox $LaunchBox -LedNextExe $exe }
 
 ""

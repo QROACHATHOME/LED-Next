@@ -96,9 +96,21 @@ lighting by front-end section.
 Ultimarc's `PacDrive64.dll`, which you supply yourself.
 
 ## Install
-Close LED-Next, LaunchBox and BigBox, then double-click **`Install LED-Next.cmd`** (needs the .NET 8 SDK).
-It builds LED-Next and installs it to `D:\LED-Next` (or `C:\LED-Next` with no D: drive). It also adds a
-Start menu shortcut and installs the LaunchBox/BigBox plugin, pointed at the installed exe. The installed
+**From a release** (no build tools needed): download from the
+[Releases page](https://github.com/QROACHATHOME/LED-Next/releases):
+- **`LED-Next-x.y.z-win-x64.zip`** (small, needs the
+  [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0), x64), **or**
+  `LED-Next-x.y.z-win-x64-self-contained.zip` (bigger, needs nothing else);
+- for LaunchBox/BigBox, also **`LED-Next-LaunchBox-plugin-x.y.z.zip`**.
+
+Unzip the LED-Next zip, unzip the plugin zip into the same folder, and close LED-Next, LaunchBox and BigBox.
+Then double-click **`Install LED-Next.cmd`**.
+
+**From the source code:** the same `Install LED-Next.cmd` in the repository builds LED-Next first (needs the
+.NET 8 SDK). It builds the plugin against your LaunchBox too (needs the .NET 10 SDK).
+
+Either way, LED-Next is installed to `D:\LED-Next` (or `C:\LED-Next` with no D: drive). The installer also
+adds a Start menu shortcut and installs the LaunchBox/BigBox plugin, pointed at the installed exe. The installed
 folder holds only:
 
 ```
@@ -114,8 +126,16 @@ Options (pass them to the `.cmd` or to `tools\install.ps1`):
 - `-InstallDir E:\LED-Next`, `-LaunchBox E:\LaunchBox`
 - `-From <old folder>`: where to copy the settings from
 - `-NoPlugin`, `-NoShortcut`
-- `-SelfContained`: a bigger exe that needs no .NET on that PC
+- `-SelfContained` (source code only): a bigger exe that needs no .NET on that PC
 - `-Uninstall`: keeps `config\`; add `-RemoveSettings` to delete it too.
+
+## Making a release
+1. Set `<Version>` in `Directory.Build.props`, commit, then tag and push: `git tag v0.2.0` and
+   `git push origin main v0.2.0`. GitHub Actions (`.github/workflows/release.yml`) tests, runs
+   `build\Build-Release.ps1` and publishes both LED-Next zips.
+2. On a PC with LaunchBox, at that commit, run `tools\build-plugin-release.ps1`. It builds the plugin against
+   LaunchBox's own DLL. Then attach `dist\LED-Next-LaunchBox-plugin-x.y.z.zip` to the release (Edit release,
+   then drag the zip in). GitHub can't build the plugin, because LaunchBox's DLL isn't ours to upload.
 
 ## Build and run (development)
 ```
