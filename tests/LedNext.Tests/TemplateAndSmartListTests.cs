@@ -130,7 +130,7 @@ public class TemplateAndSmartListDatabaseTests
         finally { Cleanup(path); }
     }
 
-    [Fact]
+    [LedBlinkySamplesFact]
     public void RealLibraryFiltersFindGenres()
     {
         var root = LedBlinkyImportTests.RepoRoot();

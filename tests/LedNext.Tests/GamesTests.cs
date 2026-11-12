@@ -297,7 +297,7 @@ public class LedBlinkyImportTests(ITestOutputHelper output)
         return GameLightResolver.Resolve(r.Library, platform, game, r.ControlMap, cab.Panel);
     }
 
-    [Fact]
+    [LedBlinkySamplesFact]
     public void ImportsPlatformsGamesAndClones()
     {
         var r = Imported.Value.Result;
@@ -319,7 +319,7 @@ public class LedBlinkyImportTests(ITestOutputHelper output)
         Assert.Single(r.Warnings, w => w.Contains("Whie"));
     }
 
-    [Fact]
+    [LedBlinkySamplesFact]
     public void Game1942LightsTheRealPanel()
     {
         var lights = Resolve("MAME", "1942");
@@ -334,7 +334,7 @@ public class LedBlinkyImportTests(ITestOutputHelper output)
         Assert.False(lights.ButtonColors.ContainsKey("P3_B3"));          // UI_SELECT (Enter) no longer lights P3 button 3
     }
 
-    [Fact]
+    [LedBlinkySamplesFact]
     public void AnExtraColorsIniOnlyLightsGamesLedBlinkyLeavesUnlit()
     {
         var root = RepoRoot();
@@ -367,7 +367,7 @@ public class LedBlinkyImportTests(ITestOutputHelper output)
         }
     }
 
-    [Fact]
+    [LedBlinkySamplesFact]
     public void AMissingExtraColorsIniIsAWarningNotAFailure()
     {
         var root = RepoRoot();
@@ -377,7 +377,7 @@ public class LedBlinkyImportTests(ITestOutputHelper output)
         Assert.Contains(r.Warnings, w => w.StartsWith("Extra colors.ini not found"));
     }
 
-    [Fact]
+    [LedBlinkySamplesFact]
     public void ControlMapFollowsTheCabinetsInputMap()
     {
         var (r, cab) = Imported.Value;
@@ -387,7 +387,7 @@ public class LedBlinkyImportTests(ITestOutputHelper output)
         Assert.Equal(new[] { "TRACKBALL" }, r.ControlMap.Lookup("P1_TRACKBALL", cab.Panel).Buttons);
     }
 
-    [Fact]
+    [LedBlinkySamplesFact]
     public void CabinetMameCfgReplacesMameDefaults()
     {
         var (r, cab) = ImportedWithMameCfg.Value;
@@ -399,7 +399,7 @@ public class LedBlinkyImportTests(ITestOutputHelper output)
         Assert.Equal(new[] { "TRACKBALL" }, r.ControlMap.Lookup("P1_TRACKBALL", cab.Panel).Buttons);
     }
 
-    [Fact]
+    [LedBlinkySamplesFact]
     public void TrackballGameLightsTheTrackball()
     {
         var lights = Resolve("MAME", "centiped");
@@ -407,7 +407,7 @@ public class LedBlinkyImportTests(ITestOutputHelper output)
         Assert.True(lights.ButtonColors.ContainsKey("TRACKBALL"));
     }
 
-    [Fact]
+    [LedBlinkySamplesFact]
     public void DatabaseRoundTripResolvesTheSame()
     {
         var (r, cab) = Imported.Value;

@@ -8,7 +8,7 @@ namespace LedNext.Tests;
 
 public class LampTests
 {
-    [Fact]
+    [LedBlinkySamplesFact]
     public void ReadsLedBlinkysMameOutputsIni()
     {
         var path = Path.Combine(LedBlinkyImportTests.RepoRoot(), "import-samples", "ledblinky", "MameOutputs.ini");

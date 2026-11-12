@@ -1,5 +1,7 @@
 # Active priorities
 
+- [x] **Samples out of the public repo** (2026-11-12): `import-samples/ledblinky` and `launchbox` are git-ignored (LEDBlinky's files aren't ours to publish; the LaunchBox files are personal). Tests needing them use `[LedBlinkySamplesFact]` and skip without them. **Dev PC:** pulling deletes your copies; get them back with `git restore --source=4a3a776 -- import-samples/ledblinky import-samples/launchbox`
+
 ## Phase 1 — Hardware core
 - [x] Solution scaffold, docs
 - [x] Core model: panel, wiring, config store

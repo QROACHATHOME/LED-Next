@@ -12,3 +12,9 @@ PacDrive*.dll
 
 # LaunchBox's plugin API DLL is LaunchBox's file (the plugin builds against the install or tools/LaunchBoxPluginStubs).
 Unbroken.LaunchBox*.dll
+
+# Copies of LEDBlinky's files and of a LaunchBox library: not ours to publish. Each machine copies its own
+# (see import-samples/README.md); the tests that need them are skipped without them.
+import-samples/ledblinky/
+import-samples/launchbox/**
+!import-samples/launchbox/README.md
