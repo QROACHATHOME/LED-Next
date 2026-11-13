@@ -20,6 +20,11 @@ public sealed class SpeechSettings
     /// <summary>Seconds to wait after the launch before speaking (the emulator is loading).</summary>
     public double DelaySeconds { get; set; } = 1.0;
     public bool SpeakGameName { get; set; } = true;
+    /// <summary>
+    /// Seconds of silence after the game's name, before the labels (config version 9). 0 = the voice's own short
+    /// pause, as before.
+    /// </summary>
+    public double PauseAfterNameSeconds { get; set; }
     /// <summary>Also speak Start and Coin ("Start Game", "Insert Coin").</summary>
     public bool SpeakStartCoin { get; set; }
     /// <summary>Also speak joystick and other non-button labels ("Move", "Aim").</summary>
@@ -37,6 +42,7 @@ public sealed class SpeechSettings
 
     [JsonIgnore] public int ClampedRate => Math.Clamp(Rate, -10, 10);
     [JsonIgnore] public int ClampedVolume => Math.Clamp(Volume, 0, 100);
+    [JsonIgnore] public TimeSpan PauseAfterName => TimeSpan.FromSeconds(Math.Clamp(PauseAfterNameSeconds, 0, 10));
 
     /// <summary>
     /// LEDBlinky's speech settings from its settings.ini (read only). <see cref="StopOnInput"/> is left as it is:
@@ -55,7 +61,12 @@ public sealed class SpeechSettings
         int Int(string key, int fallback) =>
             int.TryParse(Get(key), NumberStyles.Integer, CultureInfo.InvariantCulture, out var n) ? n : fallback;
 
-        var s = new SpeechSettings { StopOnInput = keep?.StopOnInput ?? true, DelaySeconds = keep?.DelaySeconds ?? 1.0 };
+        var s = new SpeechSettings
+        {
+            StopOnInput = keep?.StopOnInput ?? true,
+            DelaySeconds = keep?.DelaySeconds ?? 1.0,
+            PauseAfterNameSeconds = keep?.PauseAfterNameSeconds ?? 0, // LEDBlinky has no such setting
+        };
         s.Enabled = Flag("GameStartSpeakControls", false);
         s.SpeakGameName = Flag("GameStartSpeakName", true);
         s.SpeakStartCoin = Flag("GameStartSpeakStartCoin", false);

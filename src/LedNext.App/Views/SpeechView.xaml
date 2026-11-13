@@ -40,6 +40,18 @@
             <CheckBox Content="Blink each button while its label is said" IsChecked="{Binding BlinkButtons}" Margin="0,3" />
             <CheckBox Content="Stop speaking when a button is pressed or a joystick moved" IsChecked="{Binding StopOnInput}" Margin="0,3" />
             <CheckBox Content="Say the game's name first" IsChecked="{Binding SpeakGameName}" Margin="0,3" />
+            <Grid Margin="24,0,0,3" IsEnabled="{Binding SpeakGameName}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="146" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="60" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Pause after the name (s)" VerticalAlignment="Center"
+                           ToolTip="Silence between the game's name and its button labels. 0 = the voice's own short pause." />
+                <Slider Grid.Column="1" Minimum="0" Maximum="5" IsSnapToTickEnabled="True" TickFrequency="0.25"
+                        Value="{Binding PauseAfterNameSeconds}" Margin="0,6" />
+                <TextBlock Grid.Column="2" Text="{Binding PauseAfterNameSeconds}" VerticalAlignment="Center" Margin="8,0,0,0" />
+            </Grid>
             <CheckBox Content="Speak again when the game is paused (MAME)" IsChecked="{Binding SpeakOnPause}" Margin="0,3" />
             <CheckBox Content="Also say Start and Coin" IsChecked="{Binding SpeakStartCoin}" Margin="0,3" />
             <CheckBox Content="Also say joystick and other non-button labels" IsChecked="{Binding SpeakJoysticks}" Margin="0,3,0,12" />

@@ -127,7 +127,8 @@ public sealed class SpeechController : IDisposable
         {
             pb.AppendBookmark(i.ToString(System.Globalization.CultureInfo.InvariantCulture));
             pb.AppendText(items[i].Text);
-            pb.AppendBreak(PromptBreak.Small);
+            if (items[i].PauseAfter > TimeSpan.Zero) pb.AppendBreak(items[i].PauseAfter);
+            else pb.AppendBreak(PromptBreak.Small);
         }
         try
         {

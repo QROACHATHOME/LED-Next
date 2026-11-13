@@ -37,6 +37,20 @@ public class SpeechTests
     }
 
     [Fact]
+    public void PausesOnlyAfterTheGamesName()
+    {
+        var lights = Lights(C("P1_BUTTON1", "Fire", "P1_B1"), C("P1_BUTTON2", "Loop", "P1_B2"));
+        var items = SpeechPlan.For(lights, new SpeechSettings { PauseAfterNameSeconds = 1.5, Prefix = "Controls" }, "1942");
+        Assert.Equal(new[] { "1942", "Controls", "Fire", "Loop" }, items.Select(i => i.Text));
+        Assert.Equal(TimeSpan.FromSeconds(1.5), items[0].PauseAfter);
+        Assert.All(items.Skip(1), i => Assert.Equal(TimeSpan.Zero, i.PauseAfter));
+
+        Assert.All(SpeechPlan.For(lights, new SpeechSettings(), "1942"), i => Assert.Equal(TimeSpan.Zero, i.PauseAfter)); // default: as before
+        Assert.Equal(TimeSpan.FromSeconds(10), new SpeechSettings { PauseAfterNameSeconds = 99 }.PauseAfterName);      // clamped
+        Assert.Equal(2.0, SpeechSettings.FromLedBlinky(IniFile.Parse(Array.Empty<string>()),new SpeechSettings { PauseAfterNameSeconds = 2 }).PauseAfterNameSeconds); // kept
+    }
+
+    [Fact]
     public void AGameWithoutLabelsSaysNothing()
     {
         var items = SpeechPlan.For(Lights(C("P1_BUTTON1", null, "P1_B1")), new SpeechSettings(), "Galaga");

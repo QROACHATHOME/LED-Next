@@ -80,6 +80,12 @@ public static class ConfigStore
             AppLog.Info("Config upgraded from version 7 to 8 (adds speaking button labels, off).");
             config.Version = 8;
         }
+        if (config.Version < 9)
+        {
+            // v9 added Speech.PauseAfterNameSeconds; 0 by default, so speech sounds as before.
+            AppLog.Info("Config upgraded from version 8 to 9 (adds a pause after the game's name, 0 s).");
+            config.Version = 9;
+        }
         config.Lamps ??= new LampSettings();
         config.Speech ??= new LedNext.Core.Speech.SpeechSettings();
         config.Lamps.Maps ??= new();

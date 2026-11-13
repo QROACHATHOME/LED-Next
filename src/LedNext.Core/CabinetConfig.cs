@@ -26,8 +26,9 @@ public sealed class CabinetConfig
     /// so a version 1 file loads unchanged). 3 = adds the LaunchBox folder and platform map to Games.
     /// 4 = adds Games.ExtraColorsIni. 5 = adds Games.ButtonBannersFolder. 6 = adds <see cref="Lamps"/>.
     /// 7 = adds Lamps.Maps (LED-Next's own lamp table, empty by default). 8 = adds <see cref="Speech"/> (off by default).
+    /// 9 = adds Speech.PauseAfterNameSeconds (0, so speech sounds as before).
     /// </summary>
-    public const int CurrentVersion = 8;
+    public const int CurrentVersion = 9;
 
     public int Version { get; set; } = CurrentVersion;
     public PanelLayout Panel { get; set; } = new();

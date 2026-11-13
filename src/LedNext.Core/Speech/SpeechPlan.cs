@@ -2,8 +2,11 @@ using LedNext.Core.Games;
 
 namespace LedNext.Core.Speech;
 
-/// <summary>One thing to say, and the panel buttons to blink while it is said (empty for the game's name).</summary>
-public sealed record SpeechItem(string Text, IReadOnlyList<string> Buttons);
+/// <summary>
+/// One thing to say, and the panel buttons to blink while it is said (empty for the game's name).
+/// <paramref name="PauseAfter"/> is the silence after it; zero means the voice's own short pause.
+/// </summary>
+public sealed record SpeechItem(string Text, IReadOnlyList<string> Buttons, TimeSpan PauseAfter = default);
 
 /// <summary>
 /// What to say for a game: its name, then each label once, in player order (P1 first). The same label on
@@ -46,7 +49,7 @@ public static class SpeechPlan
 
         var items = new List<SpeechItem>();
         if (groups.Count == 0) return items; // nothing labelled: say nothing, not just the name
-        if (settings.SpeakGameName && !string.IsNullOrWhiteSpace(title)) items.Add(new SpeechItem(title.Trim(), Array.Empty<string>()));
+        if (settings.SpeakGameName && !string.IsNullOrWhiteSpace(title)) items.Add(new SpeechItem(title.Trim(), Array.Empty<string>(), settings.PauseAfterName));
         if (!string.IsNullOrWhiteSpace(settings.Prefix)) items.Add(new SpeechItem(settings.Prefix.Trim(), Array.Empty<string>()));
         items.AddRange(groups.Select(g => new SpeechItem(g.Text, g.Buttons)));
         return items;

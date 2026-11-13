@@ -42,6 +42,11 @@ public sealed partial class SpeechViewModel : ObservableObject
     public int Volume { get => S.Volume; set { S.Volume = Math.Clamp(value, 0, 100); Changed(); } }
     public double DelaySeconds { get => S.DelaySeconds; set { S.DelaySeconds = Math.Clamp(Math.Round(value, 1), 0, 30); Changed(); } }
     public bool SpeakGameName { get => S.SpeakGameName; set { S.SpeakGameName = value; Changed(); } }
+    public double PauseAfterNameSeconds
+    {
+        get => S.PauseAfterNameSeconds;
+        set { S.PauseAfterNameSeconds = Math.Clamp(Math.Round(value, 2), 0, 10); Changed(); }
+    }
     public bool SpeakStartCoin { get => S.SpeakStartCoin; set { S.SpeakStartCoin = value; Changed(); } }
     public bool SpeakJoysticks { get => S.SpeakJoysticks; set { S.SpeakJoysticks = value; Changed(); } }
     public bool BlinkButtons { get => S.BlinkButtons; set { S.BlinkButtons = value; Changed(); } }
