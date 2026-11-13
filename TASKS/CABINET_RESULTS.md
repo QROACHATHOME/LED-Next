@@ -577,8 +577,21 @@ Installed the build from 707418c with `tools\install.ps1` (settings kept, plugin
 - **Galaga** (BigBox, MAME network): `galaga started (MAME, network port 8000); outputs mapped by
   C:\LEDBlinky\MameOutputs.ini [default]`, then `led0 → P1_START`. It went through the same states as visit 11
   (Browsing → Launching → Playing → PlayingWithLamps → Launching → Browsing), and everything was cleared on exit.
-- **Lamp map row (step 3):** skipped at the user's choice. LED-Next's own table (`lamps.maps`) is still
-  untested on real games.
+- **Lamp map row (step 3): works.** Done later, with the user's OK. With LED-Next closed, this row was added
+  to `lamps.maps` in D:\LED-Next\config\cabinet.json:
+  `{ "emulator": "MAME", "game": "galaga", "output": "led0", "controls": ["P1_BUTTON2"] }`.
+  - The log said `outputs mapped by cabinet.json, then C:\LEDBlinky\MameOutputs.ini [[galaga], then [default]]`
+    and `galaga reports led0 → P1_BUTTON2`.
+  - P1 button 2 blinked **white**, the overlay's colour for a button the game leaves unlit. It was cleared on exit.
+  - Pitfalls found on the way:
+    - A first run had no lamps ("outputs it reported: none"). The user exited about 4 s in, before the coin.
+      That made it look as if button 2 needed a colour, so the user gave it one in the Games tab (blue); the next
+      run blinked blue.
+    - The user then set P1_BUTTON2 back to "off" (not a revert, so it stays a per-game edit that matches the
+      imported lights). The next run blinked white.
+  - Afterwards the row was removed (`"maps": []`).
+  - Note: LED-Next rewrites cabinet.json in its own layout when it closes, so a one-line row comes back split over
+    several lines. Edit the file only while LED-Next is closed.
 - **Flycast (step 4):** not tried. Flycast Race's Network Output setting is still unchecked.
 
 ## Spoken button labels
@@ -597,10 +610,8 @@ Installed the build from 707418c with `tools\install.ps1` (settings kept, plugin
   ```
   There were 6 tests: 1942 three times (3.6–4.0 s) and Open Ice 2 four times. Two of the Open Ice 2 tests were
   stopped by a key press and two finished (4.9–5.1 s). It never stopped by itself.
-- **Not checked, at the user's choice:**
-  - speech on a BigBox launch: the three BigBox launches came before speech was saved on, so there is no
-    `Speech (launch)` line;
-  - stopping by moving the joystick (both stops were key presses);
-  - speech on MAME pause;
-  - Street Fighter Alpha 2;
-  - how the delay, speed and blinking feel to the user.
+- **Speech on a BigBox launch works.** In the later Galaga runs, `Speech (launch): Galaga · Fire [P1_B1]` came
+  about 1 s after the launch, then `Speech: done (1.4 s)`, before the game was running.
+- **The user's report:** moving the joystick stops it. The delay and the blink speed feel right; settings unchanged.
+  (The joystick stop is the user's report; the log only names key presses.)
+- **Not checked:** speech on MAME pause, and Street Fighter Alpha 2.
