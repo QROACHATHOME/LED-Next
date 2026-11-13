@@ -541,3 +541,31 @@ Flycast (visit 8) not retried: Flycast Race's Network Output setting has not bee
 - **Plugin zip attached to the release** (with the user's OK) through Claude in Chrome: Edit release, upload,
   Update release. The GitHub API lists all three downloads as "uploaded". The built-in browser can't upload local
   files; Claude in Chrome can, once the extension is installed and signed in.
+
+# Visit 11: the lamp lifecycle state machine (2026-11-13)
+
+Installed the build from 7cfb3a0 (`LampLifecycle`) with `tools\install.ps1` (settings kept, plugin rebuilt).
+The user played three games in BigBox. **Every step went through the expected states, and nothing stayed lit after an exit.**
+No errors in the log.
+
+Galaga (MAME network output), as the log shows it:
+```
+15:55:20.952 Lamps: Browsing → Launching (front end launched a game).
+15:55:24.656 Lamps: galaga started (network port 8000); outputs mapped by C:\LEDBlinky\MameOutputs.ini [default].
+15:55:24.656 Lamps: Launching → Playing (galaga started (network port 8000), lights from the front end).
+15:55:45.510 Lamps: galaga reports led0 → P1_START
+15:55:45.510 Lamps: Playing → PlayingWithLamps (first lamp of galaga).
+15:55:49.780 Lamps: galaga ended (network port 8000 reported the end); 1 lamp on, all cleared.
+15:55:49.780 Lamps: PlayingWithLamps → Launching (the front end still shows the game until its exit).
+15:55:49.899 Lamps: Launching → Browsing (front end exit).
+```
+- **Dig Dug** (network): the same timeline. The user quit with the Start lamp still blinking ("1 lamp on, all cleared"),
+  then "Light source: BigBox (playing): Dig Dug" without lamps, then Browsing on exit.
+- **Chase H.Q.** (Windows messages): Browsing → Launching → Playing. It reported genout0–3 and Orientation (none
+  mapped, as in visit 7), so it never went to PlayingWithLamps. Then the end, Launching, and Browsing on exit.
+- The end of a game arrives about 0.1–0.2 s before BigBox's exit. The panel goes back to the game's base lights
+  in between, then to browsing.
+- BigBox sent no selection changes while a game was running, so "the panel stays on the game" wasn't tested by a
+  real event here. The unit tests cover it.
+- Not yet checked at the cabinet: a game started by hand (outside BigBox), and MAME set to both outputs at once.
+- One "no LED-Next platform for 'Recently Played'" warning (a BigBox playlist; playlists are still to do).
