@@ -569,3 +569,38 @@ Galaga (MAME network output), as the log shows it:
   real event here. The unit tests cover it.
 - Not yet checked at the cabinet: a game started by hand (outside BigBox), and MAME set to both outputs at once.
 - One "no LED-Next platform for 'Recently Played'" warning (a BigBox playlist; playlists are still to do).
+
+# Visit 12: lamp maps per emulator, spoken button labels (2026-11-13)
+
+Installed the build from 707418c with `tools\install.ps1` (settings kept, plugin rebuilt). Built, and 173 tests pass.
+- **Config upgrade:** "Config upgraded from version 6 to 7 (adds lamps.maps…)", then "7 to 8 (adds speaking button labels, off)".
+- **Galaga** (BigBox, MAME network): `galaga started (MAME, network port 8000); outputs mapped by
+  C:\LEDBlinky\MameOutputs.ini [default]`, then `led0 → P1_START`. It went through the same states as visit 11
+  (Browsing → Launching → Playing → PlayingWithLamps → Launching → Browsing), and everything was cleared on exit.
+- **Lamp map row (step 3):** skipped at the user's choice. LED-Next's own table (`lamps.maps`) is still
+  untested on real games.
+- **Flycast (step 4):** not tried. Flycast Race's Network Output setting is still unchecked.
+
+## Spoken button labels
+- LEDBlinky's `settings.ini` (read only) has `GameStartSpeakControls=1`, `GameStartSpeakName=1` and
+  `GamePauseSpeakControls=1`, but `AbortSpeechAnyKey=0`, so LEDBlinky doesn't stop on a key press. LED-Next's
+  `stopOnInput` is on.
+- Installed voices: Microsoft David Desktop, Microsoft Zira Desktop.
+- Saved settings (cabinet.json `speech`): enabled, Microsoft David Desktop, rate 1, volume 75, delay 1 s, game name
+  on, start/coin off, joysticks off, blink on, speak on pause on, stop on input on.
+- **"Test with the game shown" works.** The user said "it works!". From the log:
+  ```
+  Speech (test): 1942p · Fire [P1_B1] · Loop [P1_B2]
+  Speech: done (3.7 s).
+  Speech (test): openice2play · Turbo [P1_B1,P2_B1,P3_B1,P4_B1] · Shoot / Block [...] · Pass / Steal [...]
+  Speech: stopped (a key was pressed).
+  ```
+  There were 6 tests: 1942 three times (3.6–4.0 s) and Open Ice 2 four times. Two of the Open Ice 2 tests were
+  stopped by a key press and two finished (4.9–5.1 s). It never stopped by itself.
+- **Not checked, at the user's choice:**
+  - speech on a BigBox launch: the three BigBox launches came before speech was saved on, so there is no
+    `Speech (launch)` line;
+  - stopping by moving the joystick (both stops were key presses);
+  - speech on MAME pause;
+  - Street Fighter Alpha 2;
+  - how the delay, speed and blinking feel to the user.
