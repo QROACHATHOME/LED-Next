@@ -72,6 +72,9 @@
             <TabItem Header="Games">
                 <views:GamesView DataContext="{Binding Games}" />
             </TabItem>
+            <TabItem Header="Speech">
+                <views:SpeechView DataContext="{Binding Speech}" />
+            </TabItem>
             <TabItem Header="Wiring">
                 <views:WiringView DataContext="{Binding Wiring}" />
             </TabItem>

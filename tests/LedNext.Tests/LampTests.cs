@@ -39,7 +39,7 @@ public class LampTests
     public void ASessionTurnsOutputsIntoLampChanges()
     {
         var map = MameOutputMap.Parse(IniFile.Parse(new[] { "[default]", "LED0=Start1", "LAMP0=Start1", "LED1=Start2" }));
-        var s = new MameOutputSession(map, "galaga", new[] { "galaga" });
+        var s = new OutputSession(map, "MAME", "galaga", new[] { "galaga" });
         Assert.Equal("default", s.Section);
         Assert.Equal(new[] { ("P1_START", false) }, s.Update("led0", 0));   // first value counts, even off
         Assert.Equal(new[] { ("P1_START", true) }, s.Update("led0", 1));
@@ -49,6 +49,54 @@ public class LampTests
         Assert.Equal(new[] { ("P1_START", false) }, s.Update("lamp0", 0));
         Assert.Empty(s.Update("coin_counter0", 1));                          // not mapped: no lamp
         Assert.Equal(3, s.Values.Count);                                     // led0, lamp0, coin_counter0
+    }
+
+    private static LampMapEntry Row(string emulator, string game, string output, params string[] controls) =>
+        new() { Emulator = emulator, Game = game, Output = output, Controls = controls.ToList() };
+
+    [Fact]
+    public void LedNextsOwnTableMapsAnyEmulator()
+    {
+        var rows = new[]
+        {
+            Row("Flycast", "SEGA MARINE FISHING JAPAN", "lamp0", "Start1"),
+            Row("flycast", "*", "lamp0", "P2_START"),
+            Row("Flycast", "*", "lamp1", "P1_BUTTON1", " "),
+            Row("MAME", "*", "lamp0", "P1_BUTTON2"),     // another emulator's row: not in Flycast's table
+            Row("Flycast", "*", "", "P1_START"),         // no output name
+        };
+        var table = new LampMapTable("Flycast", rows);
+        Assert.Equal(2, table.Skipped);
+        var fishing = table.For(new[] { "SEGA MARINE FISHING JAPAN" });
+        Assert.Equal(new[] { "P1_START" }, fishing.ControlsFor("LAMP0"));   // the game's row wins
+        Assert.Equal(new[] { "P1_BUTTON1" }, fishing.ControlsFor("lamp1")); // "*" fills the rest
+        Assert.Equal(new[] { "P2_START" }, table.For(new[] { "other" }).ControlsFor("lamp0"));
+        Assert.Empty(new LampMapTable("Supermodel", rows).For(new[] { "x" }).ControlsFor("lamp0"));
+        Assert.True(new LampMapTable("Supermodel", rows).IsEmpty);
+    }
+
+    [Fact]
+    public void ForMameTheOwnTableComesBeforeMameOutputsIni()
+    {
+        var ini = MameOutputMap.Parse(IniFile.Parse(new[] { "[default]", "LED0=Start1", "LED1=Start2", "[galaga]", "LED0=Start1", "LAMP0=P1_BUTTON1" })); // a game section replaces [default]
+        var own = new LampMapTable("MAME", new[] { Row("MAME", "galaga", "led1", "P1_BUTTON3") });
+        var map = OutputMaps.Layer(own, ini);
+        var galaga = new OutputSession(map, "MAME", "galagao", new[] { "galagao", "galaga" }); // a clone uses its parent's rows
+        Assert.Equal(new[] { "P1_BUTTON3" }, galaga.ControlsFor("led1"));  // cabinet.json overrides the ini
+        Assert.Equal(new[] { "P1_START" }, galaga.ControlsFor("led0"));    // the rest is the ini's
+        Assert.Equal(new[] { "P1_BUTTON1" }, galaga.ControlsFor("lamp0"));
+        Assert.Contains("galaga", galaga.Section);
+        Assert.Equal("MAME", galaga.Emulator);
+    }
+
+    [Fact]
+    public void AVersion6ConfigGetsAnEmptyLampTable()
+    {
+        var config = new CabinetConfig { Version = 6 };
+        config.Lamps.Maps = null!;
+        ConfigStore.Migrate(config);
+        Assert.Equal(CabinetConfig.CurrentVersion, config.Version);
+        Assert.Empty(config.Lamps.Maps);
     }
 
     private static CabinetConfig Panel()
@@ -124,7 +172,8 @@ public class LampTests
         Assert.Equal(new OutputLine.Start("galaga", "MAME"), p.Feed("mame_start = galaga"));
         Assert.Equal(new OutputLine.Value("led0", 1), p.Feed("led0 = 1"));
         Assert.Equal(new OutputLine.Value("lamp10", 10), p.Feed("lamp10 = 10")); // decimal
-        Assert.Null(p.Feed("pause = 1"));
+        Assert.Equal(new OutputLine.Pause(true), p.Feed("pause = 1"));
+        Assert.Equal(new OutputLine.Pause(false), p.Feed("pause = 0"));
         Assert.Null(p.Feed("garbage"));
         Assert.IsType<OutputLine.Stop>(p.Feed("mame_stop = 1"));
         Assert.Null(p.Game);

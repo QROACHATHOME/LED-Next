@@ -10,6 +10,8 @@ public abstract record OutputLine
     /// <summary>The game ended (MAME "mame_stop = 1"; Flycast just closes the connection).</summary>
     public sealed record Stop : OutputLine;
     public sealed record Value(string Name, int Number) : OutputLine;
+    /// <summary>MAME "pause = 1" (paused) / "pause = 0" (resumed).</summary>
+    public sealed record Pause(bool On) : OutputLine;
 }
 
 /// <summary>
@@ -45,7 +47,7 @@ public sealed class OutputLineParser
                 Game = null;
                 return new OutputLine.Stop();
             case "pause":
-                return null;
+                return Game is null ? null : new OutputLine.Pause(value.Trim() != "0");
             default:
                 if (Game is null) return null;
                 bool ok = _hex

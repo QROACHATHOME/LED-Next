@@ -86,6 +86,12 @@ Tested on a 4-player cabinet with two Ultimarc PacLED64 boards, LaunchBox/BigBox
 **Live lamps from emulators**
 - **MAME**, over network output (`output network`) or Windows messages (`output windows`). Lamps are mapped
   through LEDBlinky's `MameOutputs.ini`; for example, the Start lamp blinks while Galaga waits for a coin.
+- **Spoken button labels** (Speech tab, off by default): when BigBox launches a game, its button labels are read
+  aloud and each button blinks while its label is said. Again on MAME's pause; a button press or joystick move stops
+  it. Can copy LEDBlinky's speech settings.
+- **LED-Next's own lamp table** (`lamps.maps` in `cabinet.json`): map any emulator's outputs to panel controls, per
+  game or for all games, without editing LEDBlinky's files. For MAME it comes before `MameOutputs.ini`. No editor
+  in the app yet.
 - **Flycast** network output: it can be read, but so far it has only been tested against a simulated Flycast.
 - Not supported: Supermodel, and TeknoParrot's own output system.
 

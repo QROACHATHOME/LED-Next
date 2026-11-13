@@ -1,6 +1,35 @@
 # Cabinet session brief (for Claude on the arcade machine)
 
-## Visit 11 (next visit) — the lamp lifecycle
+## Visit 12 (next visit) — lamp maps per emulator, spoken button labels
+Emulators now name themselves when a game starts ("MAME", "Flycast"), and each has its own output map:
+LED-Next's own table (`cabinet.json` `lamps.maps`, new in config version 7), then for MAME LEDBlinky's
+MameOutputs.ini as before. Checked with a fake MAME and a fake Flycast only.
+1. `git pull`. Close LED-Next, LaunchBox and BigBox. Ask the user, then run `Install LED-Next.cmd`.
+   The log should say "Config upgraded from version 6 to 7".
+2. In BigBox, launch **Galaga**. The log should say `galaga started (MAME, network port 8000); outputs mapped by
+   C:\LEDBlinky\MameOutputs.ini [default]`, and P1 Start / button 1 blink as in visit 11. Nothing lit after exit.
+3. Optional, with the user's OK (it edits LED-Next's own config only): close LED-Next, add to `lamps` in
+   D:\LED-Next\config\cabinet.json
+   `"maps": [ { "emulator": "MAME", "game": "galaga", "output": "led0", "controls": ["P1_BUTTON2"] } ]`,
+   start it and launch Galaga: button 2 should now follow the Start lamp instead. Then remove the row.
+4. If Flycast Race's Network Output has been switched on by then: launch Sega Marine Fishing; the log should say
+   `started (Flycast, …)` and list its outputs at the end. Write them down for step 3 (a Flycast row).
+5. **Spoken button labels** (new Speech tab, config version 8, off by default). In the Speech tab click "Copy
+   LEDBlinky's speech settings" (it reads LEDBlinky's settings.ini, read only; the cabinet's has speech on, voice
+   Microsoft David). Check the voice list shows that voice. Click Save.
+   - In the Games tab select Galaga, then Speech tab → "Test with the game shown": "Galaga, Fire" from the cabinet
+     speakers, P1 button 1 blinking while "Fire" is said.
+   - In BigBox launch **1942** and **Street Fighter Alpha 2** (labelled 6-button game): the labels are said about
+     1 s after the launch, each button blinking, over the game's start. Log: `Speech (launch): …` then `Speech: done`.
+   - Launch again and press a button or move the joystick while it talks: it must stop at once
+     (`Speech: stopped (… was pressed)`). If it stops by itself straight away, the log names the device; write it down.
+   - In MAME press P (pause): the labels are said again; unpause stops it.
+   - Ask the user whether the delay, speed and blink feel right; record their choices.
+6. Add a "Visit 12" section to `CABINET_RESULTS.md`. Commit, ask before pushing.
+
+---
+
+## Visit 11 — the lamp lifecycle (done, see CABINET_RESULTS)
 The front end and the emulator lamps now go through one state machine (`LampLifecycle`, ARCHITECTURE "Live lamps
 from emulators"). The log has a line for every change, e.g. `Lamps: Launching → Playing (…)`. It was checked
 with a fake MAME and a fake BigBox only.

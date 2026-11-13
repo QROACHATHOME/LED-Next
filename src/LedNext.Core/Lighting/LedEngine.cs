@@ -54,6 +54,17 @@ public sealed class LedEngine : IDisposable
         }
     }
 
+    /// <summary>
+    /// Drawn on top of <see cref="Source"/> every frame, or null (the speaking buttons' blink). Setting it doesn't
+    /// change the source, so <see cref="SourceShown"/> and the lamp lifecycle don't see it.
+    /// </summary>
+    public ILightSource? Highlight
+    {
+        get => _highlight;
+        set { _highlight = value; _wake.Set(); }
+    }
+    private volatile ILightSource? _highlight;
+
     public IReadOnlyList<ILedBoard> Boards
     {
         get { lock (_outputLock) return _boards.ToArray(); }
@@ -140,6 +151,14 @@ public sealed class LedEngine : IDisposable
                 AppLog.Error($"Light source '{source.Name}' failed", ex);
             }
             ctx = new RenderContext(snapshot, time);
+        }
+        if (_highlight is { } top)
+        {
+            try { top.Render(ctx); }
+            catch (Exception ex)
+            {
+                if (_lastSourceError != top.Name) { _lastSourceError = top.Name; AppLog.Error($"Light layer '{top.Name}' failed", ex); }
+            }
         }
 
         var pins = new Dictionary<string, byte[]>();

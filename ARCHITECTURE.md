@@ -167,7 +167,8 @@ LaunchBox / BigBox process                      LED-Next app (owns the boards)
 ```
 MAME / Supermodel / Output Blaster ──Windows messages──► MameWindowOutputs ┐
 MAME (output network) / Flycast ──TCP 8000 lines───────► NetworkOutputs    ┴► LampController (App, UI thread)
-                                                            MameOutputMap (LEDBlinky MameOutputs.ini) ──► MameOutputSession
+      Started(game, emulator, via) ──► IOutputMap per emulator: cabinet.json lamps.maps, then for MAME
+                                       LEDBlinky's MameOutputs.ini (OutputMaps.Layer) ──► OutputSession
 LaunchBox/BigBox ──pipe──► FrontEndController ──┐           │ lamp changes
                                                 ▼           ▼
                                   LampLifecycle (Core, pure): who owns the panel ──► LampStep ──► MainViewModel.SetSource
@@ -201,10 +202,20 @@ LaunchBox/BigBox ──pipe──► FrontEndController ──┐           │ 
   **hexadecimal** values, LF endings, no stop message (the game ended when the connection closes).
 - **MAME needs `output windows` (or `network`) in mame.ini.** `auto`, the default, picks MAME's "none" module, so
   nothing is sent (LEDBlinky's `UpdateMameIniOutput` sets it). LED-Next never edits emulator files.
-- **Mapping** (`MameOutputMap`): LEDBlinky's `MameOutputs.ini` in the LEDBlinky folder (re-read for every game):
-  `[rom]` (or a parent's), else `[default]`; control names only (`LED0=Start1` → `P1_START`); hardware ports,
-  Pixelcade and web requests are skipped. No file → LED0 → P1_START, LED1 → P2_START.
-- **Session** (`MameOutputSession`, pure): 0 = off, anything else = on; a control is on while any of its outputs
+- **Mapping** (`IOutputMap`, Core, re-read for every game). Adapters name the emulator in `Started`: network
+  output says "MAME" or "Flycast" by its dialect; Windows messages always say "MAME" (Supermodel and Output Blaster
+  use the same messages and aren't told apart yet). Each emulator's map:
+  - **LED-Next's own table** (`LampMapTable`, `cabinet.json` `lamps.maps`, config v7): rows of
+    `{ emulator, game, output, controls }`; `game` is the id the emulator reports, or `*` for every game. A game's
+    rows win per output over the `*` rows. The only map for emulators other than MAME. No UI yet: edit cabinet.json.
+  - **MAME** also reads LEDBlinky's `MameOutputs.ini` (`MameOutputMap`) in the LEDBlinky folder: `[rom]` (or a
+    parent's), else `[default]` (a game section replaces `[default]`, it doesn't add to it); control names only
+    (`LED0=Start1` → `P1_START`); hardware ports, Pixelcade and web requests are skipped. No file → LED0 → P1_START,
+    LED1 → P2_START. LED-Next's own MAME rows come first per output (`OutputMaps.Layer`), so the ini is never edited.
+  - Example: `{ "emulator": "Flycast", "game": "SEGA MARINE FISHING JAPAN", "output": "lamp0", "controls": ["P1_START"] }`.
+  - MAME games use their own control map and rom lights; other emulators' games use the cabinet's control map and
+    keep the front end's lights.
+- **Session** (`OutputSession`, pure): 0 = off, anything else = on; a control is on while any of its outputs
   is. **Overlay** (`LampOverlay`): wraps the game's lights the lifecycle chose (the front end's launched game,
   else the rom's own lights from the MAME library, else what was shown). An on lamp shows the game's colour for that
   button, else white; off = dark. `lamps.startLampsOnButton1` (default on, for Start buttons without LEDs): while
@@ -214,7 +225,31 @@ LaunchBox/BigBox ──pipe──► FrontEndController ──┐           │ 
   The log lists each output a game reports once, with what it drives (like LEDBlinky's MAMEOutputTest), and
   all outputs at the end.
 - Settings: `cabinet.json` `lamps` (config v6): `enabled`, `windowMessages`, `network`, `networkPort`,
-  `startLampsOnButton1`. Status bar: "Lamps: galaga · 1 on".
+  `startLampsOnButton1`; `maps` (config v7). Status bar: "Lamps: galaga · 1 on".
+
+## Speaking button labels
+```
+front-end launch ──(delaySeconds)──► SpeechController (App, UI thread) ──► System.Speech (Windows SAPI voices)
+MAME pause = 1 ──────────────────────►     │ SpeechPlan (Core): name, then each label once, P1 first
+exit / game end / resume / input ───►      │ bookmark per label ──► SpeechHighlight (Core) = LedEngine.Highlight
+                                    RawInputWatcher (Raw Input, RIDEV_INPUTSINK): key down / joystick change → stop
+```
+- **What is said** (`SpeechPlan`, pure, tested): the game's name, the optional prefix, then each control's label from
+  the game's lights (Games tab labels, LEDBlinky's Controls.ini). The same label on several players is said once
+  and blinks all of them. Skipped: controls without a label or not on this panel, platform always-active controls;
+  joysticks and other non-buttons unless `speakJoysticks`; Start/Coin only with `speakStartCoin` ("Start Game",
+  "Insert Coin"). A game with no labels says nothing, not even its name.
+- **Blinking** (`SpeechHighlight`): a top layer the engine draws after the source (`LedEngine.Highlight`), so it
+  never replaces the source and the lamp lifecycle and `SourceSet` don't see it. The label's buttons blink at about
+  3 Hz in the colour shown under them (white if unlit). A PromptBuilder bookmark before each label moves the blink.
+- **When**: `delaySeconds` (default 1) after a front-end launch, and again on MAME's pause (`pause` output, both
+  adapters; `speakOnPause`, controls only). Stops on the front end's exit or closing, the emulator's stop, resume,
+  and, with `stopOnInput` (default on), any key down or joystick/gamepad report change (not mouse or trackball);
+  input in the first 0.6 s is ignored (the launch button being released). Raw Input is registered only while
+  speaking. The log names what stopped it (`Speech: stopped (joystick VID_D209&PID_0410 was pressed)`).
+- Settings: `cabinet.json` `speech` (config v8), off by default; Speech tab, with "Test with the game shown" and
+  "Copy LEDBlinky's speech settings" (its settings.ini, read only; `stopOnInput` is LED-Next's own and kept).
+- Audio goes to Windows' default output device.
 
 ## Window placement
 `config/window.json` (per machine, not in cabinet.json) keeps the main window's position. On load the

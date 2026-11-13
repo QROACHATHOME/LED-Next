@@ -61,6 +61,7 @@ public partial class App : Application
 
         // The lamp controller owns the panel lifecycle; the front end feeds it, so it is created first.
         _lamps = new Lamps.LampController(_session, vm);
+        vm.Speech = new ViewModels.SpeechViewModel(_session, _lamps.Speech);
         _frontEnd = new FrontEndController(_session, vm, _lamps);
         _frontEnd.ShowRequested += () => BringToFront(window);
         _frontEnd.Start();

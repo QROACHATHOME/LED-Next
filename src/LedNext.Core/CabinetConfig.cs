@@ -25,8 +25,9 @@ public sealed class CabinetConfig
     /// 1 = phase 1. 2 = adds <see cref="ControlMap"/> and <see cref="Games"/> (both default to empty,
     /// so a version 1 file loads unchanged). 3 = adds the LaunchBox folder and platform map to Games.
     /// 4 = adds Games.ExtraColorsIni. 5 = adds Games.ButtonBannersFolder. 6 = adds <see cref="Lamps"/>.
+    /// 7 = adds Lamps.Maps (LED-Next's own lamp table, empty by default). 8 = adds <see cref="Speech"/> (off by default).
     /// </summary>
-    public const int CurrentVersion = 6;
+    public const int CurrentVersion = 8;
 
     public int Version { get; set; } = CurrentVersion;
     public PanelLayout Panel { get; set; } = new();
@@ -38,6 +39,8 @@ public sealed class CabinetConfig
     public GameSettings Games { get; set; } = new();
     /// <summary>Emulators' live lamp outputs (MAME, Supermodel, TeknoParrot via Output Blaster, Flycast). Version 6.</summary>
     public LampSettings Lamps { get; set; } = new();
+    /// <summary>Speaking a game's button labels at launch, with the buttons blinking. Version 8.</summary>
+    public LedNext.Core.Speech.SpeechSettings Speech { get; set; } = new();
 }
 
 /// <summary>Live lamps from emulators (MAME's output system). Added in config version 6.</summary>
@@ -51,6 +54,11 @@ public sealed class LampSettings
     public int NetworkPort { get; set; } = 8000;
     /// <summary>A player's Start lamp also blinks that player's button 1 while it blinks (for Start buttons without LEDs).</summary>
     public bool StartLampsOnButton1 { get; set; } = true;
+    /// <summary>
+    /// LED-Next's own lamp table: emulator / game ("*" = all) / output → controls. For MAME it comes before
+    /// LEDBlinky's MameOutputs.ini (per output); other emulators (Flycast…) use only this. Added in config version 7.
+    /// </summary>
+    public List<LedNext.Core.Outputs.LampMapEntry> Maps { get; set; } = new();
 }
 
 public sealed class GameSettings

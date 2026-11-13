@@ -53,6 +53,8 @@ public sealed partial class MainViewModel : ObservableObject
     public ObservableCollection<string> LogLines { get; } = new();
     public string ConfigPath => _session.ConfigPath;
 
+    /// <summary>Speech tab; set once the lamp controller (which owns the speech) exists.</summary>
+    [ObservableProperty] private SpeechViewModel? _speech;
     [ObservableProperty] private string _sourceName = "";
     [ObservableProperty] private string? _frameStatus;
     [ObservableProperty] private string _boardsSummary = "";

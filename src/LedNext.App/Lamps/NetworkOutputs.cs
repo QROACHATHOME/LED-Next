@@ -21,8 +21,9 @@ public sealed class NetworkOutputs(int port, Dispatcher dispatcher) : IEmulatorO
     private TcpClient? _client;
 
     public string Via => $"network port {port}";
-    public event Action<string, string>? Started;
+    public event Action<string, string, string>? Started;
     public event Action<string>? Stopped;
+    public event Action<bool>? Paused;
     public event Action<string, int>? Output;
 
     public void Start()
@@ -107,10 +108,13 @@ public sealed class NetworkOutputs(int port, Dispatcher dispatcher) : IEmulatorO
         {
             case OutputLine.Start start:
                 AppLog.Info($"Lamps: {start.Emulator} on {Via} reports game '{start.Game}'.");
-                Raise(() => Started?.Invoke(start.Game, Via));
+                Raise(() => Started?.Invoke(start.Game, start.Emulator, Via));
                 break;
             case OutputLine.Stop:
                 Raise(() => Stopped?.Invoke(Via));
+                break;
+            case OutputLine.Pause p:
+                Raise(() => Paused?.Invoke(p.On));
                 break;
             case OutputLine.Value v:
                 Raise(() => Output?.Invoke(v.Name, v.Number));

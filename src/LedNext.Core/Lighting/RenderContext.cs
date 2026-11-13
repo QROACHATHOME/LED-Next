@@ -26,6 +26,9 @@ public sealed class RenderContext
 
     public void Set(string buttonId, Rgb color) => Colors[buttonId] = color;
 
+    /// <summary>The colour a button has so far in this frame, or null when nothing set it.</summary>
+    public Rgb? ColorOf(string buttonId) => Colors.TryGetValue(buttonId, out var c) ? c : null;
+
     public void SetAll(Rgb color)
     {
         foreach (var b in Panel.Buttons) Colors[b.Id] = color;

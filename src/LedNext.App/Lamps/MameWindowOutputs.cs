@@ -36,8 +36,9 @@ public sealed class MameWindowOutputs : IEmulatorOutputs
     }
 
     public string Via => "Windows messages";
-    public event Action<string, string>? Started;
+    public event Action<string, string, string>? Started;
     public event Action<string>? Stopped;
+    public event Action<bool>? Paused;
     public event Action<string, int>? Output;
 
     public void Start()
@@ -92,7 +93,7 @@ public sealed class MameWindowOutputs : IEmulatorOutputs
         if (_names.TryGetValue(0, out var rom) && rom.Length > 0)
         {
             _rom = rom;
-            Started?.Invoke(rom, Via);
+            Started?.Invoke(rom, "MAME", Via); // Supermodel / Output Blaster use the same messages; not told apart yet
             foreach (var (id, value) in _waiting.ToArray()) OnUpdate(id, value);
             _waiting.Clear();
         }
@@ -100,7 +101,8 @@ public sealed class MameWindowOutputs : IEmulatorOutputs
 
     private void OnUpdate(int id, int value)
     {
-        if (_mame == IntPtr.Zero || id == PauseId) return;
+        if (_mame == IntPtr.Zero) return;
+        if (id == PauseId) { if (_rom is not null) Paused?.Invoke(value != 0); return; }
         if (_rom is null)
         {
             _waiting.RemoveAll(w => w.Id == id);

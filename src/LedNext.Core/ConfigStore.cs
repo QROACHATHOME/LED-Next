@@ -68,7 +68,21 @@ public static class ConfigStore
             AppLog.Info("Config upgraded from version 5 to 6 (adds live lamps from emulators).");
             config.Version = 6;
         }
+        if (config.Version < 7)
+        {
+            // v7 added Lamps.Maps (LED-Next's own lamp table); empty by default, so nothing changes.
+            AppLog.Info("Config upgraded from version 6 to 7 (adds lamps.maps, LED-Next's own lamp table).");
+            config.Version = 7;
+        }
+        if (config.Version < 8)
+        {
+            // v8 added Speech (button labels read out at launch); off by default, so nothing changes.
+            AppLog.Info("Config upgraded from version 7 to 8 (adds speaking button labels, off).");
+            config.Version = 8;
+        }
         config.Lamps ??= new LampSettings();
+        config.Speech ??= new LedNext.Core.Speech.SpeechSettings();
+        config.Lamps.Maps ??= new();
         // The deserializer builds a case-sensitive dictionary; LaunchBox platform names are matched ignoring case.
         config.Games.LaunchBoxPlatformMap = new Dictionary<string, string>(
             config.Games.LaunchBoxPlatformMap ?? new(), StringComparer.OrdinalIgnoreCase);

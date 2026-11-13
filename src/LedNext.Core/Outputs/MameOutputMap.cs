@@ -9,7 +9,7 @@ namespace LedNext.Core.Outputs;
 /// Only control names are used; LEDBlinky's hardware ports, Pixelcade and web requests are skipped.
 /// Without the file: LED0 → P1_START, LED1 → P2_START (LEDBlinky's default).
 /// </summary>
-public sealed class MameOutputMap
+public sealed class MameOutputMap : IOutputMap
 {
     private const string DefaultSection = "default";
     private readonly Dictionary<string, Dictionary<string, List<string>>> _sections = new(StringComparer.OrdinalIgnoreCase);
@@ -68,6 +68,12 @@ public sealed class MameOutputMap
             if (!string.Equals(rom, DefaultSection, StringComparison.OrdinalIgnoreCase) && _sections.ContainsKey(rom))
                 return _sections.Keys.First(k => string.Equals(k, rom, StringComparison.OrdinalIgnoreCase));
         return DefaultSection;
+    }
+
+    public GameOutputMap For(IReadOnlyList<string> gameChain)
+    {
+        var section = SectionFor(gameChain);
+        return new GameOutputMap(section, output => ControlsFor(section, output));
     }
 
     /// <summary>The controls an output drives in a section (empty when it drives none).</summary>

@@ -5,29 +5,38 @@ namespace LedNext.Core.Outputs;
 /// boards), so it is unit-tested. An output value of 0 is off, anything else is on (as in LEDBlinky). A
 /// control driven by several outputs is on while any of them is on.
 /// </summary>
-public sealed class MameOutputSession
+public sealed class OutputSession
 {
-    private readonly MameOutputMap _map;
+    private readonly GameOutputMap _map;
     private readonly Dictionary<string, int> _values = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> _reported = new(StringComparer.OrdinalIgnoreCase);
 
-    public MameOutputSession(MameOutputMap map, string rom, IEnumerable<string> romChain)
+    public OutputSession(GameOutputMap map, string emulator, string game)
     {
         _map = map;
-        Rom = rom;
-        Section = map.SectionFor(romChain);
+        Emulator = emulator;
+        Game = game;
     }
 
-    public string Rom { get; }
-    /// <summary>The MameOutputs.ini section in use ("galaga", or "default").</summary>
-    public string Section { get; }
+    public OutputSession(IOutputMap map, string emulator, string game, IReadOnlyList<string> gameChain)
+        : this(map.For(gameChain), emulator, game) { }
+
+    /// <summary>"MAME", "Flycast"…</summary>
+    public string Emulator { get; }
+    /// <summary>The game id the emulator reported (a MAME rom, a Flycast game name).</summary>
+    public string Game { get; }
+    /// <summary>What the map uses for this game ("galaga", "default"…), for the log.</summary>
+    public string Section => _map.Section;
     /// <summary>Outputs the game has reported so far (all of them, mapped or not), for the log.</summary>
     public IReadOnlyDictionary<string, int> Values => _values;
+
+    /// <summary>The controls an output drives in this game.</summary>
+    public IReadOnlyList<string> ControlsFor(string output) => _map.ControlsFor(output);
 
     /// <summary>Records an output's value; returns the controls whose lamp state this changes, with the new state.</summary>
     public List<(string Control, bool On)> Update(string output, int value)
     {
-        var controls = _map.ControlsFor(Section, output);
+        var controls = _map.ControlsFor(output);
         var before = controls.ToDictionary(c => c, IsOn, StringComparer.OrdinalIgnoreCase);
         _values[output] = value;
         var changes = new List<(string, bool)>();
@@ -42,5 +51,5 @@ public sealed class MameOutputSession
 
     /// <summary>True while any output mapped to this control is on.</summary>
     public bool IsOn(string control) =>
-        _values.Any(kv => kv.Value != 0 && _map.ControlsFor(Section, kv.Key).Contains(control, StringComparer.OrdinalIgnoreCase));
+        _values.Any(kv => kv.Value != 0 && _map.ControlsFor(kv.Key).Contains(control, StringComparer.OrdinalIgnoreCase));
 }

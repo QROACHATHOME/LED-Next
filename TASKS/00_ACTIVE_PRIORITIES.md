@@ -153,13 +153,24 @@
       Core (who owns the panel: browsing / launching / playing / playing + lamps) → mapping tables per emulator
       (MameOutputs.ini for MAME, LED-Next's own tables for the others). Do it before adding Flycast/TeknoParrot maps
   - [x] Step 1: `LampLifecycle` (2026-11-13), 10 unit tests, checked with a fake MAME and a fake BigBox
-  - [ ] Verify step 1 on the cabinet (visit 11)
-  - [ ] Step 2: emulator name on `Started`; `IOutputMap` (MAME first, then LED-Next's own tables, config bump)
+  - [x] Verify step 1 on the cabinet (visit 11: Galaga, Dig Dug quit mid-blink, Chase H.Q.). Games are only ever
+        started from BigBox on this cabinet (the user), so the "started by hand" case doesn't need a cabinet check
+  - [x] Step 2 (2026-11-13, config v7): emulator name on `Started`; `IOutputMap` with `MameOutputMap`, LED-Next's
+        own `lamps.maps` table (`LampMapTable`, before the ini for MAME, the only map for others). Checked with a fake
+        Flycast (rows lit P1_START and P1_BUTTON1) and a fake MAME (unchanged)
+  - [ ] Verify step 2 on the cabinet (visit 12): Galaga still blinks Start; config upgrades to 7
+  - [ ] Step 3: a Flycast row for Sega Marine Fishing, once real Flycast connects
+  - [ ] Later: a lamps.maps editor in the UI (today: edit cabinet.json)
 - [x] **Games tab: removed "Paste to all N matches"** (the user's request, 2026-11-13). It wasn't useful, and it sat
       between "Paste to selected" and "Revert selected", where it was easy to hit by accident. Instead: filter, Ctrl+A,
       "Paste to selected". The list still stops at 500 games (`ResultLimit`), so a paste onto more takes several
       rounds; that's accepted. Templates keep "Apply to all N matches" (for whole smart lists, e.g. 6-button
       fighting games, 5,000+).
+- [x] **Spoken button labels** (the user's request, 2026-11-13, config v8): Speech tab, labels read with a Windows
+      voice after a front-end launch and on MAME's pause, each button blinking while said; stops on any control press
+      (the user's idea), exit or game end. Checked in the simulator with a fake BigBox (Galaga, 1942, key interrupt)
+  - [ ] Verify on the cabinet (visit 12): voice through the cabinet speakers, blink timing, joystick/button interrupt
+        (watch for a gamepad whose noisy axis stops the speech at once)
 - [ ] After Start/Coin LEDs are wired: re-run the wiring wizard for them; consider turning `lamps.startLampsOnButton1` off
 - [ ] Attract mode / idle lighting in the front end (with animations, phase 5)
 - [ ] Animations (`*.lwax`) — phase 5

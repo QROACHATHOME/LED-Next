@@ -1,8 +1,11 @@
 # Design note: emulator lamps as adapters, a lifecycle state machine and mapping tables
 
 Status: proposal written 2026-11-13 on the cabinet, after visits 7–10. **Step 1 (the lifecycle) is built**
-(`LampLifecycle`, ARCHITECTURE "Live lamps from emulators"): checked with unit tests and a fake MAME plus a fake
-BigBox on the dev PC, and still to verify at the cabinet (visit 11). Steps 2–4 aren't built yet.
+(`LampLifecycle`, ARCHITECTURE "Live lamps from emulators"), verified at the cabinet in visit 11. **Step 2 is
+built** (2026-11-13): `Started(game, emulator, via)`, `IOutputMap` with `MameOutputMap` and `LampMapTable`
+(`cabinet.json` `lamps.maps`, config v7; before MameOutputs.ini for MAME, the only map for other emulators); only
+`onOff` values so far. Checked with a fake MAME and a fake Flycast, to verify at the cabinet (visit 12). Steps 3–4
+aren't built yet.
 Step 1 departs from this note in three places:
 - **No launch timeout.** `Launching` lasts until the front end's exit, as before.
 - **A selection during a game started by hand is remembered, not shown.** It's shown when the game ends.

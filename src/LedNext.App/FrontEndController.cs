@@ -107,6 +107,9 @@ public sealed class FrontEndController : IDisposable
         if (step.Show is { } shown && !closed) _timing = new Timing(shown, what, pipeMs, received, handled, Clock.Elapsed);
         _lamps.Apply(step);
         _lamps.AfterFrontEnd();
+        // Button labels read aloud: after a launch, stopped by the exit.
+        if (launch && lights is not null) _lamps.Speech.GameLaunched(lights, what);
+        else if (closed || m.Event == FrontEndEvents.Exit) _lamps.Speech.Stop(closed ? "the front end closed" : "front end exit");
     }
 
     /// <summary>

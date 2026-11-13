@@ -57,6 +57,8 @@ public sealed class LampLifecycle(Func<ILightSource, LampOverlay> makeOverlay)
     /// <summary>The last source this machine asked to show.</summary>
     public ILightSource? Shown { get; private set; }
     public LampOverlay? Overlay => _overlay;
+    /// <summary>The running game's lights under the lamps (null when no game runs).</summary>
+    public ILightSource? BaseLights => _base;
 
     private bool GameRunning => Phase is LampPhase.Playing or LampPhase.PlayingWithLamps;
 
@@ -140,7 +142,7 @@ public sealed class LampLifecycle(Func<ILightSource, LampOverlay> makeOverlay)
         return Take(_base);
     }
 
-    /// <summary>Lamp changes of the running game (from <see cref="MameOutputSession.Update"/>).</summary>
+    /// <summary>Lamp changes of the running game (from <see cref="OutputSession.Update"/>).</summary>
     public LampStep Lamps(IReadOnlyCollection<(string Control, bool On)> changes)
     {
         if (!GameRunning || changes.Count == 0 || _base is null) return LampStep.None;
