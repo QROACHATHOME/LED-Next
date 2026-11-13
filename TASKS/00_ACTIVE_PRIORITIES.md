@@ -149,6 +149,9 @@
 - [ ] Visit 8: Sega Marine Fishing (Flycast) again; note the outputs it reports
 - [ ] TeknoParrot lamps: find how "Enable Outputs" sends them without Output Blaster (shared memory? its own
       protocol?) before writing a reader
+- [ ] **Lamps design** (proposal, `TASKS/DESIGN_LAMP_STATES.md`): per-emulator adapters → one lifecycle state machine in
+      Core (who owns the panel: browsing / launching / playing / playing + lamps) → mapping tables per emulator
+      (MameOutputs.ini for MAME, LED-Next's own tables for the others). Do it before adding Flycast/TeknoParrot maps
 - [ ] After Start/Coin LEDs are wired: re-run the wiring wizard for them; consider turning `lamps.startLampsOnButton1` off
 - [ ] Attract mode / idle lighting in the front end (with animations, phase 5)
 - [ ] Animations (`*.lwax`) — phase 5
