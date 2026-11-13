@@ -278,7 +278,7 @@ public sealed partial class GamesViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ImportCommand), nameof(ChooseExtraColorsIniCommand), nameof(ChooseBannersFolderCommand), nameof(ReadLaunchBoxCommand), nameof(ChooseLaunchBoxFolderCommand),
-        nameof(PasteSelectedCommand), nameof(PasteAllMatchesCommand), nameof(RevertSelectedCommand),
+        nameof(PasteSelectedCommand), nameof(RevertSelectedCommand),
         nameof(ApplyTemplateToSelectedCommand), nameof(ApplyTemplateToAllCommand))]
     private bool _isBusy;
 
@@ -351,10 +351,8 @@ public sealed partial class GamesViewModel : ObservableObject
         if (_suppressSearch || _session.Games is null) return;
         var (games, total) = _session.Games.Search(CurrentFilter(), ResultLimit);
         _matchCount = total;
-        OnPropertyChanged(nameof(PasteAllText));
         OnPropertyChanged(nameof(ApplyAllText));
         OnPropertyChanged(nameof(FilterSummary));
-        PasteAllMatchesCommand.NotifyCanExecuteChanged();
         ApplyTemplateToAllCommand.NotifyCanExecuteChanged();
         Results.Clear();
         foreach (var g in games) Results.Add(new GameRow(g, _platformNames.GetValueOrDefault(g.Platform, g.Platform)));
@@ -551,7 +549,7 @@ public sealed partial class GamesViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ClipboardInfo))]
-    [NotifyCanExecuteChangedFor(nameof(PasteSelectedCommand), nameof(PasteAllMatchesCommand))]
+    [NotifyCanExecuteChangedFor(nameof(PasteSelectedCommand))]
     private LightClipboard? _clipboard;
 
     public string ClipboardInfo => Clipboard is null
@@ -559,7 +557,6 @@ public sealed partial class GamesViewModel : ObservableObject
         : $"Copied: {Clipboard.Describe()}";
 
     public string PasteSelectedText => $"Paste to {_selectedRows.Count:N0} selected";
-    public string PasteAllText => $"Paste to all {_matchCount:N0} matches";
 
     /// <summary>Called by the view when the list selection changes. Previews the game just clicked.</summary>
     public void SetListSelection(List<GameRow> selected, GameRow? clicked)
@@ -594,15 +591,15 @@ public sealed partial class GamesViewModel : ObservableObject
     }
 
     private bool CanPasteSelected() => !IsBusy && Clipboard is not null && _selectedRows.Count > 0;
-    private bool CanPasteAll() => !IsBusy && Clipboard is not null && _matchCount > 0;
     private bool CanRevertSelected() => !IsBusy && _selectedRows.Any(r => r.Game.Customized);
 
     [RelayCommand(CanExecute = nameof(CanPasteSelected))]
     private Task PasteSelected() => PasteTo(Clipboard, _selectedRows.Select(r => r.Game).ToList(), "selected");
 
-    [RelayCommand(CanExecute = nameof(CanPasteAll))]
-    private Task PasteAllMatches() => PasteTo(Clipboard, AllMatches(), $"matching {FilterSummary}");
+    // No "paste to all matches": it sat next to "Paste to selected" and was easy to hit by accident (user's call,
+    // 2026-11-13). Select the games (Ctrl+A for all listed) and paste to them. Templates keep "Apply to all".
 
+    /// <summary>Every game matching the filters, including ones past the list's limit (for "Apply to all").</summary>
     private List<GameInfo> AllMatches() => _session.Games?.Search(CurrentFilter(), int.MaxValue).Games ?? new();
 
     private async Task PasteTo(LightClipboard? clip, List<GameInfo> targets, string which)

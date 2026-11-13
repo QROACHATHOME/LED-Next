@@ -101,7 +101,11 @@ public sealed partial class MainViewModel : ObservableObject
         _session.Engine.Source = source;
         SourceName = source.Name;
         FrameStatus = null;
+        SourceSet?.Invoke(source);
     }
+
+    /// <summary>After every <see cref="SetSource"/>; the lamp lifecycle uses it to notice the user's own picks.</summary>
+    public event Action<ILightSource>? SourceSet;
 
     [RelayCommand] private void Off() => SetSource(new AllOff());
     [RelayCommand] private void White() => SetSource(new SolidColor(Rgb.White, "All white"));

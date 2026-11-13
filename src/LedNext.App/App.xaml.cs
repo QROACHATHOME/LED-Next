@@ -59,11 +59,11 @@ public partial class App : Application
         window.Show();
         if (minimized) window.Hide();
 
-        _frontEnd = new FrontEndController(_session, vm);
+        // The lamp controller owns the panel lifecycle; the front end feeds it, so it is created first.
+        _lamps = new Lamps.LampController(_session, vm);
+        _frontEnd = new FrontEndController(_session, vm, _lamps);
         _frontEnd.ShowRequested += () => BringToFront(window);
         _frontEnd.Start();
-
-        _lamps = new Lamps.LampController(_session, vm);
         _lamps.Start();
     }
 

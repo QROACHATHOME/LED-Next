@@ -7,6 +7,7 @@ using LedNext.Core;
 using LedNext.Core.FrontEnd;
 using LedNext.Core.Games;
 using LedNext.Core.Lighting;
+using LedNext.Core.Outputs;
 using LedNext.FrontEnd;
 
 namespace LedNext.App;
@@ -29,10 +30,13 @@ public sealed class FrontEndController : IDisposable
     private sealed record Timing(ILightSource Source, string What, long? PipeMs, TimeSpan Received, TimeSpan Handled, TimeSpan Resolved);
     private volatile Timing? _timing;
 
-    public FrontEndController(AppSession session, MainViewModel main)
+    private readonly Lamps.LampController _lamps;
+
+    public FrontEndController(AppSession session, MainViewModel main, Lamps.LampController lamps)
     {
         _session = session;
         _main = main;
+        _lamps = lamps;
         _dispatcher = Application.Current.Dispatcher;
         _server.MessageReceived += m =>
         {
@@ -66,31 +70,43 @@ public sealed class FrontEndController : IDisposable
     {
         var handled = Clock.Elapsed;
         if (m.Event != FrontEndEvents.Select) AppLog.Info($"Front end: {m}");
-        ILightSource? shown = null;
+        ILightSource? lights = null;
+        bool launch = false, closed = false;
         string what = m.Title ?? m.Platform ?? m.Event;
         switch (_state.Handle(m))
         {
             case FrontEndAction.LightGame light:
-                shown = LightGame(light.Game, light.Playing);
+                lights = LightGame(light.Game, light.Playing);
+                launch = light.Playing;
                 what = light.Game.Title ?? what;
                 break;
             case FrontEndAction.LightPlatform platform:
-                shown = LightPlatform(platform.Selection);
+                lights = LightPlatform(platform.Selection);
                 what = $"platform {platform.Selection.Platform}";
                 break;
             case FrontEndAction.AllOff off:
-                _main.SetSource(new AllOff());
+                lights = new AllOff();
+                closed = true;
                 _main.FrontEndStatus = $"Front end: {off.Reason}";
                 AppLog.Info($"{off.Reason}: all lights off.");
                 break;
             case FrontEndAction.ShowWindow:
                 ShowRequested?.Invoke();
-                break;
+                return;
         }
-        if (shown is null) return;
-        // Before SetSource: the engine renders a new source at once and may report it before this returns.
-        _timing = new Timing(shown, what, pipeMs, received, handled, Clock.Elapsed);
-        _main.SetSource(shown);
+
+        // The lamp lifecycle decides what the panel shows (a running game keeps it; an exit ends the game).
+        var life = _lamps.Lifecycle;
+        LampStep step;
+        if (closed) step = life.FrontEndClosed(lights!);
+        else if (m.Event == FrontEndEvents.Exit) step = life.FrontEndExit(lights);
+        else if (lights is null) return;
+        else step = launch ? life.FrontEndLaunch(lights) : life.FrontEndSelection(lights);
+
+        // Before showing it: the engine renders a new source at once and may report it before Apply returns.
+        if (step.Show is { } shown && !closed) _timing = new Timing(shown, what, pipeMs, received, handled, Clock.Elapsed);
+        _lamps.Apply(step);
+        _lamps.AfterFrontEnd();
     }
 
     /// <summary>

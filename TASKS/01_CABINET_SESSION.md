@@ -1,5 +1,23 @@
 # Cabinet session brief (for Claude on the arcade machine)
 
+## Visit 11 (next visit) — the lamp lifecycle
+The front end and the emulator lamps now go through one state machine (`LampLifecycle`, ARCHITECTURE "Live lamps
+from emulators"). The log has a line for every change, e.g. `Lamps: Launching → Playing (…)`. It was checked
+with a fake MAME and a fake BigBox only.
+1. `git pull`. Close LED-Next, LaunchBox and BigBox. Install from source: `Install LED-Next.cmd` (ask the user
+   first). The log in D:\LED-Next\logs is the one to read.
+2. In BigBox, launch **Galaga** (Mame02XX, network output) and insert a coin. The log should go Browsing →
+   Launching → Playing → PlayingWithLamps, and P1 button 1 should blink with the Start lamp as in visit 7. Exit:
+   "galaga ended (…)", then Browsing, with the selection lit and nothing left blinking.
+3. **Exit with the game still blinking:** launch Dig Dug, coin up so Start blinks, then quit MAME at once. Any
+   lamp that was on must be off afterwards.
+4. **Windows messages:** launch Chase H.Q. (output windows). Same timeline; its outputs are listed at the end.
+5. While a game runs, scroll in BigBox if it lets you: the panel must stay on the game.
+6. Add a "Visit 11" section to `CABINET_RESULTS.md` with the `Lamps:` lines of one game. Commit, ask before
+   pushing.
+
+---
+
 ## Visit 10 (next visit) — LaunchBox plugin for the first release
 LED-Next now has GitHub releases (README "Making a release"). GitHub builds the two LED-Next zips. It can't
 build the plugin, because that needs LaunchBox's own DLL.

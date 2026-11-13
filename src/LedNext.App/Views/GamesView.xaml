@@ -132,9 +132,7 @@
                     <TextBlock Text="{Binding ClipboardInfo}" TextWrapping="Wrap" Foreground="{StaticResource AppTextDim}" Margin="0,0,0,6" />
                     <WrapPanel>
                         <Button Content="{Binding PasteSelectedText}" Command="{Binding PasteSelectedCommand}"
-                                ToolTip="Ctrl+V. Ctrl/Shift-click to select several games, Ctrl+A for all listed" />
-                        <Button Content="{Binding PasteAllText}" Command="{Binding PasteAllMatchesCommand}"
-                                ToolTip="Every game matching the platform, search and filters, including ones not listed" />
+                                ToolTip="Ctrl+V. Ctrl/Shift-click to select several games, Ctrl+A for all listed (up to 500)" />
                         <Button Content="Revert selected" Command="{Binding RevertSelectedCommand}"
                                 ToolTip="Drop your changes to the selected games and use the imported lights again" />
                     </WrapPanel>

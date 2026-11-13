@@ -168,8 +168,25 @@ LaunchBox / BigBox process                      LED-Next app (owns the boards)
 MAME / Supermodel / Output Blaster ──Windows messages──► MameWindowOutputs ┐
 MAME (output network) / Flycast ──TCP 8000 lines───────► NetworkOutputs    ┴► LampController (App, UI thread)
                                                             MameOutputMap (LEDBlinky MameOutputs.ini) ──► MameOutputSession
+LaunchBox/BigBox ──pipe──► FrontEndController ──┐           │ lamp changes
+                                                ▼           ▼
+                                  LampLifecycle (Core, pure): who owns the panel ──► LampStep ──► MainViewModel.SetSource
                                                             LampOverlay(game lights + lamps) ──► engine (Refresh = render now)
 ```
+
+- **Lifecycle** (`LampLifecycle`, Core, unit-tested; design in `TASKS/DESIGN_LAMP_STATES.md`): one state machine,
+  `Browsing → Launching → Playing → PlayingWithLamps`. It's fed by the front end (selection, launch, exit, closing)
+  and the adapters (game started, lamp changes, game ended), and returns what to show. Nothing else compares
+  `Engine.Source`. Rules:
+  - Selections light the panel only while browsing.
+  - A launched game's front-end lights stay under the lamps, even when the emulator names the game differently
+    (logged).
+  - A game started by hand shows the rom's own lights.
+  - The first adapter to report a game owns it.
+  - The front end's exit or closing ends the game, so the lamps are cleared even without an emulator stop.
+  - A source the user picks in LED-Next (`MainViewModel.SourceSet`) wins until the next front-end event or game
+    start.
+  - Each change of state is logged: `Lamps: Launching → Playing (…)`.
 
 - **Windows messages** (`Lamps/MameWindowOutputs`, MAME's `win32_output.h`): a hidden *top-level* window (MAME's
   start/stop are broadcasts, which message-only windows don't get). On "MAMEOutputStart" (or a "MAMEOutput" window
@@ -188,11 +205,12 @@ MAME (output network) / Flycast ──TCP 8000 lines───────► Net
   `[rom]` (or a parent's), else `[default]`; control names only (`LED0=Start1` → `P1_START`); hardware ports,
   Pixelcade and web requests are skipped. No file → LED0 → P1_START, LED1 → P2_START.
 - **Session** (`MameOutputSession`, pure): 0 = off, anything else = on; a control is on while any of its outputs
-  is. **Overlay** (`LampOverlay`): wraps what the panel shows (the front end's playing game; else the rom's own
-  lights from the MAME library when the shown game isn't that rom). An on lamp shows the game's colour for that
+  is. **Overlay** (`LampOverlay`): wraps the game's lights the lifecycle chose (the front end's launched game,
+  else the rom's own lights from the MAME library, else what was shown). An on lamp shows the game's colour for that
   button, else white; off = dark. `lamps.startLampsOnButton1` (default on, for Start buttons without LEDs): while
   a player's Start lamp is blinking (changed in the last 1.5 s) that player's button 1 blinks with it, then shows
-  the game's colour again. When the game ends the previous lights come back, unless something replaced them.
+  the game's colour again. When the game ends, the front end's launch lights stay until its exit. A game
+  started by hand goes back to the latest selection, or to what was shown before it.
   The log lists each output a game reports once, with what it drives (like LEDBlinky's MAMEOutputTest), and
   all outputs at the end.
 - Settings: `cabinet.json` `lamps` (config v6): `enabled`, `windowMessages`, `network`, `networkPort`,

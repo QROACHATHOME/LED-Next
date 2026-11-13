@@ -1,7 +1,13 @@
 # Design note: emulator lamps as adapters, a lifecycle state machine and mapping tables
 
-Status: **proposal** (2026-11-13, written on the cabinet after visits 7–10). It isn't built yet. Build it on the
-dev PC, then verify at the cabinet. Nothing here changes what the LEDs do until it is built.
+Status: proposal written 2026-11-13 on the cabinet, after visits 7–10. **Step 1 (the lifecycle) is built**
+(`LampLifecycle`, ARCHITECTURE "Live lamps from emulators"): checked with unit tests and a fake MAME plus a fake
+BigBox on the dev PC, and still to verify at the cabinet (visit 11). Steps 2–4 aren't built yet.
+Step 1 departs from this note in three places:
+- **No launch timeout.** `Launching` lasts until the front end's exit, as before.
+- **A selection during a game started by hand is remembered, not shown.** It's shown when the game ends.
+- **A user pick no longer gets re-wrapped by the next lamp.** Before, a test pattern picked during a game got
+  the lamps drawn on top of it at the next lamp change. Now it stays as it is.
 
 ## Problem
 Each emulator reports lamps in its own way:

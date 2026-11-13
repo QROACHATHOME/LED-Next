@@ -149,9 +149,17 @@
 - [ ] Visit 8: Sega Marine Fishing (Flycast) again; note the outputs it reports
 - [ ] TeknoParrot lamps: find how "Enable Outputs" sends them without Output Blaster (shared memory? its own
       protocol?) before writing a reader
-- [ ] **Lamps design** (proposal, `TASKS/DESIGN_LAMP_STATES.md`): per-emulator adapters → one lifecycle state machine in
+- [ ] **Lamps design** (`TASKS/DESIGN_LAMP_STATES.md`): per-emulator adapters → one lifecycle state machine in
       Core (who owns the panel: browsing / launching / playing / playing + lamps) → mapping tables per emulator
       (MameOutputs.ini for MAME, LED-Next's own tables for the others). Do it before adding Flycast/TeknoParrot maps
+  - [x] Step 1: `LampLifecycle` (2026-11-13), 10 unit tests, checked with a fake MAME and a fake BigBox
+  - [ ] Verify step 1 on the cabinet (visit 11)
+  - [ ] Step 2: emulator name on `Started`; `IOutputMap` (MAME first, then LED-Next's own tables, config bump)
+- [x] **Games tab: removed "Paste to all N matches"** (the user's request, 2026-11-13). It wasn't useful, and it sat
+      between "Paste to selected" and "Revert selected", where it was easy to hit by accident. Instead: filter, Ctrl+A,
+      "Paste to selected". The list still stops at 500 games (`ResultLimit`), so a paste onto more takes several
+      rounds; that's accepted. Templates keep "Apply to all N matches" (for whole smart lists, e.g. 6-button
+      fighting games, 5,000+).
 - [ ] After Start/Coin LEDs are wired: re-run the wiring wizard for them; consider turning `lamps.startLampsOnButton1` off
 - [ ] Attract mode / idle lighting in the front end (with animations, phase 5)
 - [ ] Animations (`*.lwax`) — phase 5

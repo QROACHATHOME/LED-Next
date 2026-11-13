@@ -9,9 +9,10 @@ using LedNext.Core.Outputs;
 namespace LedNext.App.Lamps;
 
 /// <summary>
-/// Live lamps from emulators: while a game runs, its outputs (MAME's LED0 / LAMPn…) light the panel controls
-/// LEDBlinky's MameOutputs.ini maps them to, on top of the game's lights (<see cref="LampOverlay"/>). All on the
-/// UI thread; the engine reads the overlay on its own thread.
+/// Live lamps from emulators, and who owns the panel while games run. The emulator adapters and the front end
+/// (<see cref="FrontEndController"/>) both feed one <see cref="LampLifecycle"/>, which decides what is shown;
+/// this class applies its decisions and maps outputs to controls (LEDBlinky's MameOutputs.ini). All on the UI
+/// thread; the engine reads the overlay on its own thread.
 /// </summary>
 public sealed class LampController : IDisposable
 {
@@ -20,10 +21,6 @@ public sealed class LampController : IDisposable
     private readonly MainViewModel _main;
     private readonly List<IEmulatorOutputs> _sources = new();
     private MameOutputSession? _game;
-    private string? _via;
-    private LampOverlay? _overlay;
-    /// <summary>What the panel showed before the lamps (put back when the game ends, if nothing replaced it).</summary>
-    private ILightSource? _before;
     private ControlMap? _map;
     private readonly HashSet<string> _seenOutputs = new(StringComparer.OrdinalIgnoreCase);
 
@@ -31,6 +28,23 @@ public sealed class LampController : IDisposable
     {
         _session = session;
         _main = main;
+        Lifecycle = new LampLifecycle(MakeOverlay);
+        // Anything else that changes the panel (test patterns, Games-tab previews) is the user's pick.
+        _main.SourceSet += source => Lifecycle.SourceShown(source);
+    }
+
+    public LampLifecycle Lifecycle { get; }
+
+    /// <summary>Shows what the lifecycle decided. Returns the source it set, or null.</summary>
+    public ILightSource? Apply(LampStep step)
+    {
+        if (step.Show is { } source)
+        {
+            _main.SetSource(source);
+            return source;
+        }
+        if (step.Redraw) _session.Engine.Refresh();
+        return null;
     }
 
     public void Start()
@@ -49,35 +63,36 @@ public sealed class LampController : IDisposable
         }
     }
 
+    private bool GameRunning => Lifecycle.Phase is LampPhase.Playing or LampPhase.PlayingWithLamps;
+
     private void OnStarted(string rom, string via)
     {
+        if (GameRunning && Lifecycle.Via != via)
+        {
+            Lifecycle.GameStarted(rom, via, _session.Engine.Source, null, _ => true); // another adapter owns the game: logged, ignored
+            return;
+        }
         var map = LoadMap();
         _game = new MameOutputSession(map, rom, RomChain(rom));
-        _via = via;
-        _overlay = null;
-        _before = null;
         _seenOutputs.Clear();
         _map = _session.ControlMapFor(Mame, rom).Map;
         AppLog.Info($"Lamps: {rom} started ({via}); outputs mapped by {map.Source} [{_game.Section}].");
         _main.LampStatus = $"Lamps: {rom}";
+        Apply(Lifecycle.GameStarted(rom, via, _session.Engine.Source, RomLights(rom, via), ShowsRom));
     }
 
     private void OnStopped(string via)
     {
-        if (_game is null || via != _via) return;
-        var outputs = string.Join(", ", _game.Values.Keys.OrderBy(k => k, StringComparer.OrdinalIgnoreCase));
-        AppLog.Info($"Lamps: {_game.Rom} ended. Outputs it reported: {(outputs.Length == 0 ? "none" : outputs)}.");
-        if (_overlay is not null && ReferenceEquals(_session.Engine.Source, _overlay)) _main.SetSource(_before ?? _overlay.Base);
-        _game = null;
-        _overlay = null;
-        _before = null;
-        _via = null;
-        _main.LampStatus = null;
+        if (_game is null || via != Lifecycle.Via) return;
+        LogOutputs();
+        Apply(Lifecycle.GameEnded(via));
+        EndSession();
     }
 
     private void OnOutput(string name, int value)
     {
         if (_game is null) return;
+        if (!GameRunning) { AfterFrontEnd(); return; } // the front end ended the game (exit, closing)
         // Like LEDBlinky's MAMEOutputTest: each output a game uses is logged once, with what it drives.
         if (_seenOutputs.Add(name))
         {
@@ -86,33 +101,38 @@ public sealed class LampController : IDisposable
         }
         var changes = _game.Update(name, value);
         if (changes.Count == 0) return;
-        var overlay = EnsureOverlay();
-        foreach (var (control, on) in changes) overlay.SetLamp(control, on);
-        _main.LampStatus = $"Lamps: {_game.Rom} · {overlay.LitLamps} on";
-        _session.Engine.Refresh();
+        Apply(Lifecycle.Lamps(changes));
+        _main.LampStatus = $"Lamps: {_game.Rom} · {Lifecycle.Overlay?.LitLamps ?? 0} on";
     }
 
-    /// <summary>
-    /// The overlay on what the panel shows now: the running game's lights from the front end, else the rom's own
-    /// lights from the library. Wraps the current source again if something replaced it while the game runs.
-    /// </summary>
-    private LampOverlay EnsureOverlay()
+    /// <summary>Called after a front-end event: if it ended the game (exit, closing), drop the output session.</summary>
+    public void AfterFrontEnd()
     {
-        var current = _session.Engine.Source;
-        if (_overlay is not null && ReferenceEquals(current, _overlay)) return _overlay;
+        if (_game is null || GameRunning) return;
+        LogOutputs();
+        EndSession();
+    }
 
-        var baseSource = current is LampOverlay lo ? lo.Base : current;
-        _before = baseSource;
-        if (!ShowsRom(baseSource) && RomLights() is { } romLights) baseSource = romLights;
+    private void LogOutputs()
+    {
+        if (_game is null) return;
+        var outputs = string.Join(", ", _game.Values.Keys.OrderBy(k => k, StringComparer.OrdinalIgnoreCase));
+        AppLog.Info($"Lamps: {_game.Rom} outputs it reported: {(outputs.Length == 0 ? "none" : outputs)}.");
+    }
 
+    private void EndSession()
+    {
+        _game = null;
+        _map = null;
+        _main.LampStatus = null;
+    }
+
+    private LampOverlay MakeOverlay(ILightSource baseSource)
+    {
         var settings = _session.Config.Lamps;
         var map = _map ?? _session.Config.ControlMap;
         var panel = _session.Config.Panel;
-        var overlay = new LampOverlay(baseSource, control => map.Lookup(control, panel).Buttons, Rgb.White, settings.StartLampsOnButton1);
-        if (_overlay is not null) overlay.CopyLampsFrom(_overlay);
-        _overlay = overlay;
-        _main.SetSource(overlay);
-        return overlay;
+        return new LampOverlay(baseSource, control => map.Lookup(control, panel).Buttons, Rgb.White, settings.StartLampsOnButton1);
     }
 
     /// <summary>True when the source already shows this game (lit by the front end or the Games tab).</summary>
@@ -121,12 +141,12 @@ public sealed class LampController : IDisposable
         RomChain(_game.Rom).Contains(name, StringComparer.OrdinalIgnoreCase);
 
     /// <summary>The rom's lights from the MAME library, or null when LED-Next doesn't know it (e.g. a TeknoParrot name).</summary>
-    private GameLights? RomLights()
+    private GameLights? RomLights(string rom, string via)
     {
         var db = _session.Games;
-        if (db is null || _game is null || db.GetGame(Mame, _game.Rom) is null) return null;
-        var lights = GameLightResolver.Resolve(db, Mame, _game.Rom, _map ?? _session.Config.ControlMap, _session.Config.Panel);
-        return new GameLights(lights, $"{_via}: {_game.Rom}");
+        if (db is null || db.GetGame(Mame, rom) is null) return null;
+        var lights = GameLightResolver.Resolve(db, Mame, rom, _map ?? _session.Config.ControlMap, _session.Config.Panel);
+        return new GameLights(lights, $"{via}: {rom}");
     }
 
     private List<string> RomChain(string rom)

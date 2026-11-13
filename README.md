@@ -31,8 +31,8 @@ LED-Next reads LEDBlinky's data, so your existing setup carries over, and then a
 - **Live preview.** Selecting a game lights it on screen and on the real panel at once, and every edit shows live.
 - **Edit lights safely.** Your colour changes per game or per platform are stored apart from the imported data and
   are kept when you re-import LEDBlinky. One click reverts a game to its imported lights.
-- **Light many games at once.** Templates, copy and paste of lights (all of them or one button) to selected games
-  or to every match, and saved smart lists (platform, genre, button count, "6-button fighting games"…).
+- **Light many games at once.** Templates, copy and paste of lights (all of them or one button) to the selected games
+  (a template can go on every match), and saved smart lists (platform, genre, button count, "6-button fighting games"…).
 - **Lights follow your real key bindings:**
   - for **every MAME install** (each one's `ctrlr` file, `default.cfg` and per-game cfg), not just one;
   - for **TeknoParrot** games, from each game's own profile.
