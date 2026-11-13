@@ -615,3 +615,11 @@ Installed the build from 707418c with `tools\install.ps1` (settings kept, plugin
 - **The user's report:** moving the joystick stops it. The delay and the blink speed feel right; settings unchanged.
   (The joystick stop is the user's report; the log only names key presses.)
 - **Not checked:** speech on MAME pause, and Street Fighter Alpha 2.
+
+## Pause after the game's name (added on the cabinet, d458cf9)
+The user asked for a setting for the gap between the game's name and its labels. There is now a Speech tab slider,
+"Pause after the name (s)", 0–5 s, saved as `speech.pauseAfterNameSeconds`, with config version 9.
+0 keeps the voice's own short pause.
+- Installed. The log said "Config upgraded from version 8 to 9 (adds a pause after the game's name, 0 s)".
+- The user set it to **1 s**. With a BigBox launch of Galaga, `Speech (launch): Galaga · Fire [P1_B1]` took 2.1 s,
+  against 1.4 s at 0 earlier. The extra 0.7 s is the 1 s pause in place of the voice's own short one.
