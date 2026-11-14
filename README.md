@@ -74,6 +74,9 @@ Tested on a 4-player cabinet with two Ultimarc PacLED64 boards, LaunchBox/BigBox
 - Imports LEDBlinky's data (controls, colours and input map) and lights each game the way LEDBlinky would. It
   matched LEDBlinky on the real cabinet. It only reads LEDBlinky's files; it never changes them.
 - Light inheritance: game → parent → platform → MAME default.
+- **MAME fallback for arcade platforms.** On a platform whose games are MAME rom names (Sega Naomi, Atomiswave,
+  Model 2/3…), a game LEDBlinky didn't set up gets a copy of MAME's lights for the same rom instead of a blank or
+  generic platform default. Games you've edited are left alone.
 - Per-game and per-platform colour overrides, templates, bulk copy, and saved smart lists.
 - **Each emulator's own key bindings.** When a game's buttons are remapped in the emulator, the lights follow:
   - **MAME:** each install's `ctrlr` file, `default.cfg` and per-game `cfg` (for cabinets with several MAME installs);
@@ -91,20 +94,23 @@ Tested on a 4-player cabinet with two Ultimarc PacLED64 boards, LaunchBox/BigBox
 - **MAME**, over network output (`output network`) or Windows messages (`output windows`). Lamps are mapped
   through LEDBlinky's `MameOutputs.ini`; for example, the Start lamp blinks while Galaga waits for a coin.
 - **Spoken button labels** (Speech tab, off by default): when BigBox launches a game, its button labels are read
-  aloud and each button blinks while its label is said. Again on MAME's pause; a button press or joystick move stops
-  it. Can copy LEDBlinky's speech settings.
+  aloud and each button blinks while its label is said. The game's title comes first (bracketed extras such as
+  "(World 940223)" left out), with an adjustable pause after it; a game without labels just says its name. Again on
+  MAME's pause; a button press or joystick move stops it. Windows' newer voices (Microsoft Mark, David, Zira) are
+  listed first and sound better than the old "Desktop" ones. Can copy LEDBlinky's speech settings.
 - **LED-Next's own lamp table** (`lamps.maps` in `cabinet.json`): map any emulator's outputs to panel controls, per
   game or for all games, without editing LEDBlinky's files. For MAME it comes before `MameOutputs.ini`. No editor
   in the app yet.
-- **Other emulators' lamps**, told apart by their process (all written from each emulator's source; only MAME is
-  tested on a real cabinet so far):
+- **Other emulators' lamps**, told apart by their process (written from each emulator's source, and tested on the
+  real cabinet with MAME, Keisho, Odin, Supermodel, TeknoParrot and Flycast):
   - **Flycast** (Naomi/Atomiswave): its "Network Output" setting. Lamps differ per game, so each needs a
     `lamps.maps` row.
   - **TeknoParrot**, through Output Blaster (OutputBlaster.dll in the game folder, "Enable Outputs" in TeknoParrot).
   - **Odin** (Sega Hikaru): `[outputs] network = on` in odin.ini.
   - **Keisho** (Sega Model 1/2/3): Windows or network outputs in its System tab. Uses MameOutputs.ini like MAME.
   - **Supermodel** (`-outputs=win`) and **M2Emulator** (with Output Blaster).
-  - Start lamps of TeknoParrot, Odin, Supermodel and Keisho games work without any setup; other lamps need rows.
+  - Start lamps of TeknoParrot, Odin, Supermodel and Keisho games work without any setup (checked on the cabinet:
+    Operation G.H.O.S.T., Brave Firefighters, Scud Race Plus, Daytona USA); other lamps need rows.
   - No lamp outputs at all: pcsx2x6, the Xemu Chihiro fork, Hypseus Singe. Their games keep the front end's lights.
 
 **Not yet:** other front ends (only LaunchBox/BigBox), LEDBlinky animations (`.lwax`), BigBox playlists, and
