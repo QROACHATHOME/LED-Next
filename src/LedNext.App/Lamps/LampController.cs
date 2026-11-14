@@ -180,16 +180,22 @@ public sealed class LampController : IDisposable
     }
 
     /// <summary>
-    /// The emulator's output map: LED-Next's own table (cabinet.json lamps.maps) first, then for MAME
-    /// LEDBlinky's MameOutputs.ini. Read again for every game, so edits apply.
+    /// The emulator's output map: LED-Next's own table (cabinet.json lamps.maps) first, then for MAME and Keisho
+    /// LEDBlinky's MameOutputs.ini, then the emulator's built-in start lamps (TeknoParrot, Odin, Supermodel…). Read again for every game, so edits apply.
     /// </summary>
     private IOutputMap MapFor(string emulator)
     {
         var own = new LampMapTable(emulator, _session.Config.Lamps.Maps);
         if (own.Skipped > 0) AppLog.Warn($"Lamps: {own.Skipped} lamps.maps row(s) for {emulator} skipped (no output name, or not a control name).");
-        if (!IsMame(emulator)) return own;
-        var ini = LoadMameOutputsIni();
-        return own.IsEmpty ? ini : OutputMaps.Layer(own, ini);
+        IOutputMap map = own;
+        if (EmulatorNames.UsesMameOutputsIni(emulator))
+        {
+            var ini = LoadMameOutputsIni();
+            map = own.IsEmpty ? ini : OutputMaps.Layer(own, ini);
+        }
+        var builtIn = BuiltInLampMaps.For(emulator);
+        if (!builtIn.IsEmpty) map = own.IsEmpty && map == own ? builtIn : OutputMaps.Layer(map, builtIn);
+        return map;
     }
 
     /// <summary>LEDBlinky's MameOutputs.ini (read only), else the built-in default.</summary>

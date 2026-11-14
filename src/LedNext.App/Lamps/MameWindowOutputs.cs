@@ -6,7 +6,7 @@ namespace LedNext.App.Lamps;
 
 /// <summary>
 /// MAME's Windows output protocol (src/osd/modules/output/win32_output.h; "output windows" in mame.ini), also
-/// spoken by Supermodel and TeknoParrot's Output Blaster. MAME broadcasts "MAMEOutputStart" with its output
+/// spoken by Supermodel, Keisho and TeknoParrot's Output Blaster. MAME broadcasts "MAMEOutputStart" with its output
 /// window; a client registers with "MAMEOutputRegister" and then gets "MAMEOutputUpdateState" (id, value) for
 /// every output. Names come from "MAMEOutputGetIDString" as a WM_COPYDATA reply; id 0 is the rom name.
 /// Runs on the UI thread: a hidden top-level window (broadcasts don't reach message-only windows).
@@ -93,7 +93,8 @@ public sealed class MameWindowOutputs : IEmulatorOutputs
         if (_names.TryGetValue(0, out var rom) && rom.Length > 0)
         {
             _rom = rom;
-            Started?.Invoke(rom, "MAME", Via); // Supermodel / Output Blaster use the same messages; not told apart yet
+            // Supermodel, Keisho, Output Blaster (TeknoParrot)… use the same messages: told apart by the window's process.
+            Started?.Invoke(rom, EmulatorProcess.ForWindow(_mame, LedNext.Core.Outputs.EmulatorNames.Mame), Via);
             foreach (var (id, value) in _waiting.ToArray()) OnUpdate(id, value);
             _waiting.Clear();
         }

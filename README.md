@@ -92,8 +92,16 @@ Tested on a 4-player cabinet with two Ultimarc PacLED64 boards, LaunchBox/BigBox
 - **LED-Next's own lamp table** (`lamps.maps` in `cabinet.json`): map any emulator's outputs to panel controls, per
   game or for all games, without editing LEDBlinky's files. For MAME it comes before `MameOutputs.ini`. No editor
   in the app yet.
-- **Flycast** network output: it can be read, but so far it has only been tested against a simulated Flycast.
-- Not supported: Supermodel, and TeknoParrot's own output system.
+- **Other emulators' lamps**, told apart by their process (all written from each emulator's source; only MAME is
+  tested on a real cabinet so far):
+  - **Flycast** (Naomi/Atomiswave): its "Network Output" setting. Lamps differ per game, so each needs a
+    `lamps.maps` row.
+  - **TeknoParrot**, through Output Blaster (OutputBlaster.dll in the game folder, "Enable Outputs" in TeknoParrot).
+  - **Odin** (Sega Hikaru): `[outputs] network = on` in odin.ini.
+  - **Keisho** (Sega Model 1/2/3): Windows or network outputs in its System tab. Uses MameOutputs.ini like MAME.
+  - **Supermodel** (`-outputs=win`) and **M2Emulator** (with Output Blaster).
+  - Start lamps of TeknoParrot, Odin, Supermodel and Keisho games work without any setup; other lamps need rows.
+  - No lamp outputs at all: pcsx2x6, the Xemu Chihiro fork, Hypseus Singe. Their games keep the front end's lights.
 
 **Not yet:** other front ends (only LaunchBox/BigBox), LEDBlinky animations (`.lwax`), BigBox playlists, and
 lighting by front-end section.

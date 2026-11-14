@@ -1,5 +1,25 @@
 # Cabinet session brief (for Claude on the arcade machine)
 
+## Visit 13 (next visit) — more emulators' lamps
+Emulators speaking MAME's protocols are now told apart by their process (the log says
+`Lamps: outputs come from x.exe (pid …) → Name`): Odin, Keisho, TeknoParrot (via OutputBlaster.dll), Supermodel,
+Model 2. Start lamps of those work without setup; anything else needs a `lamps.maps` row. Checked with a fake only.
+Don't edit any emulator's settings without the user's OK (they are read-only input).
+1. `git pull`, build, ask the user, then run `Install LED-Next.cmd`. No config change this time.
+2. In BigBox launch **Galaga**: the log must still say `outputs come from mame….exe → MAME` and the Start lamp blinks
+   as before. If it names something other than MAME, write down the exe name (that is a bug).
+3. For each of these the user has installed, check (read only) whether outputs are on, and with the user's OK turn
+   them on, then launch one game from BigBox and note the log lines `started (…)` and `reports …`:
+   - **TeknoParrot**: is `OutputBlaster.dll` in a game's folder, and "Enable Outputs" ticked in its settings? Without
+     the dll, check whether anything arrives anyway (open question).
+   - **Keisho**: System tab → Windows or Network outputs. A Model 2 game (Daytona USA) should blink P1 Start.
+   - **Odin**: `[outputs] network = on` in odin.ini. Brave Firefighters should light the start lamps.
+   - **Flycast**: Network Output (still off in Flycast Race at visit 12). Write down the game id and lamp names.
+   - **Supermodel**: `-outputs=win`.
+4. pcsx2x6, the Xemu Chihiro fork and Hypseus Singe send no outputs (checked in their source); nothing to test.
+5. Still open from visit 12: speech on MAME pause.
+6. Add a "Visit 13" section to `CABINET_RESULTS.md`. Commit, ask before pushing.
+
 ## Visit 12 (next visit) — lamp maps per emulator, spoken button labels
 Emulators now name themselves when a game starts ("MAME", "Flycast"), and each has its own output map:
 LED-Next's own table (`cabinet.json` `lamps.maps`, new in config version 7), then for MAME LEDBlinky's

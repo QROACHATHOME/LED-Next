@@ -9,7 +9,8 @@ using LedNext.Core.Outputs;
 namespace LedNext.App.Lamps;
 
 /// <summary>
-/// MAME's network output ("output network" in mame.ini) and Flycast's ("Network Output"): the emulator listens
+/// MAME's network output ("output network" in mame.ini), also sent by Odin, Keisho and Output Blaster, and
+/// Flycast's ("Network Output"): the emulator listens
 /// on TCP port 8000 and sends lines "name = value"; <see cref="OutputLineParser"/> reads both dialects.
 /// A background thread tries to connect every 2 s while nothing listens; nothing is ever sent.
 /// </summary>
@@ -30,7 +31,7 @@ public sealed class NetworkOutputs(int port, Dispatcher dispatcher) : IEmulatorO
     {
         _thread = new Thread(Run) { IsBackground = true, Name = "LED-Next lamp network listener" };
         _thread.Start();
-        AppLog.Info($"Lamps: watching for emulator network output on port {port} (MAME \"output network\", Flycast).");
+        AppLog.Info($"Lamps: watching for emulator network output on port {port} (MAME \"output network\", Flycast, Odin, Keisho, Output Blaster).");
     }
 
     private void Run()
@@ -107,8 +108,10 @@ public sealed class NetworkOutputs(int port, Dispatcher dispatcher) : IEmulatorO
         switch (line)
         {
             case OutputLine.Start start:
-                AppLog.Info($"Lamps: {start.Emulator} on {Via} reports game '{start.Game}'.");
-                Raise(() => Started?.Invoke(start.Game, start.Emulator, Via));
+                // MAME, Odin, Keisho and Output Blaster all say "mame_start": the listening process tells them apart.
+                var emulator = EmulatorProcess.ForListener(port, start.Emulator);
+                AppLog.Info($"Lamps: {emulator} on {Via} reports game '{start.Game}'.");
+                Raise(() => Started?.Invoke(start.Game, emulator, Via));
                 break;
             case OutputLine.Stop:
                 Raise(() => Stopped?.Invoke(Via));

@@ -165,8 +165,8 @@ LaunchBox / BigBox process                      LED-Next app (owns the boards)
 ## Live lamps from emulators (phase 5, first part)
 
 ```
-MAME / Supermodel / Output Blaster ──Windows messages──► MameWindowOutputs ┐
-MAME (output network) / Flycast ──TCP 8000 lines───────► NetworkOutputs    ┴► LampController (App, UI thread)
+MAME / Keisho / Supermodel / Output Blaster ──Windows messages──► MameWindowOutputs ┐
+MAME / Odin / Keisho / Output Blaster / Flycast ──TCP 8000──────► NetworkOutputs    ┴► LampController (App, UI thread)
       Started(game, emulator, via) ──► IOutputMap per emulator: cabinet.json lamps.maps, then for MAME
                                        LEDBlinky's MameOutputs.ini (OutputMaps.Layer) ──► OutputSession
 LaunchBox/BigBox ──pipe──► FrontEndController ──┐           │ lamp changes
@@ -202,9 +202,31 @@ LaunchBox/BigBox ──pipe──► FrontEndController ──┐           │ 
   **hexadecimal** values, LF endings, no stop message (the game ended when the connection closes).
 - **MAME needs `output windows` (or `network`) in mame.ini.** `auto`, the default, picks MAME's "none" module, so
   nothing is sent (LEDBlinky's `UpdateMameIniOutput` sets it). LED-Next never edits emulator files.
-- **Mapping** (`IOutputMap`, Core, re-read for every game). Adapters name the emulator in `Started`: network
-  output says "MAME" or "Flycast" by its dialect; Windows messages always say "MAME" (Supermodel and Output Blaster
-  use the same messages and aren't told apart yet). Each emulator's map:
+- **Which emulator** (`EmulatorNames.Identify`, Core, tested; `Lamps/EmulatorProcess`, App). Many emulators speak
+  MAME's protocols and all say `mame_start`, so the adapter names the emulator from the process behind it: the
+  owner of the `MAMEOutput` window (`GetWindowThreadProcessId`), or of the listening port (`GetExtendedTcpTable`).
+  Its exe name: `*mame*`/`arcade64` → MAME, `flycast` → Flycast, `odin` → Odin, `keisho` → Keisho, `supermodel` →
+  Supermodel, `emulator`/`emulator_multicpu` → Model 2, `demulshooter` → DemulShooter; otherwise a process with
+  `OutputBlaster.dll` loaded (Toolhelp module list, 32-bit games too) → TeknoParrot. Anything unknown or not
+  readable keeps the protocol's name ("MAME", "Flycast"), as before. The log says `outputs come from x.exe → Name`.
+  What each emulator sends (from its source, 2026-11-14):
+  - **Odin** (Sega Hikaru, `outputs_network.cpp`): MAME's network dialect on 127.0.0.1:8000 only, ids from
+    `odin-games.json` (`start_lamp`, `1p_start_lamp`, `2p_start_lamp`, `left_revolving_light`…). On with
+    `[outputs] network = on` in odin.ini.
+  - **Keisho** (Sega Model 1/2/3, `osd/outputs.cpp`): both MAME protocols (network port 8000 by default, a
+    `MAMEOutput` window), `pause`, MAME's rom names and lamp names (`lamp0`…`lamp5`, plus `LampStart`, `LampView1`…,
+    `RawLamps`). On with "Windows" or "Network outputs" in its System tab.
+  - **TeknoParrot** (Output Blaster, `Output Files/*.cpp`): OutputBlaster.dll in the game folder plus "Enable
+    Outputs" in the game's TeknoParrot settings; both MAME protocols, decimal values, names like `LampStart`,
+    `2pLampStart`, `LampView1`; the game id is Output Blaster's own name for the game.
+  - **Flycast** (rechecked against `core/network/output.h`, `maple_jvs.cpp`, `atomiswave.cpp`): as described above;
+    outputs are `lamp0`…`lamp31` (the JVS general-purpose output bits, which mean different things per game),
+    plus `tachometer`, `speedometer`, `m3ffb`, `awffb`, `midiffb`. The game line only comes with the first output,
+    so a game that never changes a lamp never reports itself.
+  - **No outputs** (checked in their source): pcsx2x6 (its JVS general-purpose output command is read and
+    dropped; a "TODO" for gun recoil), the Xemu Chihiro fork (JVS outputs stay inside the emulator), Hypseus Singe
+    (no output code). Those games keep the front end's lights.
+- **Mapping** (`IOutputMap`, Core, re-read for every game). Each emulator's map:
   - **LED-Next's own table** (`LampMapTable`, `cabinet.json` `lamps.maps`, config v7): rows of
     `{ emulator, game, output, controls }`; `game` is the id the emulator reports, or `*` for every game. A game's
     rows win per output over the `*` rows. The only map for emulators other than MAME. No UI yet: edit cabinet.json.
@@ -212,9 +234,13 @@ LaunchBox/BigBox ──pipe──► FrontEndController ──┐           │ 
     parent's), else `[default]` (a game section replaces `[default]`, it doesn't add to it); control names only
     (`LED0=Start1` → `P1_START`); hardware ports, Pixelcade and web requests are skipped. No file → LED0 → P1_START,
     LED1 → P2_START. LED-Next's own MAME rows come first per output (`OutputMaps.Layer`), so the ini is never edited.
+    Keisho uses it too (MAME rom and lamp names).
+  - **Built-in start lamps** (`BuiltInLampMaps`), last, only names an emulator's source fixes: TeknoParrot / Model 2
+    `LampStart` → P1_START, `2pLampStart` → P2_START; Supermodel and Keisho `LampStart` → P1_START; Odin
+    `start_lamp`/`1p_start_lamp` → P1_START, `2p_start_lamp` → P2_START. None for Flycast (bits differ per game).
   - Example: `{ "emulator": "Flycast", "game": "SEGA MARINE FISHING JAPAN", "output": "lamp0", "controls": ["P1_START"] }`.
   - MAME games use their own control map and rom lights; other emulators' games use the cabinet's control map and
-    keep the front end's lights.
+    keep the front end's lights. (Before 2026-11-14 Supermodel and Output Blaster games counted as MAME here.)
 - **Session** (`OutputSession`, pure): 0 = off, anything else = on; a control is on while any of its outputs
   is. **Overlay** (`LampOverlay`): wraps the game's lights the lifecycle chose (the front end's launched game,
   else the rom's own lights from the MAME library, else what was shown). An on lamp shows the game's colour for that
