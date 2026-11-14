@@ -28,8 +28,9 @@ public sealed class CabinetConfig
     /// 7 = adds Lamps.Maps (LED-Next's own lamp table, empty by default). 8 = adds <see cref="Speech"/> (off by default).
     /// 9 = adds Speech.PauseAfterNameSeconds (0, so speech sounds as before).
     /// 10 = adds Speech.SpeakNameWithoutLabels (on: a game without labels still says its name).
+    /// 11 = adds <see cref="Idle"/> (off) and <see cref="Shows"/> (none), so nothing changes.
     /// </summary>
-    public const int CurrentVersion = 10;
+    public const int CurrentVersion = 11;
 
     public int Version { get; set; } = CurrentVersion;
     public PanelLayout Panel { get; set; } = new();
@@ -43,6 +44,10 @@ public sealed class CabinetConfig
     public LampSettings Lamps { get; set; } = new();
     /// <summary>Speaking a game's button labels at launch, with the buttons blinking. Version 8.</summary>
     public LedNext.Core.Speech.SpeechSettings Speech { get; set; } = new();
+    /// <summary>Idle (attract) light show, optionally following the PC's sound. Version 11, off.</summary>
+    public LedNext.Core.Shows.IdleSettings Idle { get; set; } = new();
+    /// <summary>Light shows when BigBox (or LaunchBox) starts and closes. Version 11, none.</summary>
+    public LedNext.Core.Shows.FrontEndShowSettings Shows { get; set; } = new();
 }
 
 /// <summary>Live lamps from emulators (MAME's output system). Added in config version 6.</summary>

@@ -1,0 +1,124 @@
+<UserControl x:Class="LedNext.App.Views.AnimationsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="16" MaxWidth="760" HorizontalAlignment="Left">
+
+            <!-- Idle -->
+            <TextBlock Text="Idle animation" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource AppTextDim}" Margin="0,4,0,10"
+                       Text="When nobody has touched the controls for a while, the panel plays a light show. A key, button, joystick, mouse or trackball ends it and the game you were on lights again. It never starts while a game is playing." />
+            <CheckBox Content="Play an idle animation" IsChecked="{Binding IdleEnabled}" Margin="0,0,0,8" />
+            <Grid Margin="0,0,0,4" IsEnabled="{Binding IdleEnabled}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="190" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="70" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock Text="Start after (minutes)" VerticalAlignment="Center" />
+                <Slider Grid.Column="1" Minimum="0.5" Maximum="30" IsSnapToTickEnabled="True" TickFrequency="0.5"
+                        Value="{Binding IdleMinutes}" Margin="0,6" />
+                <TextBlock Grid.Column="2" Text="{Binding IdleMinutes}" VerticalAlignment="Center" Margin="8,0,0,0" />
+
+                <TextBlock Grid.Row="1" Text="Animation" VerticalAlignment="Center" />
+                <ComboBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" ItemsSource="{Binding IdleShows}"
+                          SelectedItem="{Binding IdleShow}" DisplayMemberPath="Name" Margin="0,3" />
+                <TextBlock Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding IdleShowNote}" TextWrapping="Wrap"
+                           Foreground="{StaticResource AppTextDim}" Margin="0,2,0,4" />
+
+                <TextBlock Grid.Row="3" Text="Random: change every (s)" VerticalAlignment="Center" />
+                <Slider Grid.Row="3" Grid.Column="1" Minimum="10" Maximum="600" IsSnapToTickEnabled="True" TickFrequency="5"
+                        Value="{Binding ChangeEverySeconds}" IsEnabled="{Binding IsRandom}" Margin="0,6" />
+                <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding ChangeEverySeconds}" VerticalAlignment="Center" Margin="8,0,0,0" />
+            </Grid>
+            <CheckBox Content="Only while LaunchBox / BigBox is running" IsChecked="{Binding OnlyWithFrontEnd}"
+                      IsEnabled="{Binding IdleEnabled}" Margin="0,3,0,12"
+                      ToolTip="Off: the idle animation also plays when no front end is open (LED-Next started by hand, or after BigBox closed)." />
+
+            <!-- Sound -->
+            <TextBlock Text="Follow the sound" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource AppTextDim}" Margin="0,4,0,10"
+                       Text="During the idle animation the lights follow the music or sound playing on the PC (Windows' default speakers, e.g. BigBox's attract videos or a music player). LED-Next only reads the level meter Windows shows in its Sound settings; nothing is recorded. In silence the animation looks as usual." />
+            <CheckBox Content="Idle animation follows the sound" IsChecked="{Binding ReactToAudio}" Margin="0,0,0,8" />
+            <Grid Margin="0,0,0,4" IsEnabled="{Binding ReactToAudio}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="190" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="70" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock Text="Sensitivity" VerticalAlignment="Center" />
+                <Slider Grid.Column="1" Minimum="0.25" Maximum="6" IsSnapToTickEnabled="True" TickFrequency="0.25"
+                        Value="{Binding AudioSensitivity}" Margin="0,6" />
+                <TextBlock Grid.Column="2" Text="{Binding AudioSensitivity}" VerticalAlignment="Center" Margin="8,0,0,0" />
+                <CheckBox Grid.Row="1" Content="Show the level" IsChecked="{Binding WatchSound}" VerticalAlignment="Center" />
+                <ProgressBar Grid.Row="1" Grid.Column="1" Value="{Binding SoundLevel}" Maximum="100" Height="10" Margin="0,8"
+                             Background="{StaticResource AppSurfaceRaised}" Foreground="{StaticResource AppAccent}" BorderThickness="0" />
+            </Grid>
+            <TextBlock Text="{Binding SoundNote}" Foreground="{StaticResource AppTextDim}" Margin="190,0,0,12" />
+
+            <!-- Start-up / shut-down -->
+            <TextBlock Text="Start-up and shut-down" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource AppTextDim}" Margin="0,4,0,10"
+                       Text="A short light show when BigBox has started (then the selected game lights) and when it closes (then all lights go off). Launching a game ends the start-up show at once." />
+            <Grid Margin="0,0,0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="190" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="70" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock Text="Start-up animation" VerticalAlignment="Center" />
+                <ComboBox Grid.Column="1" Grid.ColumnSpan="2" ItemsSource="{Binding StartupShows}" SelectedItem="{Binding StartupShow}"
+                          Margin="0,3">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}" ToolTip="{Binding Description}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <TextBlock Grid.Row="1" Text="Start-up length (s)" VerticalAlignment="Center" />
+                <Slider Grid.Row="1" Grid.Column="1" Minimum="1" Maximum="20" IsSnapToTickEnabled="True" TickFrequency="0.5"
+                        Value="{Binding StartupSeconds}" Margin="0,6" />
+                <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding StartupSeconds}" VerticalAlignment="Center" Margin="8,0,0,0" />
+                <TextBlock Grid.Row="2" Text="Shut-down animation" VerticalAlignment="Center" />
+                <ComboBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" ItemsSource="{Binding ShutdownShows}"
+                          SelectedItem="{Binding ShutdownShow}" Margin="0,3">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}" ToolTip="{Binding Description}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <TextBlock Grid.Row="3" Text="Shut-down length (s)" VerticalAlignment="Center" />
+                <Slider Grid.Row="3" Grid.Column="1" Minimum="1" Maximum="15" IsSnapToTickEnabled="True" TickFrequency="0.5"
+                        Value="{Binding ShutdownSeconds}" Margin="0,6" />
+                <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding ShutdownSeconds}" VerticalAlignment="Center" Margin="8,0,0,0" />
+            </Grid>
+            <CheckBox Content="Also when LaunchBox (not only BigBox) starts and closes" IsChecked="{Binding AlsoLaunchBox}" Margin="0,3,0,12" />
+
+            <StackPanel Orientation="Horizontal" Margin="0,4,0,8">
+                <Button Content="Try idle animation" Command="{Binding TryIdleCommand}" ToolTip="Plays it for 20 seconds, then shows what was lit before." />
+                <Button Content="Try start-up" Command="{Binding TryStartupCommand}" Margin="8,0,0,0" />
+                <Button Content="Try shut-down" Command="{Binding TryShutdownCommand}" Margin="8,0,0,0" />
+                <Button Content="Stop" Command="{Binding StopShowCommand}" Margin="8,0,0,0" />
+            </StackPanel>
+            <TextBlock Text="{Binding Playing}" Foreground="{StaticResource AppTextDim}" />
+            <TextBlock Text="{Binding Status}" Foreground="{StaticResource AppAccent}" TextWrapping="Wrap" Margin="0,4,0,0" />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -277,6 +277,44 @@ exit / game end / resume / input ───►      │ bookmark per label ──
   "Copy LEDBlinky's speech settings" (its settings.ini, read only; `stopOnInput` is LED-Next's own and kept).
 - Audio goes to Windows' default output device.
 
+## Light shows (idle, start-up, shut-down)
+```
+GetLastInputInfo (keys, I-PAC, mouse) ─┐ 1 s   IdleMonitor (Core, tested)        LightShows (Core, tested)
+raw input (joysticks, while idle) ─────┼──────► start / stop ──► ShowController ──► IdleShow / start-up / shut-down
+game ended (lifecycle leaves Playing) ─┘                          (App, UI thread)       │ engine thread renders
+front end: started / closing / selections ──────────────────────►  takes the panel,   AudioEnvelope ◄─ AudioMeter
+                                                                   defers selections     (Core)        (App, IAudioMeterInformation)
+```
+- **Shows** (`Core/Shows/LightShows.cs`): ten looping shows plus two that need sound (Sound meter, Beat flash);
+  start-up intros (Power up, Sweep on, Flash) and shut-down outros (Fade out and Sweep off of what was shown, Flash
+  and fade). Any looping show without sound can also be a start-up or shut-down show (it fades out at the end).
+  Each show is drawn from the frame time only (plus its own start for timed ones), so no timers run on the engine
+  thread. `IdleShow` plays one show or a random one every `changeEverySeconds` with a 2 s cross-fade.
+- **ShowController** (App) owns the panel while a show plays: front-end selections are remembered
+  (`Defer`) and shown when it ends; a launch, an emulator's game start, or a source picked in LED-Next ends it at
+  once without restoring. The start-up show starts on the plugin's `started` event (BigBox; LaunchBox with
+  `alsoLaunchBox`); the shut-down show replaces the immediate all-off on `closing` and switches off after it.
+- **Idle**: `IdleMonitor` (pure) starts the show after `idle.minutes` without input when nothing blocks it (a game
+  between launch and exit / emulator stop, another show, speech, no front end open with `onlyWithFrontEnd`), and
+  stops it on newer input. Input = `GetLastInputInfo` (keyboard incl. keyboard encoders, mouse/trackball), plus
+  joystick/gamepad reports through the shared `RawInputWatcher` while the show plays. Front-end selections are not
+  input (BigBox's attract mode moves them). When a game ends, the wait starts again.
+- **Sound** (`AudioMeter`, App): the default render endpoint's peak meter (`IAudioMeterInformation`, per channel),
+  polled ~30x/s on its own MTA thread only while the idle show (with `reactToAudio`) or the tab's level display
+  needs it; the default device is looked up again every 5 s. No capture, nothing recorded. `AudioEnvelope` (Core)
+  smooths it (instant rise, ~0.3 s fall), finds beats (well above a 1.2 s average, at most 4/s) and says when
+  there was sound in the last 2 s; in silence the shows look as they do without sound.
+- Settings: `cabinet.json` `idle` and `shows` (config v11), all off. Animations tab.
+- Raw input is one registration per process, so speech and idle share `RawInputWatcher.Shared` (it listens while
+  either needs it).
+
+## Known lamps
+- `games.db` table `lamp_outputs` (schema 8): emulator, game, output, what it was mapped to and by which map, first /
+  last seen (UTC), sessions, min / max value, changes. `LampOutputLog` (Core) collects the running game's outputs on
+  the UI thread; `LampController` stores them when the game ends (one transaction), never while it plays. Imports
+  don't touch it. Lamps tab: filter by emulator / text, "Not mapped only". Meant as the one place for lamp triggers
+  later; `lamps.maps` still lives in cabinet.json.
+
 ## Window placement
 `config/window.json` (per machine, not in cabinet.json) keeps the main window's position. On load the
 window is moved/shrunk into the work area of the nearest monitor, in physical pixels
@@ -343,5 +381,6 @@ per-board byte[PinCount]  ──►  write only if changed  ──►  ILedBoard
 
 ## Threading summary
 - UI thread: view models, config edits, autosave (debounced 1 s).
-- Engine thread: rendering and all native calls.
+- Engine thread: rendering and all native calls (light shows are rendered here too).
+- Sound level thread (`AudioMeter`): only while a show or the Animations tab needs the level.
 - `ReplaceBoards` takes the output lock, so rescans never overlap a write.

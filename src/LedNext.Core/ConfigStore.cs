@@ -92,7 +92,15 @@ public static class ConfigStore
             AppLog.Info("Config upgraded from version 9 to 10 (games without button labels now say their name; Speech tab to turn off).");
             config.Version = 10;
         }
+        if (config.Version < 11)
+        {
+            // v11 added Idle (off) and Shows (none): the panel behaves as before.
+            AppLog.Info("Config upgraded from version 10 to 11 (adds idle, start-up and shut-down light shows, all off).");
+            config.Version = 11;
+        }
         config.Lamps ??= new LampSettings();
+        config.Idle ??= new LedNext.Core.Shows.IdleSettings();
+        config.Shows ??= new LedNext.Core.Shows.FrontEndShowSettings();
         config.Speech ??= new LedNext.Core.Speech.SpeechSettings();
         config.Lamps.Maps ??= new();
         // The deserializer builds a case-sensitive dictionary; LaunchBox platform names are matched ignoring case.

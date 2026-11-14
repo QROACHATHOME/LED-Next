@@ -1,6 +1,20 @@
 # Cabinet session brief (for Claude on the arcade machine)
 
-## Visit 13 (next visit) — more emulators' lamps
+## Visit 14 (next visit) — light shows, known lamps
+New (config v11, all off, so nothing changes until the user turns them on in the new **Animations** tab):
+1. `git pull`, build, ask the user, then run `Install LED-Next.cmd`. games.db goes to schema 8 by itself.
+2. Animations tab, with the user: pick a start-up show (e.g. Sweep on, 4 s) and a shut-down show (Fade out, 3 s).
+   Restart BigBox: the log says `Show: Start-up: Sweep on (BigBox started, 4 s)`, then the selected game lights.
+   Close BigBox: `Show: Shut-down: Fade out (BigBox closed, 3 s)`, then Off.
+3. Idle: on, 1 minute, Random. Leave BigBox alone: `Show: Idle: random shows (no input for 1 min …)`. Press a
+   panel button (I-PAC: keyboard input), then move a gamepad if there is one: each must end it (`ended (input …)`).
+   Check BigBox's own attract mode (if on) doesn't end it, and launching a game from idle works.
+4. Follow the sound: on; tick "Show the level" while a BigBox video plays and set the sensitivity so the bar rarely
+   hits the top. Try the idle animation with "Sound meter" and "Beat flash". Note the sensitivity the user likes.
+5. Lamps tab: after Galaga and one Keisho / Odin game, their outputs are listed; note the unmapped ones.
+6. Add a "Visit 14" section to `CABINET_RESULTS.md`. Commit, ask before pushing.
+
+## Visit 13 — more emulators' lamps (done, see CABINET_RESULTS)
 Emulators speaking MAME's protocols are now told apart by their process (the log says
 `Lamps: outputs come from x.exe (pid …) → Name`): Odin, Keisho, TeknoParrot (via OutputBlaster.dll), Supermodel,
 Model 2. Start lamps of those work without setup; anything else needs a `lamps.maps` row. Checked with a fake only.

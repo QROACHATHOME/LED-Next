@@ -90,6 +90,19 @@ Tested on a 4-player cabinet with two Ultimarc PacLED64 boards, LaunchBox/BigBox
 - LaunchBox pictures ("Arcade - Control Panel", "Arcade - Controls Information") and button-layout banners in
   the Games tab.
 
+**Light shows** (Animations tab, all off by default)
+- **Idle animation**: after the controls haven't been touched for a set time (default 5 minutes), the panel plays
+  one of ten animations (rainbow wave, comet, twinkle, player colours, scanner, ripple, fire, rain…) or a random
+  one that changes every so often with a cross-fade. Any key, button, joystick, mouse or trackball ends it and the
+  selected game lights again. It never starts while a game is playing, and by default only while LaunchBox / BigBox
+  runs. BigBox's own attract mode moving the selection doesn't end it.
+- **Follow the sound**: during the idle animation the lights pulse with the music or sound playing on the PC
+  (Windows' default speakers; LED-Next only reads Windows' level meter, nothing is recorded). Two animations react
+  to the sound themselves: a level meter from the middle out (left/right channel) and a colour flash on each beat.
+- **Start-up and shut-down animations** for BigBox (optionally LaunchBox too): e.g. "Sweep on" when BigBox has
+  started, then the selected game; "Fade out" of the game's lights when it closes, then all off.
+- "Try" buttons play each one on the panel.
+
 **Live lamps from emulators**
 - **MAME**, over network output (`output network`) or Windows messages (`output windows`). Lamps are mapped
   through LEDBlinky's `MameOutputs.ini`; for example, the Start lamp blinks while Galaga waits for a coin.
@@ -98,6 +111,9 @@ Tested on a 4-player cabinet with two Ultimarc PacLED64 boards, LaunchBox/BigBox
   "(World 940223)" left out), with an adjustable pause after it; a game without labels just says its name. Again on
   MAME's pause; a button press or joystick move stops it. Windows' newer voices (Microsoft Mark, David, Zira) are
   listed first and sound better than the old "Desktop" ones. Can copy LEDBlinky's speech settings.
+- **Known lamps** (Lamps tab): every output a game reports (lamps, LEDs, recoil…) is kept in the game library
+  per emulator and game, with what it lit, its values and when it was last seen. "Not mapped only" lists the ones
+  that light nothing yet. This is the one place future lamp triggers will build on.
 - **LED-Next's own lamp table** (`lamps.maps` in `cabinet.json`): map any emulator's outputs to panel controls, per
   game or for all games, without editing LEDBlinky's files. For MAME it comes before `MameOutputs.ini`. No editor
   in the app yet.

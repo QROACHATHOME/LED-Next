@@ -55,6 +55,10 @@ public sealed partial class MainViewModel : ObservableObject
 
     /// <summary>Speech tab; set once the lamp controller (which owns the speech) exists.</summary>
     [ObservableProperty] private SpeechViewModel? _speech;
+    /// <summary>Animations tab (idle, start-up, shut-down shows); set once the show controller exists.</summary>
+    [ObservableProperty] private AnimationsViewModel? _animations;
+    /// <summary>Lamps tab: every output emulators have reported (games.db).</summary>
+    [ObservableProperty] private KnownLampsViewModel? _knownLamps;
     [ObservableProperty] private string _sourceName = "";
     [ObservableProperty] private string? _frameStatus;
     [ObservableProperty] private string _boardsSummary = "";

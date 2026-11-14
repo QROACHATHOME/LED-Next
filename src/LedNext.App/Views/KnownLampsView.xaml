@@ -1,0 +1,50 @@
+<UserControl x:Class="LedNext.App.Views.KnownLampsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DockPanel Margin="16">
+        <StackPanel DockPanel.Dock="Top">
+            <TextBlock Text="Known lamps" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource AppTextDim}" Margin="0,4,0,10" MaxWidth="900" HorizontalAlignment="Left"
+                       Text="Every output an emulator has reported (lamps, LEDs, recoil, drive…), per game, kept in the game library (games.db). A row is added or updated when the game ends. &quot;Mapped to&quot; is what it lit on the panel then; empty means nothing (add a lamps.maps row in cabinet.json, or a line in LEDBlinky's MameOutputs.ini for MAME)." />
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                <ComboBox ItemsSource="{Binding Emulators}" SelectedItem="{Binding Emulator}" Width="170" />
+                <TextBox Text="{Binding Filter, UpdateSourceTrigger=PropertyChanged, Delay=250}" Width="240" Margin="8,0,0,0"
+                         ToolTip="Filter on emulator, game, output or mapping" />
+                <CheckBox Content="Not mapped only" IsChecked="{Binding UnmappedOnly}" VerticalAlignment="Center" Margin="12,0,0,0" />
+                <Button Content="Refresh" Command="{Binding RefreshCommand}" Margin="12,0,0,0" />
+            </StackPanel>
+            <TextBlock Text="{Binding Summary}" Foreground="{StaticResource AppTextDim}" Margin="0,0,0,8" />
+        </StackPanel>
+        <DataGrid ItemsSource="{Binding Lamps}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
+                  Background="{StaticResource AppSurface}" RowBackground="{StaticResource AppSurface}"
+                  AlternatingRowBackground="{StaticResource AppSurfaceRaised}" Foreground="{StaticResource AppText}"
+                  BorderBrush="{StaticResource AppBorder}" GridLinesVisibility="None" CanUserAddRows="False">
+            <DataGrid.ColumnHeaderStyle>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="{StaticResource AppSurfaceRaised}" />
+                    <Setter Property="Foreground" Value="{StaticResource AppTextDim}" />
+                    <Setter Property="Padding" Value="6,4" />
+                    <Setter Property="BorderThickness" Value="0" />
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Emulator" Binding="{Binding Emulator}" Width="110" />
+                <DataGridTextColumn Header="Game" Binding="{Binding Game}" Width="200" />
+                <DataGridTextColumn Header="Output" Binding="{Binding Output}" Width="160" />
+                <DataGridTextColumn Header="Mapped to" Binding="{Binding MappedTo}" Width="170" />
+                <DataGridTextColumn Header="Values" Width="80">
+                    <DataGridTextColumn.Binding>
+                        <MultiBinding StringFormat="{}{0}–{1}">
+                            <Binding Path="Min" />
+                            <Binding Path="Max" />
+                        </MultiBinding>
+                    </DataGridTextColumn.Binding>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Changes" Binding="{Binding Changes}" Width="70" />
+                <DataGridTextColumn Header="Games played" Binding="{Binding Sessions}" Width="90" />
+                <DataGridTextColumn Header="Last seen" Binding="{Binding LastSeen, StringFormat=yyyy-MM-dd HH:mm}" Width="120" />
+                <DataGridTextColumn Header="Map" Binding="{Binding MapSource}" Width="*" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</UserControl>

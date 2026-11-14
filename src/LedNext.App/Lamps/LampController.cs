@@ -25,6 +25,7 @@ public sealed class LampController : IDisposable
     private IReadOnlyList<string> _chain = Array.Empty<string>();
     private ControlMap? _map;
     private readonly HashSet<string> _seenOutputs = new(StringComparer.OrdinalIgnoreCase);
+    private LampOutputLog? _outputLog; // the running game's outputs, stored in games.db when it ends
 
     public LampController(AppSession session, MainViewModel main)
     {
@@ -37,6 +38,8 @@ public sealed class LampController : IDisposable
     }
 
     public LampLifecycle Lifecycle { get; }
+    /// <summary>The light shows (idle, start-up, shut-down); a game start ends them. Set by the App.</summary>
+    public Shows.ShowController? Shows { get; set; }
     /// <summary>Button labels read aloud (front-end launch, MAME pause).</summary>
     public Speech.SpeechController Speech { get; }
 
@@ -83,10 +86,12 @@ public sealed class LampController : IDisposable
         _chain = mame ? RomChain(game) : new[] { game };
         _game = new OutputSession(map, emulator, game, _chain);
         _seenOutputs.Clear();
+        _outputLog = new LampOutputLog(emulator, game, map.Source);
         // MAME games use their own control map (MAME's button order); other emulators the cabinet's.
         _map = mame ? _session.ControlMapFor(Mame, game).Map : null;
         AppLog.Info($"Lamps: {game} started ({emulator}, {via}); outputs mapped by {map.Source} [{_game.Section}].");
         _main.LampStatus = $"Lamps: {game}";
+        Shows?.Cancel($"{emulator} started {game}");
         Apply(Lifecycle.GameStarted(game, via, _session.Engine.Source, mame ? RomLights(game, via) : null, ShowsGame));
     }
 
@@ -118,6 +123,7 @@ public sealed class LampController : IDisposable
             var drives = _game.ControlsFor(name);
             AppLog.Info($"Lamps: {_game.Game} reports {name}" + (drives.Count > 0 ? $" → {string.Join(", ", drives)}" : " (not mapped)"));
         }
+        _outputLog?.Add(name, value, _game.ControlsFor(name));
         var changes = _game.Update(name, value);
         if (changes.Count == 0) return;
         Apply(Lifecycle.Lamps(changes));
@@ -137,7 +143,29 @@ public sealed class LampController : IDisposable
         if (_game is null) return;
         var outputs = string.Join(", ", _game.Values.Keys.OrderBy(k => k, StringComparer.OrdinalIgnoreCase));
         AppLog.Info($"Lamps: {_game.Game} outputs it reported: {(outputs.Length == 0 ? "none" : outputs)}.");
+        StoreOutputs();
     }
+
+    /// <summary>Known lamps: the game's outputs go into games.db (lamp_outputs), for the Lamps tab and later triggers.</summary>
+    private void StoreOutputs()
+    {
+        var log = _outputLog;
+        _outputLog = null;
+        if (log is null || log.Count == 0 || _session.Games is not { } db) return;
+        try
+        {
+            db.RecordLampOutputs(log.Emulator, log.Game, log.MapSource, log.Outputs());
+            AppLog.Info($"Lamps: {log.Count} output(s) of {log.Game} ({log.Emulator}) stored as known lamps.");
+            KnownLampsChanged?.Invoke();
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error($"Lamps: could not store the outputs of {log.Game}", ex);
+        }
+    }
+
+    /// <summary>After a game's outputs were stored (the Lamps tab refreshes).</summary>
+    public event Action? KnownLampsChanged;
 
     private void EndSession()
     {

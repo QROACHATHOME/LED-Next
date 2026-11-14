@@ -23,7 +23,7 @@ public sealed class SpeechController : IDisposable
 
     private readonly AppSession _session;
     private readonly SpeechHighlight _highlight = new();
-    private readonly RawInputWatcher _input = new();
+    private readonly RawInputWatcher _input = RawInputWatcher.Shared;
     private readonly DispatcherTimer _delay;
     private readonly Stopwatch _since = new();
     private SpeechSynthesizer? _synth;
@@ -284,7 +284,7 @@ public sealed class SpeechController : IDisposable
     public void Dispose()
     {
         Stop(null);
-        _input.Dispose();
+        _input.End(); // shared: the App disposes it
         try { _synth?.Dispose(); } catch { }
         _synth = null;
     }

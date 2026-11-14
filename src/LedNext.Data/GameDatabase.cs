@@ -16,11 +16,11 @@ public sealed record PlatformSummary(string Key, string Name, int Games, int Lit
 /// live in user_profiles / user_lights (schema 2), which an import never touches; a customized
 /// profile replaces the imported one at the same level (game or platform default).
 /// </remarks>
-public sealed class GameDatabase : IGameLibrary
+public sealed partial class GameDatabase : IGameLibrary
 {
     /// <summary>2: user edits · 3: games.buttons / tags · 4: launchbox_games · 5: launchbox_games.genre · 6: launchbox_games.emulator
-    /// · 7: button_banners.</summary>
-    public const int SchemaVersion = 7;
+    /// · 7: button_banners · 8: lamp_outputs (every output an emulator reported, GameDatabase.LampOutputs.cs).</summary>
+    public const int SchemaVersion = 8;
     private const string GameColumns = """
         g.platform, g.name, g.description, g.parent, g.players, g.info, g.sources, g.lighting,
         EXISTS(SELECT 1 FROM user_profiles u WHERE u.platform = g.platform AND u.game = g.name), g.buttons, g.tags,
@@ -84,6 +84,12 @@ public sealed class GameDatabase : IGameLibrary
             CREATE INDEX IF NOT EXISTS launchbox_games_added ON launchbox_games(date_added);
             CREATE TABLE IF NOT EXISTS button_banners(
                 rom TEXT PRIMARY KEY COLLATE NOCASE, buttons INTEGER NOT NULL, positions TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS lamp_outputs(
+                emulator TEXT NOT NULL COLLATE NOCASE, game TEXT NOT NULL COLLATE NOCASE, output TEXT NOT NULL COLLATE NOCASE,
+                mapped_to TEXT NOT NULL DEFAULT '', map_source TEXT NOT NULL DEFAULT '',
+                first_seen TEXT NOT NULL, last_seen TEXT NOT NULL, sessions INTEGER NOT NULL DEFAULT 1,
+                min_value INTEGER NOT NULL DEFAULT 0, max_value INTEGER NOT NULL DEFAULT 0, changes INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY(emulator, game, output));
             """);
 
         var oldVersion = ReadMeta(c, "schema_version");

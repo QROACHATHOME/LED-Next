@@ -31,12 +31,14 @@ public sealed class FrontEndController : IDisposable
     private volatile Timing? _timing;
 
     private readonly Lamps.LampController _lamps;
+    private readonly Shows.ShowController _shows;
 
-    public FrontEndController(AppSession session, MainViewModel main, Lamps.LampController lamps)
+    public FrontEndController(AppSession session, MainViewModel main, Lamps.LampController lamps, Shows.ShowController shows)
     {
         _session = session;
         _main = main;
         _lamps = lamps;
+        _shows = shows;
         _dispatcher = Application.Current.Dispatcher;
         _server.MessageReceived += m =>
         {
@@ -70,6 +72,12 @@ public sealed class FrontEndController : IDisposable
     {
         var handled = Clock.Elapsed;
         if (m.Event != FrontEndEvents.Select) AppLog.Info($"Front end: {m}");
+        _shows.FrontEndEvent(m);
+        if (m.Event == FrontEndEvents.Started)
+        {
+            _shows.FrontEndStarted(m.Source); // the start-up show, if one is picked; selections wait for it
+            return;
+        }
         ILightSource? lights = null;
         bool launch = false, closed = false;
         string what = m.Title ?? m.Platform ?? m.Event;
@@ -102,6 +110,21 @@ public sealed class FrontEndController : IDisposable
         else if (m.Event == FrontEndEvents.Exit) step = life.FrontEndExit(lights);
         else if (lights is null) return;
         else step = launch ? life.FrontEndLaunch(lights) : life.FrontEndSelection(lights);
+
+        // Light shows: a selection waits for the show playing (idle, start-up) and is shown when it ends; a launch or
+        // an exit ends the show; the close plays the shut-down show before all off.
+        bool selection = !closed && !launch && m.Event != FrontEndEvents.Exit;
+        if (selection && step.Show is { } waiting && _shows.Defer(waiting)) return;
+        if (!selection)
+        {
+            if (closed && step.Show is { } off && _shows.FrontEndClosing(m.Source, off))
+            {
+                _lamps.AfterFrontEnd();
+                _lamps.Speech.Stop("the front end closed");
+                return;
+            }
+            _shows.Cancel(launch ? "a game was launched" : closed ? "the front end closed" : "the game exited");
+        }
 
         // Before showing it: the engine renders a new source at once and may report it before Apply returns.
         if (step.Show is { } shown && !closed) _timing = new Timing(shown, what, pipeMs, received, handled, Clock.Elapsed);

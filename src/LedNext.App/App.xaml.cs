@@ -12,6 +12,7 @@ public partial class App : Application
     private AppSession? _session;
     private FrontEndController? _frontEnd;
     private Lamps.LampController? _lamps;
+    private Shows.ShowController? _shows;
     private Mutex? _singleInstance;
 
     protected override void OnStartup(StartupEventArgs e)
@@ -62,7 +63,12 @@ public partial class App : Application
         // The lamp controller owns the panel lifecycle; the front end feeds it, so it is created first.
         _lamps = new Lamps.LampController(_session, vm);
         vm.Speech = new ViewModels.SpeechViewModel(_session, _lamps.Speech);
-        _frontEnd = new FrontEndController(_session, vm, _lamps);
+        _shows = new Shows.ShowController(_session, vm, _lamps, Dispatcher);
+        _lamps.Shows = _shows;
+        vm.Animations = new ViewModels.AnimationsViewModel(_session, _shows);
+        vm.KnownLamps = new ViewModels.KnownLampsViewModel(_session);
+        _lamps.KnownLampsChanged += () => vm.KnownLamps.Refresh();
+        _frontEnd = new FrontEndController(_session, vm, _lamps, _shows);
         _frontEnd.ShowRequested += () => BringToFront(window);
         _frontEnd.Start();
         _lamps.Start();
@@ -85,8 +91,10 @@ public partial class App : Application
     protected override void OnExit(ExitEventArgs e)
     {
         _tray?.Dispose();
+        _shows?.Dispose();
         _lamps?.Dispose();
         _frontEnd?.Dispose();
+        Speech.RawInputWatcher.Shared.Dispose();
         _session?.Dispose();
         if (_singleInstance is not null)
         {

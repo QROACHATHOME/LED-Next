@@ -183,7 +183,13 @@
   - [ ] Verify on the cabinet (visit 12): voice through the cabinet speakers, blink timing, joystick/button interrupt
         (watch for a gamepad whose noisy axis stops the speech at once)
 - [ ] After Start/Coin LEDs are wired: re-run the wiring wizard for them; consider turning `lamps.startLampsOnButton1` off
-- [ ] Attract mode / idle lighting in the front end (with animations, phase 5)
+- [x] Idle animation (attract), start-up / shut-down animations for BigBox, sound-reactive idle (2026-11-14,
+      Animations tab, config v11, all off). Simulator-checked with a fake BigBox; the sound meter only checked in
+      silence on the dev PC
+- [x] Known lamps in games.db (`lamp_outputs`, schema 8) + Lamps tab (2026-11-14)
+- [ ] Lamp triggers built on the known lamps (e.g. an output starts a show or lights other buttons); move
+      `lamps.maps` into the database then
+- [ ] On the cabinet: idle with a real gamepad / I-PAC, BigBox's own attract mode, sound reaction with BigBox videos
 - [ ] Animations (`*.lwax`) — phase 5
 
 ## Ultimate I/O (2026-11-14) — needs online testers

@@ -10,10 +10,15 @@ namespace LedNext.App.Speech;
 /// <see cref="Begin"/> and <see cref="End"/> (gamepads send many reports, so it isn't left on). Keyboard: key
 /// downs only. Joysticks and gamepads: a report that differs from that device's previous one (the first report of
 /// each device is only remembered). Mouse and trackball movement is not watched. UI thread only. Never throws:
-/// a failure is logged and the watcher stays off.
+/// a failure is logged and the watcher stays off. Windows keeps one raw-input registration per process, so speech
+/// and the idle show share <see cref="Shared"/>: it listens while at least one of them has called Begin.
 /// </summary>
 public sealed class RawInputWatcher : IDisposable
 {
+    /// <summary>The one watcher of this process (UI thread).</summary>
+    public static RawInputWatcher Shared { get; } = new();
+    private readonly HashSet<string> _owners = new();
+
     private const int WM_INPUT = 0x00FF;
     private const uint RID_INPUT = 0x10000003, RIDI_DEVICENAME = 0x20000007;
     private const uint RIM_TYPEKEYBOARD = 1, RIM_TYPEHID = 2;
@@ -27,8 +32,9 @@ public sealed class RawInputWatcher : IDisposable
     /// <summary>Raised on the UI thread with what was pressed or moved ("key", "HID\VID_D209&PID_0410…").</summary>
     public event Action<string>? Input;
 
-    public void Begin()
+    public void Begin(string owner = "speech")
     {
+        _owners.Add(owner);
         if (_listening) return;
         try
         {
@@ -44,9 +50,10 @@ public sealed class RawInputWatcher : IDisposable
         catch (Exception ex) { AppLog.Error("Speech: could not watch the controls", ex); }
     }
 
-    public void End()
+    public void End(string owner = "speech")
     {
-        if (!_listening) return;
+        _owners.Remove(owner);
+        if (!_listening || _owners.Count > 0) return;
         _listening = false;
         try { Register(RIDEV_REMOVE, IntPtr.Zero); }
         catch (Exception ex) { AppLog.Error("Speech: could not stop watching the controls", ex); }
@@ -122,6 +129,7 @@ public sealed class RawInputWatcher : IDisposable
 
     public void Dispose()
     {
+        _owners.Clear();
         End();
         _window?.Dispose();
         _window = null;
