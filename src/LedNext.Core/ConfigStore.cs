@@ -86,6 +86,12 @@ public static class ConfigStore
             AppLog.Info("Config upgraded from version 8 to 9 (adds a pause after the game's name, 0 s).");
             config.Version = 9;
         }
+        if (config.Version < 10)
+        {
+            // v10 added Speech.SpeakNameWithoutLabels; on (the property's default), so a game without labels says its name.
+            AppLog.Info("Config upgraded from version 9 to 10 (games without button labels now say their name; Speech tab to turn off).");
+            config.Version = 10;
+        }
         config.Lamps ??= new LampSettings();
         config.Speech ??= new LedNext.Core.Speech.SpeechSettings();
         config.Lamps.Maps ??= new();

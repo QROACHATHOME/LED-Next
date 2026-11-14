@@ -25,6 +25,11 @@ public sealed class SpeechSettings
     /// pause, as before.
     /// </summary>
     public double PauseAfterNameSeconds { get; set; }
+    /// <summary>
+    /// Say the game's name even when it has no labelled buttons (config version 10; on). Off: such games say nothing.
+    /// Only with <see cref="SpeakGameName"/>.
+    /// </summary>
+    public bool SpeakNameWithoutLabels { get; set; } = true;
     /// <summary>Also speak Start and Coin ("Start Game", "Insert Coin").</summary>
     public bool SpeakStartCoin { get; set; }
     /// <summary>Also speak joystick and other non-button labels ("Move", "Aim").</summary>
@@ -66,6 +71,7 @@ public sealed class SpeechSettings
             StopOnInput = keep?.StopOnInput ?? true,
             DelaySeconds = keep?.DelaySeconds ?? 1.0,
             PauseAfterNameSeconds = keep?.PauseAfterNameSeconds ?? 0, // LEDBlinky has no such setting
+            SpeakNameWithoutLabels = keep?.SpeakNameWithoutLabels ?? true, // nor this one
         };
         s.Enabled = Flag("GameStartSpeakControls", false);
         s.SpeakGameName = Flag("GameStartSpeakName", true);

@@ -64,10 +64,16 @@ public class SpeechTests
     }
 
     [Fact]
-    public void AGameWithoutLabelsSaysNothing()
+    public void AGameWithoutLabelsSaysOnlyItsName()
     {
-        var items = SpeechPlan.For(Lights(C("P1_BUTTON1", null, "P1_B1")), new SpeechSettings(), "Galaga");
-        Assert.Empty(items); // not even the name
+        var lights = Lights(C("P1_BUTTON1", null, "P1_B1"));
+        var items = SpeechPlan.For(lights, new SpeechSettings { PauseAfterNameSeconds = 2 }, "Star Gladiator 2 (USA)");
+        Assert.Equal(new[] { "Star Gladiator 2" }, items.Select(i => i.Text)); // just the name (the default)
+        Assert.Equal(TimeSpan.Zero, items[0].PauseAfter);                     // nothing follows it
+
+        Assert.Empty(SpeechPlan.For(lights, new SpeechSettings { SpeakNameWithoutLabels = false }, "Galaga"));
+        Assert.Empty(SpeechPlan.For(lights, new SpeechSettings { SpeakGameName = false }, "Galaga"));
+        Assert.Empty(SpeechPlan.For(lights, new SpeechSettings(), null));     // on pause: no name, nothing to say
     }
 
     [Fact]

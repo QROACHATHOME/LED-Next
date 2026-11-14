@@ -60,7 +60,13 @@ public static class SpeechPlan
         }
 
         var items = new List<SpeechItem>();
-        if (groups.Count == 0) return items; // nothing labelled: say nothing, not just the name
+        if (groups.Count == 0)
+        {
+            // Nothing labelled: just the name (SpeakNameWithoutLabels), else nothing.
+            if (settings.SpeakNameWithoutLabels && settings.SpeakGameName && !string.IsNullOrWhiteSpace(title))
+                items.Add(new SpeechItem(SpokenTitle(title), Array.Empty<string>()));
+            return items;
+        }
         if (settings.SpeakGameName && !string.IsNullOrWhiteSpace(title)) items.Add(new SpeechItem(SpokenTitle(title), Array.Empty<string>(), settings.PauseAfterName));
         if (!string.IsNullOrWhiteSpace(settings.Prefix)) items.Add(new SpeechItem(settings.Prefix.Trim(), Array.Empty<string>()));
         items.AddRange(groups.Select(g => new SpeechItem(g.Text, g.Buttons)));

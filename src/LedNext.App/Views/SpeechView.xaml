@@ -5,7 +5,7 @@
         <StackPanel Margin="16" MaxWidth="720" HorizontalAlignment="Left">
             <TextBlock Text="Speak button labels" FontSize="15" FontWeight="SemiBold" />
             <TextBlock TextWrapping="Wrap" Foreground="{StaticResource AppTextDim}" Margin="0,4,0,12"
-                       Text="When LaunchBox / BigBox launches a game, its button labels (Games tab) are read aloud and each button blinks while its label is said. Games without labels say nothing." />
+                       Text="When LaunchBox / BigBox launches a game, its button labels (Games tab) are read aloud and each button blinks while its label is said. Games without labels say only their name (or nothing, below)." />
 
             <CheckBox Content="Speak button labels when a game is launched" IsChecked="{Binding Enabled}" Margin="0,0,0,12" />
             <TextBlock TextWrapping="Wrap" Foreground="{StaticResource AppTextDim}" Margin="0,0,0,8"
@@ -55,6 +55,9 @@
                         Value="{Binding PauseAfterNameSeconds}" Margin="0,6" />
                 <TextBlock Grid.Column="2" Text="{Binding PauseAfterNameSeconds}" VerticalAlignment="Center" Margin="8,0,0,0" />
             </Grid>
+            <CheckBox Content="Say the name even for games without button labels" IsChecked="{Binding SpeakNameWithoutLabels}"
+                      IsEnabled="{Binding SpeakGameName}" Margin="24,0,0,3"
+                      ToolTip="Off: a game with no labelled buttons says nothing. Labels can be added per game in the Games tab." />
             <CheckBox Content="Speak again when the game is paused (MAME)" IsChecked="{Binding SpeakOnPause}" Margin="0,3" />
             <CheckBox Content="Also say Start and Coin" IsChecked="{Binding SpeakStartCoin}" Margin="0,3" />
             <CheckBox Content="Also say joystick and other non-button labels" IsChecked="{Binding SpeakJoysticks}" Margin="0,3,0,12" />
