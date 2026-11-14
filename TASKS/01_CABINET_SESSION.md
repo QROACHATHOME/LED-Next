@@ -20,7 +20,7 @@ Don't edit any emulator's settings without the user's OK (they are read-only inp
    - **Flycast**: Network Output (still off in Flycast Race at visit 12). Write down the game id and lamp names.
    - **Supermodel**: `-outputs=win`.
 4. pcsx2x6, the Xemu Chihiro fork and Hypseus Singe send no outputs (checked in their source); nothing to test.
-5. Still open from visit 12: speech on MAME pause.
+5. Speech on pause: dropped (the user never uses pause).
 6. Add a "Visit 13" section to `CABINET_RESULTS.md`. Commit, ask before pushing.
 
 ## Visit 12 (next visit) — lamp maps per emulator, spoken button labels

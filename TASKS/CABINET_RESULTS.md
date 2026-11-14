@@ -664,4 +664,6 @@ v0.1.4 installed with no config change.
   a `lamps.maps` row would need that exact game name.
 - **Model 2** (ElSemi's EMULATOR.EXE in the CoinOPS collections): no output setting in EMULATOR.INI. Keisho covers it.
 - TeknoParrot with "Enable Outputs" but no OutputBlaster.dll: not checked (only 2 games have the dll).
-- Not checked: speech on MAME pause.
+- Speech on pause: not needed, the user never uses pause.
+- Crazy Taxi: the user saw a button flash, though LED-Next mapped nothing (`lamp7` unmapped, speech said only the name).
+- TeknoParrot: the user will add OutputBlaster.dll to the other TeknoParrot games themselves.

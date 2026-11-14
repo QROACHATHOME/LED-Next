@@ -156,9 +156,10 @@
       lights or MameOutputs.ini; their built-in start lamps instead)
   - [x] On the cabinet (visit 13): Keisho, Odin, Supermodel, TeknoParrot (Output Blaster) start lamps light; MAME
         unchanged. Fixed: Supermodel / Output Blaster names had bytes after their NUL
-  - [ ] Flycast built-in start lamps? Crazy Taxi sends only `lamp7` (meaning unknown)
-  - [ ] TeknoParrot: "Enable Outputs" without OutputBlaster.dll: does TeknoParrot send anything itself? (visit 7
-        found no Output Blaster installed)
+  - [ ] Flycast built-in start lamps? Crazy Taxi sends only `lamp7` (meaning unknown; the user saw a button flash
+        in Crazy Taxi, though LED-Next mapped nothing)
+  - [x] TeknoParrot without OutputBlaster.dll: not needed. The user adds Output Blaster to the other TeknoParrot
+        games themselves (visit 13)
 - [ ] **Lamps design** (`TASKS/DESIGN_LAMP_STATES.md`): per-emulator adapters → one lifecycle state machine in
       Core (who owns the panel: browsing / launching / playing / playing + lamps) → mapping tables per emulator
       (MameOutputs.ini for MAME, LED-Next's own tables for the others). Do it before adding Flycast/TeknoParrot maps
