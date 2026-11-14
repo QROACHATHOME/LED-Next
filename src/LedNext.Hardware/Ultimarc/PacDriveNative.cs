@@ -19,9 +19,6 @@ internal static class PacDriveNative
     private static bool _resolverInstalled;
     private static string? _configuredPath;
 
-    public const int UltimarcVendorId = 0xD209;
-    public const int PacLed64FirstProductId = 0x1401; // board ID 1; 0x1402..0x1404 = IDs 2..4
-
     public static string DefaultFileName => Environment.Is64BitProcess ? "PacDrive64.dll" : "PacDrive32.dll";
 
     /// <summary>Points the loader at a specific DLL (or null for the exe folder). Call before the first native call.</summary>
@@ -86,12 +83,12 @@ internal static class PacDriveNative
     [DllImport(Lib, CallingConvention = CallingConvention.StdCall)]
     public static extern int PacGetVersionNumber(int id);
 
-    /// <summary>Sets one LED. Port is 0-based (0..63).</summary>
+    /// <summary>Sets one LED. Port is 0-based (0..63 on a PacLED64, 0..95 on an Ultimate I/O).</summary>
     [DllImport(Lib, CallingConvention = CallingConvention.StdCall)]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static extern bool Pac64SetLEDIntensity(int id, int port, byte intensity);
 
-    /// <summary>Sets all 64 LEDs in one call. Not present in every SDK build — callers fall back to per-port writes.</summary>
+    /// <summary>Sets every LED in one call (64 bytes PacLED64, 96 Ultimate I/O). Not present in every SDK build — callers fall back to per-port writes.</summary>
     [DllImport(Lib, CallingConvention = CallingConvention.StdCall)]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static extern bool Pac64SetLEDIntensities(int id, byte[] data);

@@ -6,6 +6,9 @@ Emulators speaking MAME's protocols are now told apart by their process (the log
 Model 2. Start lamps of those work without setup; anything else needs a `lamps.maps` row. Checked with a fake only.
 Don't edit any emulator's settings without the user's OK (they are read-only input).
 1. `git pull`, build, ask the user, then run `Install LED-Next.cmd`. No config change this time.
+   The board driver was reworked for the Ultimate I/O: check the log still says
+   `device 0: VID D209 PID 1401 … → PacLED64 #1` (and #2), both boards Online, and a LaunchBox scroll lights as
+   fast as before (Timing lines). The PacLED64 still sends one all-pins command per change.
 2. In BigBox launch **Galaga**: the log must still say `outputs come from mame….exe → MAME` and the Start lamp blinks
    as before. If it names something other than MAME, write down the exe name (that is a bug).
 3. For each of these the user has installed, check (read only) whether outputs are on, and with the user's OK turn

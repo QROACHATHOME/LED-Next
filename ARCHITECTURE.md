@@ -8,7 +8,7 @@
 | `src/LedNext.LaunchBox` | FrontEnd, LaunchBox's plugin API | LaunchBox / BigBox plugin (thin: events → pipe). Built against `<LaunchBox>\Core\Unbroken.LaunchBox.Plugins.dll`, else against `tools/LaunchBoxPluginStubs` (compile-only stand-in) |
 | `src/LedNext.Core` | FrontEnd | Data model (panel, wiring, config), JSON store, lighting engine, test patterns, board interfaces, logging, game model + light resolver (`Games/`), LEDBlinky importer (`Import/LedBlinky/`) |
 | `src/LedNext.Data` | Core, Microsoft.Data.Sqlite | The game library in SQLite (`GameDatabase`, implements `IGameLibrary`) |
-| `src/LedNext.Hardware` | Core | Board drivers: Ultimarc PacLED64 (via PacDrive SDK DLL) and a simulator |
+| `src/LedNext.Hardware` | Core | Board drivers: Ultimarc PacLED64 and Ultimate I/O (via PacDrive SDK DLL) and a simulator |
 | `src/LedNext.App` | Core, Data, Hardware | WPF desktop app: panel designer, games browser, Nodify wiring graph, board test view |
 | `tests/LedNext.Tests` | Core, Data | xUnit tests; the importer tests run on the real files in `import-samples/` and `cabinet/` |
 
@@ -306,8 +306,25 @@ per-board byte[PinCount]  ──►  write only if changed  ──►  ILedBoard
 
 - `ILedBoard` / `ILedBoardProvider` are defined in Core; drivers implement them.
 - `PacLed64Provider` loads `PacDrive64.dll` (or `PacDrive32.dll` in a 32-bit process) from the
-  configured path or the exe folder, enumerates devices and keeps those with
-  VID `0xD209`, PID `0x1401`–`0x1404` (board ID 1–4).
+  configured path or the exe folder, enumerates devices and keeps the LED boards `BoardModels.Identify` (Core,
+  tested) recognises, as `UltimarcLedBoard`s:
+  - **PacLED64**: VID `0xD209`, PID `0x1401`–`0x1404` (board ID 1–4), 64 pins. Verified on the cabinet.
+  - **I-PAC Ultimate I/O**: PID `0x0410` + (DirectInput mode ? 2 : 0) + (board ID − 1), board ID 1–2, or SDK
+    device type 6; 96 pins (32 RGB). Same SDK calls with 96 bytes. Ultimarc's readme calls the all-pins command
+    long (20 ms) and says to use it only when more than half the LEDs change, so the Ultimate I/O sends smaller
+    changes pin by pin (the PacLED64 keeps one all-pins command per changed frame, as verified). In XInput mode
+    the board is an Xbox 360 pad (`045E:028E`) with no LEDs. **Untested on a real board**; testers follow
+    `docs/TESTING_ULTIMATE_IO.md` and report with the "Ultimate I/O test report" issue template. Sources:
+    github.com/benbaker76/PacDriveSDK (readme, `PacDrive.cs`), LEDSpicer `src/devices/Ultimarc/README.md`,
+    Ultimarc-linux `ipacultimate.h`.
+  - The first, 10th and 100th write of each board are logged with how many were all-pins commands.
+- `BoardModels` (Core) is the catalogue: model, pin count, board IDs; `Add` / `Remove` put a board in the wiring
+  (the Boards tab's "Add a board" and per-board Remove, which also drops that board's pin bindings). Both are undo
+  steps. In simulator mode a change to the board list rescans, so the virtual boards follow (also after undo).
+  The Boards tab shows only the boards of the model picked in "Add a board" (the user's request); it starts on
+  the first configured board's model and says how many boards are hidden.
+- LEDBlinky import: controller `PACLED64` → `PacLED64#id`; any name containing `ULTIMATE` → `UltimateIO#id`
+  (LEDBlinky's real name for the Ultimate I/O isn't known yet).
 - `SimulatedBoardProvider` creates a virtual board for every board in the wiring config, so wiring
   designed on a dev PC carries over unchanged to the cabinet.
 

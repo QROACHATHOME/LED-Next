@@ -183,6 +183,16 @@
 - [ ] Attract mode / idle lighting in the front end (with animations, phase 5)
 - [ ] Animations (`*.lwax`) — phase 5
 
+## Ultimate I/O (2026-11-14) — needs online testers
+- [x] I-PAC Ultimate I/O support from Ultimarc's documentation (`BoardModels`, `UltimarcLedBoard`, Boards tab add /
+      remove, LEDBlinky "ULTIMATE" controllers). 96 pins; batch write only for big changes. Simulator-checked (add,
+      96 pins, pin walk, remove, undo/redo). The user has no board
+- [x] Tester guide `docs/TESTING_ULTIMATE_IO.md` + issue template "Ultimate I/O test report"
+- [ ] First tester report: device line (PID / type / mode), pins 1-3 colours, pin walk, flicker/lag, LEDBlinky's
+      controller name for the board
+- [ ] Open questions for testers: does Pac64SetLEDIntensities take 96 bytes on every firmware? Does board ID 2
+      really enumerate as PID 0411? Is per-pin writing fast enough for animations?
+
 ## At the arcade machine — suggested order
 
 ### 1. Get the boards talking (the driver has never run on real hardware)

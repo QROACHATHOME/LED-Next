@@ -119,6 +119,20 @@ public static class ControlMapBuilder
         return map;
     }
 
+    /// <summary>
+    /// The LED-Next board a LEDBlinky controller is: "PACLED64" (seen on the cabinet, type 3), or any name with
+    /// "ULTIMATE" in it for the I-PAC Ultimate I/O (LEDBlinky's exact name for it is not known yet; a tester's
+    /// LEDBlinkyInputMap.xml will tell).
+    /// </summary>
+    public static string? BoardKeyFor(InputMapPort port)
+    {
+        if (port.ControllerName.Contains("PACLED64", StringComparison.OrdinalIgnoreCase))
+            return BoardModels.PacLed64.KeyFor(port.ControllerId);
+        if (port.ControllerName.Contains("ULTIMATE", StringComparison.OrdinalIgnoreCase))
+            return BoardModels.UltimateIO.KeyFor(Math.Max(1, port.ControllerId));
+        return null;
+    }
+
     /// <summary>Input codes reaching each LED-Next button, through LEDBlinky port → LED-Next pin binding.</summary>
     public static Dictionary<string, HashSet<string>> CollectButtonCodes(IReadOnlyList<InputMapPort> ports, WiringMap wiring, List<string> notes)
     {
@@ -127,13 +141,12 @@ public static class ControlMapBuilder
         foreach (var port in ports)
         {
             if (port.InputCodes.Count == 0) continue;
-            if (!port.ControllerName.Contains("PACLED64", StringComparison.OrdinalIgnoreCase))
+            if (BoardKeyFor(port) is not { } boardKey)
             {
                 if (unsupported.Add($"{port.ControllerName}#{port.ControllerId}"))
                     notes.Add($"LEDBlinky controller {port.ControllerName} #{port.ControllerId} is not supported yet; its ports were skipped.");
                 continue;
             }
-            var boardKey = $"PacLED64#{port.ControllerId}";
             var binding = wiring.FindByPin(boardKey, port.Port);
             if (binding is null)
             {

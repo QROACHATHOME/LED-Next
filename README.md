@@ -58,8 +58,12 @@ Tested on a 4-player cabinet with two Ultimarc PacLED64 boards, LaunchBox/BigBox
 
 **LED controllers**
 - Ultimarc **PacLED64** (RGB), several boards per PC, identified by board id rather than USB order.
+- Ultimarc **I-PAC Ultimate I/O** (96 pins, 32 RGB LEDs): **new and untested on a real board.** Written from
+  Ultimarc's documentation; if you have one, please try it with
+  [docs/TESTING_ULTIMATE_IO.md](docs/TESTING_ULTIMATE_IO.md) and report back.
+- Add or remove boards in the **Boards** tab.
 - **Simulator** mode: everything works with no boards attached.
-- Not supported yet: other Ultimarc boards (PacDrive, Ultimate I/O, I-PAC LED), LEDWiz, and other makers' boards.
+- Not supported yet: other Ultimarc boards (PacDrive, Nano-LED, I-PAC LED), LEDWiz, and other makers' boards.
 
 **Panel and wiring**
 - A visual panel designer: buttons, joysticks, trackball, coin and start, with a photo of your panel as a background.
@@ -106,8 +110,8 @@ Tested on a 4-player cabinet with two Ultimarc PacLED64 boards, LaunchBox/BigBox
 **Not yet:** other front ends (only LaunchBox/BigBox), LEDBlinky animations (`.lwax`), BigBox playlists, and
 lighting by front-end section.
 
-**Needs:** Windows 10 or 11, the .NET 8 Desktop Runtime (or the self-contained build), and, for PacLED64 boards,
-Ultimarc's `PacDrive64.dll`, which you supply yourself.
+**Needs:** Windows 10 or 11, the .NET 8 Desktop Runtime (or the self-contained build), and, for PacLED64 or Ultimate I/O
+boards, Ultimarc's `PacDrive64.dll`, which you supply yourself.
 
 ## Install
 **From a release** (no build tools needed): download from the

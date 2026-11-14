@@ -156,6 +156,11 @@ public sealed partial class MainViewModel : ObservableObject
 
     private void OnStructureChanged()
     {
+        // The simulator makes one virtual board per configured board: after a board was added or removed (or an
+        // undo brought one back), make them again. Real boards are found whether configured or not.
+        if (_session.Config.Hardware.Mode == HardwareMode.Simulator &&
+            !_session.Engine.Boards.Select(b => b.Key).Order().SequenceEqual(_session.Config.Wiring.Boards.Select(b => b.Key).Order()))
+            _session.Rescan();
         Panel.Rebuild();
         Wiring.Rebuild();
         Boards.Rebuild();

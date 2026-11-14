@@ -21,7 +21,7 @@
                 <Rectangle Width="1" Fill="{StaticResource AppBorder}" Margin="12,2" />
 
                 <CheckBox Content="Hardware mode" IsChecked="{Binding IsHardwareMode}" Margin="0,0,6,0"
-                          ToolTip="Off = simulator (no boards needed). On = drive the real PacLED64 boards." />
+                          ToolTip="Off = simulator (no boards needed). On = drive the real boards (PacLED64, Ultimate I/O)." />
                 <Button Content="Rescan boards" Command="{Binding RescanCommand}" />
 
                 <Rectangle Width="1" Fill="{StaticResource AppBorder}" Margin="12,2" />
