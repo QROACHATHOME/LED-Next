@@ -29,6 +29,8 @@ public sealed class SpeechController : IDisposable
     private SpeechSynthesizer? _synth;
     private bool _synthFailed;
     private Prompt? _current;
+    /// <summary>Set while one of Windows' newer voices speaks (<see cref="OneCoreSpeech"/>); cancelling stops it.</summary>
+    private CancellationTokenSource? _oneCore;
     private List<SpeechItem> _items = new();
     private List<SpeechItem>? _pending;
 
@@ -43,28 +45,34 @@ public sealed class SpeechController : IDisposable
         };
         _input.Input += what =>
         {
-            if (_current is null || _since.Elapsed < InputGrace) return;
+            if (!Talking || _since.Elapsed < InputGrace) return;
             Stop($"{what} was pressed");
         };
     }
 
     private SpeechSettings Settings => _session.Config.Speech;
 
-    public bool Speaking => _current is not null || _pending is not null;
+    /// <summary>A voice is talking now (not just waiting for the delay).</summary>
+    private bool Talking => _current is not null || _oneCore is not null;
+    public bool Speaking => Talking || _pending is not null;
 
-    /// <summary>The installed Windows voices, for the settings.</summary>
+    /// <summary>
+    /// The installed Windows voices, for the settings: Windows' newer voices first ("Microsoft Mark", clearer), then
+    /// the old SAPI ones ("Microsoft David Desktop", the ones LEDBlinky uses). The names never clash.
+    /// </summary>
     public static IReadOnlyList<string> Voices()
     {
+        var voices = OneCoreSpeech.Voices().ToList();
         try
         {
             using var s = new SpeechSynthesizer();
-            return s.GetInstalledVoices().Where(v => v.Enabled).Select(v => v.VoiceInfo.Name).ToList();
+            voices.AddRange(s.GetInstalledVoices().Where(v => v.Enabled).Select(v => v.VoiceInfo.Name));
         }
         catch (Exception ex)
         {
             AppLog.Warn($"Speech: could not list the Windows voices ({ex.Message}).");
-            return Array.Empty<string>();
         }
+        return voices;
     }
 
     /// <summary>The front end launched a game: say its labels after the delay.</summary>
@@ -119,6 +127,7 @@ public sealed class SpeechController : IDisposable
 
     private void Speak(List<SpeechItem> items, string why)
     {
+        if (OneCoreSpeech.Find(Settings.Voice) is { } newer) { SpeakOneCore(newer, items, why); return; }
         var synth = Synth();
         if (synth is null) return;
         Cancel();
@@ -149,6 +158,32 @@ public sealed class SpeechController : IDisposable
         }
     }
 
+    /// <summary>Says the items with one of Windows' newer voices. Never throws (async void on the UI thread).</summary>
+    private async void SpeakOneCore(Windows.Media.SpeechSynthesis.VoiceInformation voice, List<SpeechItem> items, string why)
+    {
+        Cancel();
+        var run = new CancellationTokenSource();
+        _oneCore = run;
+        try
+        {
+            _items = items;
+            _session.Engine.Highlight = Settings.BlinkButtons ? _highlight : null;
+            if (Settings.StopOnInput) _input.Begin();
+            _since.Restart();
+            AppLog.Info($"Speech ({why}, {voice.DisplayName}): {string.Join(" · ", items.Select(i => i.Buttons.Count == 0 ? i.Text : $"{i.Text} [{string.Join(",", i.Buttons)}]"))}");
+            await OneCoreSpeech.SpeakAsync(voice, items, Settings.ClampedRate, Settings.ClampedVolume,
+                i => { if (_oneCore == run) _highlight.Blink(items[i].Buttons); }, run.Token);
+            if (_oneCore == run) AppLog.Info($"Speech: done ({_since.Elapsed.TotalSeconds:0.0} s).");
+        }
+        catch (OperationCanceledException) { } // stopped: Stop/Cancel already cleaned up
+        catch (Exception ex) { AppLog.Error($"Speech: {voice.DisplayName} could not speak", ex); }
+        finally
+        {
+            if (_oneCore == run) { _oneCore = null; Finish(); }
+            run.Dispose();
+        }
+    }
+
     /// <summary>Stops speaking and blinking. <paramref name="why"/> is logged when something was being said.</summary>
     public void Stop(string? why)
     {
@@ -167,6 +202,12 @@ public sealed class SpeechController : IDisposable
             _current = null; // its SpeakCompleted is then ignored
             try { _synth?.SpeakAsyncCancel(c); }
             catch (Exception ex) { AppLog.Error("Speech: could not stop", ex); }
+        }
+        if (_oneCore is not null)
+        {
+            var run = _oneCore;
+            _oneCore = null; // its SpeakOneCore then skips its own clean-up
+            run.Cancel();
         }
         Finish();
     }

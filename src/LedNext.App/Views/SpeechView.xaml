@@ -8,6 +8,8 @@
                        Text="When LaunchBox / BigBox launches a game, its button labels (Games tab) are read aloud and each button blinks while its label is said. Games without labels say nothing." />
 
             <CheckBox Content="Speak button labels when a game is launched" IsChecked="{Binding Enabled}" Margin="0,0,0,12" />
+            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource AppTextDim}" Margin="0,0,0,8"
+                       Text="Tip: voices without &quot;Desktop&quot; in their name (Microsoft Mark, David, Zira) are Windows' newer voices and sound clearer than the &quot;Desktop&quot; ones LEDBlinky uses." />
 
             <Grid Margin="0,0,0,12">
                 <Grid.ColumnDefinitions>
@@ -22,7 +24,8 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <TextBlock Text="Voice" VerticalAlignment="Center" />
-                <ComboBox Grid.Column="1" Grid.ColumnSpan="2" ItemsSource="{Binding Voices}" SelectedItem="{Binding Voice}" Margin="0,3" />
+                <ComboBox Grid.Column="1" Grid.ColumnSpan="2" ItemsSource="{Binding Voices}" SelectedItem="{Binding Voice}" Margin="0,3"
+                          ToolTip="Voices without &quot;Desktop&quot; in their name are Windows' newer voices, which sound clearer. The &quot;Desktop&quot; ones are the older voices LEDBlinky uses." />
                 <TextBlock Grid.Row="1" Text="Speed" VerticalAlignment="Center" />
                 <Slider Grid.Row="1" Grid.Column="1" Minimum="-10" Maximum="10" IsSnapToTickEnabled="True" TickFrequency="1"
                         Value="{Binding Rate}" Margin="0,6" />
