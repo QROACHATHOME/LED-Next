@@ -123,9 +123,10 @@ public sealed class MameWindowOutputs : IEmulatorOutputs
     {
         var data = Marshal.PtrToStructure<COPYDATASTRUCT>(lParam);
         if (data.dwData.ToInt64() != CopyDataIdString || data.lpData == IntPtr.Zero || data.cbData < 5) return false;
-        int id = Marshal.ReadInt32(data.lpData);
-        var name = Marshal.PtrToStringAnsi(data.lpData + 4, Math.Max(0, data.cbData - 5)).TrimEnd('\0');
-        _names[id] = name;
+        var bytes = new byte[data.cbData];
+        Marshal.Copy(data.lpData, bytes, 0, bytes.Length);
+        if (Core.Outputs.MameCopyData.ParseIdString(bytes) is not { } reply) return false;
+        _names[reply.Id] = reply.Name;
         return true;
     }
 

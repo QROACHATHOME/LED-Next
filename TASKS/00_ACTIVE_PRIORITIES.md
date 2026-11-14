@@ -154,7 +154,9 @@
       Singe send no outputs. Checked with a fake emulator named odin.exe (both protocols) and a fake MAME (unchanged).
       **Behaviour change:** Supermodel and Output Blaster games no longer count as MAME (no MAME control map, rom
       lights or MameOutputs.ini; their built-in start lamps instead)
-  - [ ] On the cabinet: whichever of these emulators the user has, with outputs switched on (visit 13)
+  - [x] On the cabinet (visit 13): Keisho, Odin, Supermodel, TeknoParrot (Output Blaster) start lamps light; MAME
+        unchanged. Fixed: Supermodel / Output Blaster names had bytes after their NUL
+  - [ ] Flycast built-in start lamps? Crazy Taxi sends only `lamp7` (meaning unknown)
   - [ ] TeknoParrot: "Enable Outputs" without OutputBlaster.dll: does TeknoParrot send anything itself? (visit 7
         found no Output Blaster installed)
 - [ ] **Lamps design** (`TASKS/DESIGN_LAMP_STATES.md`): per-emulator adapters → one lifecycle state machine in

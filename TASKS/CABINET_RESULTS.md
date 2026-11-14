@@ -637,3 +637,31 @@ The user asked for a setting for the gap between the game's name and its labels.
   `GameLights` carries the title. Bracketed extras are left out when speaking ("10-Yard Fight (World, set 1)" →
   "10-Yard Fight"). After the fix: `Speech (test, Microsoft Mark): 10-Yard Fight · Pass / Hike [P1_B1] · Lateral [P1_B2]`.
   BigBox launches already said LaunchBox's title.
+
+# Visit 13: more emulators' lamps, the reworked board driver (2026-11-14)
+v0.1.4 installed with no config change.
+- **Board driver** (reworked for the Ultimate I/O): `device 0: VID D209 PID 1401 … → PacLED64 #1`, `device 1 … PID 1402
+  → PacLED64 #2`, both Online, one all-pins command per change. LaunchBox scrolling: boards ~206 ms (write ~206 ms),
+  the same as before (board #1's USB path, visit 6).
+- **Galaga (MAME)**: `galaga started (MAME, network port 8000); outputs mapped by C:\LEDBlinky\MameOutputs.ini [default]`.
+  The user: "worked perfect".
+- **Keisho** (`F:\Collections\keisho\keisho.exe`, not in LaunchBox yet, run by hand): `%APPDATA%\Keisho\keisho.ini` already
+  has `outputs_network = true` (port 8000) and `outputs_windows = true`. Daytona USA: `outputs come from keisho.exe →
+  Keisho`, game `daytona93`, `LampStart → P1_START`. Also sends lamp0–lamp5, LampView1–4, LampLeader, RawLamps,
+  RawDrive. Both channels report the game; the second is ignored as it should be. Started outside the front end, the
+  panel kept BigBox's last game as the base lights, and its pause had nothing to say.
+- **Odin** (`%APPDATA%\odin\odin.ini`: `[outputs] network = on`): Brave Firefighters → `odin.exe → Odin`,
+  `1p_start_lamp → P1_START`, `2p_start_lamp → P2_START`. Works.
+- **Supermodel** (`Config\Supermodel.ini`: `Outputs = win`) and **TeknoParrot** (Operation G.H.O.S.T., OutputBlaster.dll
+  in its folder; `gs2.exe (… OutputBlaster.dll loaded) → TeknoParrot`): both named right, but every name had junk after
+  it (`scudplus do`, `LampStart _o`, `LampStart ÍÍ`), so nothing mapped. Their WM_COPYDATA reply is bigger than the
+  name; LED-Next read up to the block's end. **Fixed** (`MameCopyData`: the name ends at the first NUL). After the fix:
+  Scud Race Plus `LampStart → P1_START`; G.H.O.S.T. `LampStart → P1_START`, `2pLampStart → P2_START`.
+  Other outputs: Scud Race LampView1–4, LampLeader, RawDrive, RawLamps, BillDigit1–5; G.H.O.S.T. 1p/2pRecoil,
+  1p/2pHolderLamp, BillboardLamp. G.H.O.S.T. restarts its gs2.exe a few times on its own; followed fine.
+- **Flycast**: every copy has `NetworkOutput = yes` now (Flycast Race too). Crazy Taxi: game id
+  `CRAZY TAXI --------------` (padding is Flycast's), only `lamp7`. No built-in Flycast start lamps, so nothing lit;
+  a `lamps.maps` row would need that exact game name.
+- **Model 2** (ElSemi's EMULATOR.EXE in the CoinOPS collections): no output setting in EMULATOR.INI. Keisho covers it.
+- TeknoParrot with "Enable Outputs" but no OutputBlaster.dll: not checked (only 2 games have the dll).
+- Not checked: speech on MAME pause.

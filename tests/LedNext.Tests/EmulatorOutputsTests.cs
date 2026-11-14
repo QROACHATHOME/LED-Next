@@ -87,4 +87,20 @@ public class EmulatorOutputsTests
         Assert.Null(p.Feed("game = SEGA MARINE FISHING JAPAN"));            // sent again after a reset: same game
         Assert.Equal(new OutputLine.Value("m3ffb", -1), p.Feed("m3ffb = ffffffff")); // a 32-bit pattern: kept, not a crash
     }
+
+    private static byte[] Reply(int id, string text, params byte[] after) =>
+        BitConverter.GetBytes(id).Concat(System.Text.Encoding.Latin1.GetBytes(text)).Concat(new byte[] { 0 }).Concat(after).ToArray();
+
+    [Fact]
+    public void ReadsWindowsMessageNamesUpToTheirNul()
+    {
+        // MAME and Keisho: id, name, NUL and nothing more.
+        Assert.Equal((0, "daytona93"), MameCopyData.ParseIdString(Reply(0, "daytona93")));
+        // Supermodel and Output Blaster (visit 13): leftover bytes after the NUL ("scudplus do", "LampStart ÍÍ").
+        Assert.Equal((0, "scudplus"), MameCopyData.ParseIdString(Reply(0, "scudplus", (byte)' ', (byte)'d', (byte)'o')));
+        Assert.Equal((7, "LampStart"), MameCopyData.ParseIdString(Reply(7, "LampStart", 0xCD, 0xCD, 0xCD)));
+        // No NUL at all: the whole block.
+        Assert.Equal((3, "lamp0"), MameCopyData.ParseIdString(BitConverter.GetBytes(3).Concat("lamp0"u8.ToArray()).ToArray()));
+        Assert.Null(MameCopyData.ParseIdString(new byte[] { 1, 0 }));
+    }
 }
