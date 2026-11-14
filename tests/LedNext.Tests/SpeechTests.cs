@@ -50,6 +50,19 @@ public class SpeechTests
         Assert.Equal(2.0, SpeechSettings.FromLedBlinky(IniFile.Parse(Array.Empty<string>()),new SpeechSettings { PauseAfterNameSeconds = 2 }).PauseAfterNameSeconds); // kept
     }
 
+    [Theory]
+    [InlineData("Galaga (Namco rev. B)", "Galaga")]
+    [InlineData("Super Street Fighter II Turbo (World 940223)", "Super Street Fighter II Turbo")]
+    [InlineData("Street Fighter II [Turbo hack] (bootleg)", "Street Fighter II")]
+    [InlineData("1942", "1942")]
+    [InlineData("(prototype)", "(prototype)")]
+    public void SaysTheTitleWithoutBracketedExtras(string title, string spoken)
+    {
+        Assert.Equal(spoken, SpeechPlan.SpokenTitle(title));
+        var items = SpeechPlan.For(Lights(C("P1_BUTTON1", "Fire", "P1_B1")), new SpeechSettings(), title);
+        Assert.Equal(spoken, items[0].Text);
+    }
+
     [Fact]
     public void AGameWithoutLabelsSaysNothing()
     {

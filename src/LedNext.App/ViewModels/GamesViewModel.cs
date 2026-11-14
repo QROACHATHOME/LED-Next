@@ -410,7 +410,7 @@ public sealed partial class GamesViewModel : ObservableObject
         CopyAllCommand.NotifyCanExecuteChanged();
         CopyButtonCommand.NotifyCanExecuteChanged();
 
-        _main.SetSource(new GameLights(lights, $"Game: {title}"));
+        _main.SetSource(new GameLights(lights, $"Game: {title}", title));
     }
 
     private void RebuildPreviewButtons()
@@ -836,7 +836,7 @@ public sealed partial class GamesViewModel : ObservableObject
         UpdateSelection();
         OnPropertyChanged(nameof(CanEdit));
         CopyAllCommand.NotifyCanExecuteChanged();
-        _main.SetSource(new GameLights(lights, _title));
+        _main.SetSource(new GameLights(lights, _title)); // a template being tried: no spoken title
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteTemplate))]

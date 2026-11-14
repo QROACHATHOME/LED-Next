@@ -101,7 +101,7 @@ public sealed class SpeechController : IDisposable
         var source = _session.Engine.Source;
         var lights = source is Core.Outputs.LampOverlay o ? o.Base : source;
         if (lights is not GameLights g) return "Show a game first (select it in the Games tab).";
-        var items = SpeechPlan.For(g.Lights, Settings, g.Lights.Game);
+        var items = SpeechPlan.For(g.Lights, Settings, g.Title ?? g.Lights.Game);
         if (items.Count == 0) return $"{g.Name}: no labelled buttons to say.";
         Stop(null);
         Speak(items, "test");
@@ -116,7 +116,7 @@ public sealed class SpeechController : IDisposable
             AppLog.Info($"Speech: '{lights.Name}' isn't a game's lights; nothing to say.");
             return null;
         }
-        var items = SpeechPlan.For(g.Lights, Settings, withName ? title ?? g.Lights.Game : null);
+        var items = SpeechPlan.For(g.Lights, Settings, withName ? title ?? g.Title ?? g.Lights.Game : null);
         if (items.Count == 0)
         {
             AppLog.Info($"Speech: {g.Name} has no labelled buttons; nothing to say.");

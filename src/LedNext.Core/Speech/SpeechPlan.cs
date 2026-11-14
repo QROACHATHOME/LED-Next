@@ -17,6 +17,18 @@ public sealed record SpeechItem(string Text, IReadOnlyList<string> Buttons, Time
 /// </summary>
 public static class SpeechPlan
 {
+    /// <summary>
+    /// The title as it should be said: MAME's and LaunchBox's bracketed extras are dropped
+    /// ("Galaga (Namco rev. B)" → "Galaga", "Street Fighter II [Turbo hack]" → "Street Fighter II").
+    /// A title that is nothing but brackets is kept as it is.
+    /// </summary>
+    public static string SpokenTitle(string title)
+    {
+        var s = System.Text.RegularExpressions.Regex.Replace(title, @"\s*[\(\[][^\)\]]*[\)\]]", "");
+        s = System.Text.RegularExpressions.Regex.Replace(s, @"\s{2,}", " ").Trim();
+        return s.Length == 0 ? title.Trim() : s;
+    }
+
     public static List<SpeechItem> For(ResolvedLights lights, SpeechSettings settings, string? title)
     {
         var groups = new List<(string Text, List<string> Buttons)>();
@@ -49,7 +61,7 @@ public static class SpeechPlan
 
         var items = new List<SpeechItem>();
         if (groups.Count == 0) return items; // nothing labelled: say nothing, not just the name
-        if (settings.SpeakGameName && !string.IsNullOrWhiteSpace(title)) items.Add(new SpeechItem(title.Trim(), Array.Empty<string>(), settings.PauseAfterName));
+        if (settings.SpeakGameName && !string.IsNullOrWhiteSpace(title)) items.Add(new SpeechItem(SpokenTitle(title), Array.Empty<string>(), settings.PauseAfterName));
         if (!string.IsNullOrWhiteSpace(settings.Prefix)) items.Add(new SpeechItem(settings.Prefix.Trim(), Array.Empty<string>()));
         items.AddRange(groups.Select(g => new SpeechItem(g.Text, g.Buttons)));
         return items;

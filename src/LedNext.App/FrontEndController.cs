@@ -166,7 +166,7 @@ public sealed class FrontEndController : IDisposable
         var lights = GameLightResolver.Resolve(db, f.Platform, f.Game, map, config.Panel);
         if (keys is not null) lights = lights with { From = $"{lights.From}; {keys}" };
         var verb = playing ? "playing" : "browsing";
-        var light = new GameLights(lights, $"{source} ({verb}): {g.Title}");
+        var light = new GameLights(lights, $"{source} ({verb}): {g.Title}", g.Title);
         _main.FrontEndStatus = $"{source} · {verb} {g.Title}";
         // Selections arrive while scrolling; log them briefly, launches in full.
         if (playing) AppLog.Info($"{source}: playing '{g.Title}' → {f.Platform}/{f.Game} ({f.How}); {lights.From}.");
