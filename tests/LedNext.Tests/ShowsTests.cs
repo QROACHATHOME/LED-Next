@@ -238,6 +238,28 @@ public class IdleMonitorTests
         Assert.False(m.IsIdle);
         Assert.Equal(IdleChange.Start, m.Tick(M(11), M(0), After, null));
     }
+
+    [Fact]
+    public void WindowsLastInputDoesNotWobbleBetweenTheTwoClocks()
+    {
+        // The cabinet's bug: the tick clock moves in 16 ms steps, the steady clock smoothly, so "now - age" moved
+        // a few ms each second and stopped the idle show as if something was pressed.
+        var clock = new LastInputClock();
+        var m = new IdleMonitor();
+        const uint input = 1_000_000;
+        var first = clock.LastInput(M(1), input, input + 60_000);
+        Assert.Equal(IdleChange.Start, m.Tick(M(1), first, TimeSpan.FromMinutes(1), null));
+        for (int s = 1; s <= 30; s++)
+        {
+            var now = M(1) + TimeSpan.FromSeconds(s) + TimeSpan.FromMilliseconds(s % 3 * 7); // off the tick grid
+            uint tick = input + 60_000 + (uint)(s * 1000) - (uint)(s % 2 * 15);
+            Assert.Equal(IdleChange.None, m.Tick(now, clock.LastInput(now, input, tick), TimeSpan.FromMinutes(1), null));
+        }
+        // A real input (a new tick) stops it.
+        var press = clock.LastInput(M(1.6), input + 95_000, input + 96_000);
+        Assert.Equal(M(1.6) - TimeSpan.FromSeconds(1), press);
+        Assert.Equal(IdleChange.Stop, m.Tick(M(1.6), press, TimeSpan.FromMinutes(1), null));
+    }
 }
 
 public class KnownLampsTests

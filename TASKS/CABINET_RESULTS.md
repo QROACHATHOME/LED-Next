@@ -684,3 +684,28 @@ which lights no buttons. They asked for a fallback that copies MAME's lights int
   now they show MAME's.
 - Checked: BigBox Crazy Taxi → `Sega_Naomi/crzytaxi …; game crzytaxi` (was `Sega Naomi default`). Speech says only
   the name (MAME's default has no labels). The Flycast lamp `lamp7` is still unmapped.
+
+# Visit 14: light shows, known lamps (2026-11-14)
+`76b197e` installed. Config upgraded 10 → 11, games.db schema 7 → 8, no errors. Both boards online.
+- **Start-up / shut-down** (the user picked Rainbow wave 4 s and Fire 3 s): `Show: Start-up: Rainbow wave (BigBox
+  started, 4 s)` … `ended (its time is up); showing Off`; on close `Show: Shut-down: Fire (BigBox closed, 3 s)` … Off.
+  It ended on Off because BigBox opened on "Konami e-Amusement", a BigBox category with no LED-Next platform
+  (`lights unchanged`), so nothing was selected yet. Not a show bug.
+- **Idle — bug found and fixed on the cabinet.** The idle show stopped and restarted every 1–5 s (30 times in 5
+  minutes), each restart saying `no input for 1.1 … 1.4 min`, so no real input ended it. Cause: the last input time
+  was recomputed every second as `stopwatch now − (TickCount − GetLastInputInfo)`; the tick clock moves in ~16 ms
+  steps, so the result wobbled a few ms and `IdleMonitor` read a later value as a new input. Fix: `LastInputClock`
+  (Core) converts Windows' last-input tick once per new tick and keeps it; test
+  `WindowsLastInputDoesNotWobbleBetweenTheTwoClocks`. After the fix: shows held 43 s and 12 s until real input, and
+  came back one full minute later.
+- Idle, the rest (worked before the fix too): a panel button and a joystick button (raw input) each end it and the
+  wait starts again; BigBox's attract mode (a new selection every ~30 s) does not end it; launching a game from idle
+  stops it (`a game was launched`); after the game it waits the full time again.
+- **Follow the sound**: random shows and Beat flash followed BigBox's videos; the default sensitivity is fine (the
+  user has no preference). The user set idle to 30 s.
+- **Board #2 hiccup**: once, during the first sound-following idle show,
+  `PacLED64#2: write failed; retrying in 5s: … Pac64SetLEDIntensities returned false`, then `writes working again`
+  5 s later. The only one in the whole log. Sound shows write more often than browsing; watch for it.
+- **Known lamps**: after Galaga and Brave Firefighters, `lamp_outputs` holds MAME galaga `led0 → P1_START`
+  (MameOutputs.ini) and Odin braveff `1p_start_lamp → P1_START`, `2p_start_lamp → P2_START`, and the unmapped
+  `1p_nozzle_vibration`. Small thing: the unmapped row's `map_source` still says "LED-Next's built-in start lamps".

@@ -189,7 +189,10 @@
 - [x] Known lamps in games.db (`lamp_outputs`, schema 8) + Lamps tab (2026-11-14)
 - [ ] Lamp triggers built on the known lamps (e.g. an output starts a show or lights other buttons); move
       `lamps.maps` into the database then
-- [ ] On the cabinet: idle with a real gamepad / I-PAC, BigBox's own attract mode, sound reaction with BigBox videos
+- [x] On the cabinet (visit 14): idle with the panel and a joystick, BigBox's attract mode, sound with BigBox videos.
+      Fixed there: the idle show stopped and restarted every few seconds (LastInputClock)
+- [ ] Unmapped known lamps show the map source of the table that was searched; show none instead
+- [ ] Watch for PacLED64#2 write failures during sound shows (one in visit 14, recovered in 5 s)
 - [ ] Animations (`*.lwax`) — phase 5
 
 ## Ultimate I/O (2026-11-14) — needs online testers

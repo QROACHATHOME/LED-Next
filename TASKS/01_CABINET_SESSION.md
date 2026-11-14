@@ -1,6 +1,6 @@
 # Cabinet session brief (for Claude on the arcade machine)
 
-## Visit 14 (next visit) — light shows, known lamps
+## Visit 14 — light shows, known lamps (done, see CABINET_RESULTS)
 New (config v11, all off, so nothing changes until the user turns them on in the new **Animations** tab):
 1. `git pull`, build, ask the user, then run `Install LED-Next.cmd`. games.db goes to schema 8 by itself.
 2. Animations tab, with the user: pick a start-up show (e.g. Sweep on, 4 s) and a shut-down show (Fade out, 3 s).

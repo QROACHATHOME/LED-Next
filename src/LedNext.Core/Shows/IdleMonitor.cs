@@ -38,3 +38,28 @@ public sealed class IdleMonitor
     /// <summary>Forget the idle state (the show was replaced by something else).</summary>
     public void Reset() => IsIdle = false;
 }
+
+/// <summary>
+/// Turns Windows' last-input tick (<c>GetLastInputInfo</c>, on the 16 ms <c>GetTickCount</c> clock) into a time on
+/// the app's steady clock. The conversion is made once per new input and then kept: recomputing it every second
+/// wobbles by a few ms between the two clocks, and <see cref="IdleMonitor"/> would read each wobble as an input
+/// (seen on the cabinet: the idle show stopped and restarted every 1–5 s).
+/// </summary>
+public sealed class LastInputClock
+{
+    private uint? _tick;
+    private TimeSpan _at;
+
+    /// <param name="now">The steady clock now.</param>
+    /// <param name="lastInputTick">Tick count of the last input.</param>
+    /// <param name="tickNow">Tick count now (both wrap after 49 days).</param>
+    public TimeSpan LastInput(TimeSpan now, uint lastInputTick, uint tickNow)
+    {
+        if (_tick != lastInputTick)
+        {
+            _tick = lastInputTick;
+            _at = now - TimeSpan.FromMilliseconds(unchecked(tickNow - lastInputTick));
+        }
+        return _at;
+    }
+}

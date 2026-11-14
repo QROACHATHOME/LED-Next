@@ -32,6 +32,7 @@ public sealed class ShowController : IDisposable
     private readonly Lamps.LampController _lamps;
     private readonly DispatcherTimer _idleTimer, _endTimer;
     private readonly IdleMonitor _monitor = new();
+    private readonly LastInputClock _windowsInput = new();
     private ILightSource? _show, _resume;
     private bool _setting, _frontEndOpen, _rawInput, _audio;
     private TimeSpan _activityAt = TimeSpan.Zero, _idleSince;
@@ -233,7 +234,7 @@ public sealed class ShowController : IDisposable
         {
             var now = Clock.Elapsed;
             var lastInput = _activityAt;
-            if (LastInputAge() is { } age && now - age > lastInput) lastInput = now - age;
+            if (LastInputTick() is { } tick && _windowsInput.LastInput(now, tick, unchecked((uint)Environment.TickCount)) is var windows && windows > lastInput) lastInput = windows;
             var blocked = IdleBlockedBy();
             // A game just ended: wait the full time again (a game played only with a gamepad leaves no Windows input).
             if (_lastBlock == GamePlaying && blocked != GamePlaying)
@@ -275,13 +276,11 @@ public sealed class ShowController : IDisposable
 
     private static string Minutes(TimeSpan t) => t.TotalMinutes >= 1 ? $"{t.TotalMinutes:0.#} min" : $"{t.TotalSeconds:0} s";
 
-    /// <summary>Time since Windows last saw keyboard or mouse input in this session, or null.</summary>
-    private static TimeSpan? LastInputAge()
+    /// <summary>Tick count of Windows' last keyboard or mouse input in this session, or null.</summary>
+    private static uint? LastInputTick()
     {
         var info = new LASTINPUTINFO { cbSize = (uint)Marshal.SizeOf<LASTINPUTINFO>() };
-        if (!GetLastInputInfo(ref info)) return null;
-        uint ms = unchecked((uint)Environment.TickCount - info.dwTime); // both wrap after 49 days
-        return TimeSpan.FromMilliseconds(ms);
+        return GetLastInputInfo(ref info) ? info.dwTime : null;
     }
 
     public void Dispose()
