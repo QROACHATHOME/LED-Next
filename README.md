@@ -134,7 +134,9 @@ Then double-click **`Install LED-Next.cmd`**.
 .NET 8 SDK). It builds the plugin against your LaunchBox too (needs the .NET 10 SDK).
 
 Either way, LED-Next is installed to `D:\LED-Next` (or `C:\LED-Next` with no D: drive). The installer also
-adds a Start menu shortcut and installs the LaunchBox/BigBox plugin, pointed at the installed exe. The installed
+adds a Start menu shortcut and installs the LaunchBox/BigBox plugin, pointed at the installed exe. LaunchBox is
+found on any drive: from its Desktop or Start menu shortcuts, else `X:\LaunchBox` or `X:\<folder>\LaunchBox`. If it
+isn't found, the installer asks for the folder (press Enter to skip the plugin). The installed
 folder holds only:
 
 ```
@@ -147,7 +149,7 @@ logs\             led-next.log
 Run it again to update: `config\` is kept, and leftovers of an older multi-file install are removed. On the
 first install, settings are copied from the repo's Debug build folder; that folder is left untouched.
 Options (pass them to the `.cmd` or to `tools\install.ps1`):
-- `-InstallDir E:\LED-Next`, `-LaunchBox E:\LaunchBox`
+- `-InstallDir E:\LED-Next`, `-LaunchBox "F:\Games\LaunchBox"` (skips the search)
 - `-From <old folder>`: where to copy the settings from
 - `-NoPlugin`, `-NoShortcut`
 - `-SelfContained` (source code only): a bigger exe that needs no .NET on that PC

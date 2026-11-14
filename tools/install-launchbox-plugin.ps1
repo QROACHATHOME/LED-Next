@@ -15,7 +15,8 @@
   powershell -ExecutionPolicy Bypass -File tools\install-launchbox-plugin.ps1 -Uninstall
 #>
 param(
-    [string]$LaunchBox = "D:\LaunchBox",
+    # Default: found by tools\Find-LaunchBox.ps1 (its shortcuts, or X:\LaunchBox / X:\<folder>\LaunchBox on any drive).
+    [string]$LaunchBox = "",
     # The LED-Next the plugin starts (minimized) when LaunchBox/BigBox start. Default: this repo's build.
     [string]$LedNextExe = "",
     [switch]$NoAutoStart,
@@ -25,9 +26,11 @@ param(
 )
 $ErrorActionPreference = "Stop"
 $repo = Split-Path -Parent $PSScriptRoot
+. (Join-Path $PSScriptRoot "Find-LaunchBox.ps1")
+if (-not $LaunchBox) { $LaunchBox = Find-LaunchBox; if (-not $LaunchBox) { throw "LaunchBox wasn't found. Pass -LaunchBox <folder>." } }
 $target = Join-Path $LaunchBox "Plugins\LED-Next"
 
-if (-not (Test-Path (Join-Path $LaunchBox "Core\Unbroken.LaunchBox.Plugins.dll"))) {
+if (-not (Test-LaunchBoxFolder $LaunchBox)) {
     throw "No LaunchBox at $LaunchBox (Core\Unbroken.LaunchBox.Plugins.dll not found). Pass -LaunchBox <folder>."
 }
 $running = Get-Process -Name LaunchBox, BigBox -ErrorAction SilentlyContinue

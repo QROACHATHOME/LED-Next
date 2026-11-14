@@ -15,12 +15,15 @@
   powershell -ExecutionPolicy Bypass -File tools\build-plugin-release.ps1 -LaunchBox E:\LaunchBox -Version v0.2.0
 #>
 param(
-    [string]$LaunchBox = "D:\LaunchBox",
+    # Default: found by tools\Find-LaunchBox.ps1.
+    [string]$LaunchBox = "",
     [string]$Version = ""
 )
 $ErrorActionPreference = "Stop"
 $repo = Split-Path -Parent $PSScriptRoot
-if (-not (Test-Path (Join-Path $LaunchBox "Core\Unbroken.LaunchBox.Plugins.dll"))) {
+. (Join-Path $PSScriptRoot "Find-LaunchBox.ps1")
+if (-not $LaunchBox) { $LaunchBox = Find-LaunchBox; if (-not $LaunchBox) { throw "LaunchBox wasn't found. Pass -LaunchBox <folder>." } }
+if (-not (Test-LaunchBoxFolder $LaunchBox)) {
     throw "No LaunchBox at $LaunchBox (Core\Unbroken.LaunchBox.Plugins.dll not found). Pass -LaunchBox <folder>."
 }
 if (-not $Version) {

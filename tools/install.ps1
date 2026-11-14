@@ -31,7 +31,8 @@
 #>
 param(
     [string]$InstallDir = "",
-    [string]$LaunchBox = "D:\LaunchBox",
+    # Default: found by tools\Find-LaunchBox.ps1 (its shortcuts, or X:\LaunchBox / X:\<folder>\LaunchBox on any drive).
+    [string]$LaunchBox = "",
     # Where to copy config\ and PacDrive64.dll from on a first install. Default: this repo's Debug build.
     [string]$From = "",
     [switch]$SelfContained,
@@ -51,7 +52,17 @@ $releaseVersion = (Get-Content (Join-Path $repo "VERSION.txt") -ErrorAction Sile
 $exe = Join-Path $InstallDir "LED-Next.exe"
 $shortcut = Join-Path ([Environment]::GetFolderPath("Programs")) "LED-Next.lnk"
 $pluginScript = Join-Path $PSScriptRoot "install-launchbox-plugin.ps1"
-$hasLaunchBox = Test-Path (Join-Path $LaunchBox "Core\Unbroken.LaunchBox.Plugins.dll")
+. (Join-Path $PSScriptRoot "Find-LaunchBox.ps1")
+if (-not $LaunchBox -and -not $NoPlugin) {
+    $LaunchBox = Find-LaunchBox
+    if ($LaunchBox) { "Found LaunchBox at $LaunchBox" }
+    else {
+        # Double-clicked "Install LED-Next.cmd": ask, since there is nowhere to pass -LaunchBox.
+        try { $LaunchBox = (Read-Host "LaunchBox wasn't found. Type its folder (e.g. E:\Games\LaunchBox), or press Enter to skip the plugin").Trim().Trim('"') }
+        catch { $LaunchBox = "" }
+    }
+}
+$hasLaunchBox = [bool]$LaunchBox -and (Test-LaunchBoxFolder $LaunchBox)
 
 $running = Get-Process -Name LED-Next -ErrorAction SilentlyContinue
 if ($running) { throw "Close LED-Next first (right-click its tray icon > Exit)." }

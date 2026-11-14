@@ -40,7 +40,7 @@ function Build-Zip([string]$name, [bool]$selfContained) {
     if ($files.Count -ne 1 -or $files[0].Name -ne 'LED-Next.exe') { throw "Expected only LED-Next.exe, got: $($files.Name -join ', ')" }
 
     New-Item -ItemType Directory -Force (Join-Path $dir 'tools') | Out-Null
-    Copy-Item 'tools/install.ps1', 'tools/install-launchbox-plugin.ps1' (Join-Path $dir 'tools')
+    Copy-Item 'tools/install.ps1', 'tools/install-launchbox-plugin.ps1', 'tools/Find-LaunchBox.ps1' (Join-Path $dir 'tools')
     Copy-Item 'Install LED-Next.cmd', 'README.md' $dir
     [IO.File]::WriteAllText((Join-Path $dir 'VERSION.txt'), "$Version`r`n", (New-Object Text.UTF8Encoding $false))
 
