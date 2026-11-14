@@ -623,3 +623,17 @@ The user asked for a setting for the gap between the game's name and its labels.
 - Installed. The log said "Config upgraded from version 8 to 9 (adds a pause after the game's name, 0 s)".
 - The user set it to **1 s**. With a BigBox launch of Galaga, `Speech (launch): Galaga · Fire [P1_B1]` took 2.1 s,
   against 1.4 s at 0 earlier. The extra 0.7 s is the 1 s pause in place of the voice's own short one.
+
+## Windows' newer voices, and the title in the Test button (added on the cabinet, b18b1ee and 53d7f6a)
+- The user asked for a better-sounding voice. The cabinet has Windows' newer "OneCore" voices installed: Microsoft
+  David, Zira and **Mark**. System.Speech only reaches the old SAPI "Desktop" voices (David Desktop, Zira Desktop).
+  The Windows 11 "natural" voices need 22H2 or later; the cabinet runs 21H2 (build 22000).
+  - LED-Next now lists the newer voices first and speaks them through Windows.Media.SpeechSynthesis (`OneCoreSpeech`).
+    The blinking, speed, volume, pause and stop-on-input all work with them.
+  - The App targets `net8.0-windows10.0.19041.0`, so the installed exe grew from 3.9 MB to 28.2 MB.
+  - Tested: Microsoft David, Zira and Mark, e.g. `Speech (test, Microsoft Mark): ssf2ta · Light Punch [P1_B1,P2_B1] …`,
+    "done (13.7 s)". A key press stopped Zira. **The user likes Mark.**
+- **"Test with the game shown" said the rom name** ("sf2ce", "10yard"): it only had the game's lights. Now
+  `GameLights` carries the title. Bracketed extras are left out when speaking ("10-Yard Fight (World, set 1)" →
+  "10-Yard Fight"). After the fix: `Speech (test, Microsoft Mark): 10-Yard Fight · Pass / Hike [P1_B1] · Lateral [P1_B2]`.
+  BigBox launches already said LaunchBox's title.
