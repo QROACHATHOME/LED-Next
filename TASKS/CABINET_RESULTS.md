@@ -667,3 +667,20 @@ v0.1.4 installed with no config change.
 - Speech on pause: not needed, the user never uses pause.
 - Crazy Taxi: the user saw a button flash, though LED-Next mapped nothing (`lamp7` unmapped, speech said only the name).
 - TeknoParrot: the user will add OutputBlaster.dll to the other TeknoParrot games themselves.
+
+## MAME fallback for arcade platforms (added on the cabinet)
+The user: Crazy Taxi has buttons in MAME but BigBox's Crazy Taxi (Sega Naomi, run by Flycast) lit Naomi's default,
+which lights no buttons. They asked for a fallback that copies MAME's lights into the platform.
+- `GameDatabase.CopyLightsFromMame` runs after every LEDBlinky import and LaunchBox read. An arcade platform is one
+  with at least 80% of its games being MAME rom names, not already using MAME's data.
+  - Each game there with no lights of its own (nor a parent's), and not customized, gets a copy of what MAME shows
+    for the same rom: its game lights and labels, else MAME's default.
+  - The copy is written as that platform's lights, with source "MAME fallback: …".
+  - The platform's always-lit UI controls still come from its own default.
+- At start: 382 games on 13 platforms. Sega Naomi 74, Casino Arcade 122, Jakks Pacific 81, Model 3 19, Model 2 16,
+  Atomiswave 15, Naomi 2 14, System SP 14, Medalusion 7, Hyper Neo Geo 64 7, Hikaru 6, Model 1 6, Arcade Duck 1.
+  Most come from MAME's default; a few from MAME's own game lights (bass, vf, buriki).
+- **Behaviour change:** Model 2 / Model 3 games without lights used their platform default (every button white);
+  now they show MAME's.
+- Checked: BigBox Crazy Taxi → `Sega_Naomi/crzytaxi …; game crzytaxi` (was `Sega Naomi default`). Speech says only
+  the name (MAME's default has no labels). The Flycast lamp `lamp7` is still unmapped.

@@ -741,6 +741,7 @@ public sealed class GameDatabase : IGameLibrary
         RemoveStaleLaunchBoxGames();
         UseMameDataForArcadePlatforms();
         AddMissingLaunchBoxGames();
+        CopyLightsFromMame();
         FillFromMameData();
     }
 
@@ -978,6 +979,99 @@ public sealed class GameDatabase : IGameLibrary
             tx.Commit();
         }
         AppLog.Info($"Platforms {string.Join(", ", keys)} now use MAME's game data: {lit:N0} of {games.Count:N0} games lit from it.");
+    }
+
+    /// <summary>
+    /// An arcade platform whose games are MAME rom names (at least 80% of them: Sega Naomi, Atomiswave, Model 2…)
+    /// but that LEDBlinky only set up some games of: each game with no lights of its own (nor a parent's) gets
+    /// a copy of what MAME shows for the same rom (its game data, else MAME's default), written as that platform's
+    /// lights (source "MAME fallback: …"). Customized games are left alone. Platforms that already use MAME's data
+    /// (Cave, ZiNc) don't need it. Runs after every import; copied games then have lights and are skipped.
+    /// </summary>
+    private void CopyLightsFromMame()
+    {
+        if (GetPlatform("MAME") is null) return;
+        var candidates = new List<(string Platform, string Game)>();
+        using (var c = Connect())
+        using (var cmd = c.CreateCommand())
+        {
+            cmd.CommandText = """
+                WITH arcade AS (
+                  SELECT g.platform FROM games g JOIN platforms p ON p.key = g.platform
+                  WHERE p.uses_mame = 0 AND g.platform <> 'MAME'
+                  GROUP BY g.platform
+                  HAVING SUM(EXISTS(SELECT 1 FROM games m WHERE m.platform = 'MAME' AND m.name = g.name)) * 5 >= COUNT(*) * 4)
+                SELECT g.platform, g.name FROM games g
+                WHERE g.platform IN (SELECT platform FROM arcade)
+                  AND EXISTS(SELECT 1 FROM games m WHERE m.platform = 'MAME' AND m.name = g.name)
+                  AND NOT EXISTS(SELECT 1 FROM lights l WHERE l.platform = g.platform AND l.game = g.name)
+                  AND NOT EXISTS(SELECT 1 FROM user_profiles u WHERE u.platform = g.platform AND u.game = g.name)
+                ORDER BY g.platform, g.name
+                """;
+            using var r = cmd.ExecuteReader();
+            while (r.Read()) candidates.Add((r.GetString(0), r.GetString(1)));
+        }
+        if (candidates.Count == 0) return;
+
+        var empty = new ControlMap();
+        var panel = new PanelLayout();
+        var copies = new List<(string Platform, string Game, string From, List<ResolvedControl> Controls)>();
+        foreach (var (platform, game) in candidates)
+        {
+            if (GameLightResolver.Resolve(this, platform, game, empty, panel).GameSpecific) continue; // a parent's lights
+            var mame = GameLightResolver.Resolve(this, "MAME", game, empty, panel);
+            // The platform's own default keeps its always-lit UI controls; only the game's controls are copied.
+            var controls = mame.Controls
+                .Where(x => !x.FromPlatformAlwaysActive && !(x.AlwaysActive && ControlNames.PlayerOf(x.Control) == 0))
+                .ToList();
+            if (controls.Count > 0) copies.Add((platform, game, mame.From, controls));
+        }
+        if (copies.Count == 0) return;
+
+        using (var c = Connect())
+        using (var tx = c.BeginTransaction())
+        {
+            using var ins = c.CreateCommand();
+            ins.Transaction = tx;
+            ins.CommandText = "INSERT OR REPLACE INTO lights VALUES($pl, $g, $seq, $c, $col, $cn, $lab, $a, $src)";
+            var pl = ins.Parameters.Add("$pl", SqliteType.Text);
+            var g = ins.Parameters.Add("$g", SqliteType.Text);
+            var seq = ins.Parameters.Add("$seq", SqliteType.Integer);
+            var ctl = ins.Parameters.Add("$c", SqliteType.Text);
+            var col = ins.Parameters.Add("$col", SqliteType.Text);
+            var cn = ins.Parameters.Add("$cn", SqliteType.Text);
+            var lab = ins.Parameters.Add("$lab", SqliteType.Text);
+            var a = ins.Parameters.Add("$a", SqliteType.Integer);
+            var src = ins.Parameters.Add("$src", SqliteType.Text);
+            using var up = c.CreateCommand();
+            up.Transaction = tx;
+            up.CommandText = "UPDATE games SET lighting = $l WHERE platform = $p AND name = $n";
+            up.Parameters.AddWithValue("$l", (int)GameLighting.Own);
+            var gp = up.Parameters.Add("$p", SqliteType.Text);
+            var gn = up.Parameters.Add("$n", SqliteType.Text);
+            foreach (var copy in copies)
+            {
+                pl.Value = copy.Platform; g.Value = copy.Game; src.Value = $"MAME fallback: {copy.From}";
+                for (int i = 0; i < copy.Controls.Count; i++)
+                {
+                    var x = copy.Controls[i];
+                    bool inherited = x.ColorName == "default"; // no colour in MAME: this platform's default-active colour
+                    seq.Value = i; ctl.Value = x.Control;
+                    col.Value = inherited ? DBNull.Value : x.Color.ToHex();
+                    cn.Value = inherited || x.ColorName is null ? DBNull.Value : x.ColorName;
+                    lab.Value = (object?)x.Label ?? DBNull.Value;
+                    a.Value = x.AlwaysActive ? 1 : 0;
+                    ins.ExecuteNonQuery();
+                }
+                gp.Value = copy.Platform; gn.Value = copy.Game;
+                up.ExecuteNonQuery();
+            }
+            tx.Commit();
+        }
+        lock (_cacheLock) _lightCache.Clear();
+        foreach (var platform in copies.GroupBy(x => x.Platform, StringComparer.OrdinalIgnoreCase))
+            AppLog.Info($"{platform.Key}: {platform.Count():N0} games without lights copied MAME's for the same rom " +
+                        $"(e.g. {string.Join(", ", platform.Take(3).Select(x => $"{x.Game} from {x.From}"))}).");
     }
 
     public List<LaunchBoxPlatformSummary> LaunchBoxSummaries()

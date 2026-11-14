@@ -287,6 +287,46 @@ public class LaunchBoxDatabaseTests : IDisposable
     }
 
     [Fact]
+    public void AnArcadePlatformsGameWithoutLightsCopiesMames()
+    {
+        // Visit 13: Crazy Taxi on Sega Naomi had no lights (Naomi's default lights no buttons), MAME's crzytaxi does.
+        var lib = Library();
+        lib.AddGame(new GameInfo("MAME", "crzytaxi", "Crazy Taxi", null, 1, "", "LEDBlinkyMinimizedMame.xml", GameLighting.PlatformDefault));
+        lib.AddGame(new GameInfo("MAME", "mvsc2", "Marvel Vs. Capcom 2", null, 2, "", "Colors.ini", GameLighting.Own));
+        lib.SetLights("MAME", "mvsc2", new LightProfile { Controls = { new ControlLight("P1_BUTTON1", Rgb.Red, "Red", "Light Punch"), new ControlLight("P1_BUTTON2", null, null, "Heavy Punch") } });
+        lib.AddPlatform(new PlatformInfo("Sega_Naomi", "Sega Naomi", null, false, Rgb.White));
+        lib.SetLights("Sega_Naomi", null, new LightProfile { Controls = { new ControlLight("UI_SELECT", Rgb.Green, "Green", null, AlwaysActive: true) } });
+        foreach (var rom in new[] { "crzytaxi", "mvsc2", "sf2", "1942", "kept" })
+            lib.AddGame(new GameInfo("Sega_Naomi", rom, rom, null, 2, "", "LEDBlinkyControls.xml", GameLighting.PlatformDefault));
+        lib.SetLights("Sega_Naomi", "sf2", new LightProfile { Controls = { new ControlLight("P1_BUTTON3", Rgb.Blue, "Blue", null) } }); // set up: kept
+        lib.AddGame(new GameInfo("MAME", "kept", "Kept", null, 2, "", "Colors.ini", GameLighting.Own));
+        // Genesis is not arcade (sor2 is not a MAME rom): untouched.
+        var db = GameDatabase.Open(_dbPath);
+        db.SaveUserLights("Sega_Naomi", "kept", new LightProfile { Customized = true });
+        db.ReplaceAll(lib, "test");
+        db.ImportLaunchBox(LaunchBoxLibrary.Read(Path.Combine(_root, "LaunchBox"), new List<string>()), new Dictionary<string, string>(), Path.Combine(_root, "LaunchBox"));
+
+        ResolvedLights R(string p, string g) => GameLightResolver.Resolve(db, p, g, new ControlMap(), new PanelLayout());
+        var taxi = R("Sega_Naomi", "crzytaxi");
+        Assert.Equal("game crzytaxi", taxi.From);
+        Assert.Equal(new[] { "P1_BUTTON1", "UI_SELECT" }, taxi.Controls.Select(c => c.Control));      // MAME's default, then Naomi's UI
+        Assert.Equal(Rgb.White, taxi.Controls[0].Color);
+        Assert.StartsWith("MAME fallback: MAME default", db.GetLights("Sega_Naomi", "crzytaxi")!.Source);
+        Assert.Equal(GameLighting.Own, db.GetGame("Sega_Naomi", "crzytaxi")!.Lighting);
+
+        var mvsc2 = R("Sega_Naomi", "mvsc2");                                                          // MAME's own game lights, labels too
+        Assert.Equal(new[] { ("P1_BUTTON1", "Light Punch"), ("P1_BUTTON2", "Heavy Punch") }, mvsc2.Controls.Take(2).Select(c => (c.Control, c.Label!)));
+        Assert.Equal(Rgb.Red, mvsc2.Controls[0].Color);
+        Assert.Equal(Rgb.Blue, Assert.Single(R("Sega_Naomi", "sf2").Controls, c => c.Control == "P1_BUTTON3").Color);
+        Assert.Empty(db.GetLights("Sega_Naomi", "kept")!.Controls);                                    // customized (all off): left alone
+        Assert.Null(db.GetLights("Sega_Genesis", "sor2"));
+
+        // Idempotent, and it survives a re-import.
+        db.ReplaceAll(lib, "re-import");
+        Assert.Equal("game crzytaxi", R("Sega_Naomi", "crzytaxi").From);
+    }
+
+    [Fact]
     public void AnOldWronglyNamedLaunchBoxGameIsReplacedNotMatchedByTitle()
     {
         // The cabinet's library from before the emulator fix: Zangus was added as game "mame", and on the
