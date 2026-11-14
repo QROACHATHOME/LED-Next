@@ -90,7 +90,7 @@ Tested on a 4-player cabinet with two Ultimarc PacLED64 boards, LaunchBox/BigBox
 - LaunchBox pictures ("Arcade - Control Panel", "Arcade - Controls Information") and button-layout banners in
   the Games tab.
 
-**Light shows** (Animations tab, all off by default)
+**Light shows** (Animations tab, all off by default; tested on the cabinet with BigBox)
 - **Idle animation**: after the controls haven't been touched for a set time (default 5 minutes), the panel plays
   one of ten animations (rainbow wave, comet, twinkle, player colours, scanner, ripple, fire, rain…) or a random
   one that changes every so often with a cross-fade. Any key, button, joystick, mouse or trackball ends it and the
