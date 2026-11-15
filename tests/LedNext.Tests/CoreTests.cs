@@ -285,3 +285,28 @@ public class ConfigStoreTests
         Assert.Equal(c, Rgb.ParseHex("#12abff"));
     }
 }
+
+public class PickerColorsTests
+{
+    [Fact]
+    public void SavedColoursBecomeTheDialogsBgrSlotsAndBack()
+    {
+        var slots = PickerColors.ToDialog(["#FF8000", "not a colour", "#0000FF"]);
+        Assert.Equal(PickerColors.Slots, slots.Length);
+        Assert.Equal(0x0080FF, slots[0]); // the dialog's ints are 0x00BBGGRR
+        Assert.Equal(0xFF0000, slots[1]);
+        Assert.All(slots.Skip(2), s => Assert.Equal(0xFFFFFF, s));
+        Assert.Equal(["#FF8000", "#0000FF"], PickerColors.FromDialog(slots));
+    }
+
+    [Fact]
+    public void NoSavedColoursGiveAnEmptyListAndAV12ConfigGetsOne()
+    {
+        Assert.Empty(PickerColors.FromDialog(PickerColors.ToDialog(null)));
+        var config = new CabinetConfig { Version = 12 };
+        config.Games.PickerColors = null!;
+        ConfigStore.Migrate(config);
+        Assert.Equal(13, config.Version);
+        Assert.Empty(config.Games.PickerColors);
+    }
+}

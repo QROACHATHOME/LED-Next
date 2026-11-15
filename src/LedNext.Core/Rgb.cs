@@ -53,6 +53,12 @@ public readonly record struct Rgb(byte R, byte G, byte B)
         return new((byte)(v >> 16), (byte)(v >> 8), (byte)v);
     }
 
+    public static bool TryParseHex(string? hex, out Rgb color)
+    {
+        try { color = ParseHex(hex ?? ""); return true; }
+        catch (FormatException) { color = default; return false; }
+    }
+
     public override string ToString() => ToHex();
 
     private static byte ToByte(double v) => (byte)Math.Round(Math.Clamp(v, 0, 1) * 255);

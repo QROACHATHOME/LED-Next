@@ -13,6 +13,12 @@ namespace LedNext.App.ViewModels;
 
 public sealed record PlatformItem(string? Key, string Display);
 
+/// <summary>Our WPF window as the owner of a Windows Forms dialog (the colour picker), so it opens over it.</summary>
+internal sealed class DialogOwner(nint handle) : System.Windows.Forms.IWin32Window
+{
+    public nint Handle { get; } = handle;
+}
+
 /// <summary>A LaunchBox picture shown next to the panel (control panel photo, controls card). Click opens the file.</summary>
 public sealed record ReferencePicture(string Caption, ImageSource Image, string Path);
 
@@ -288,7 +294,7 @@ public sealed partial class GamesViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanEdit))]
-    [NotifyCanExecuteChangedFor(nameof(SetColorCommand), nameof(ApplyHexCommand), nameof(CopyButtonCommand))]
+    [NotifyCanExecuteChangedFor(nameof(SetColorCommand), nameof(ApplyHexCommand), nameof(PickColorCommand), nameof(CopyButtonCommand))]
     private string? _selectedControl;
 
     [ObservableProperty] private string _selectionInfo = "Click a button on the panel to change its colour.";
@@ -493,6 +499,41 @@ public sealed partial class GamesViewModel : ObservableObject
         Rgb rgb;
         try { rgb = Rgb.ParseHex(CustomHex); }
         catch (FormatException) { SelectionInfo = $"'{CustomHex}' is not a colour; use #RRGGBB."; return; }
+        var control = SelectedControl;
+        Edit(p => GameLightEditor.SetColor(p, control, rgb, rgb.ToHex()), $"{control} → {rgb.ToHex()}");
+    }
+
+    /// <summary>
+    /// Windows' colour picker, starting on the hex box's colour. Its custom colours ("Add to Custom Colors") are kept
+    /// in cabinet.json, so colours you added are there next time. OK sets the selected button to the picked colour.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanEdit))]
+    private void PickColor()
+    {
+        if (SelectedControl is null) return;
+        var start = Rgb.TryParseHex(CustomHex, out var current) ? current : Rgb.White;
+        var games = _session.Config.Games;
+        using var dialog = new System.Windows.Forms.ColorDialog
+        {
+            FullOpen = true,
+            AnyColor = true,
+            Color = System.Drawing.Color.FromArgb(start.R, start.G, start.B),
+            CustomColors = PickerColors.ToDialog(games.PickerColors),
+        };
+        var result = System.Windows.Application.Current?.MainWindow is { } main
+            ? dialog.ShowDialog(new DialogOwner(new System.Windows.Interop.WindowInteropHelper(main).Handle))
+            : dialog.ShowDialog();
+
+        var added = PickerColors.FromDialog(dialog.CustomColors);
+        if (!added.SequenceEqual(games.PickerColors))
+        {
+            games.PickerColors = added;
+            _session.MarkDirty();
+        }
+        if (result != System.Windows.Forms.DialogResult.OK) return;
+
+        var rgb = new Rgb(dialog.Color.R, dialog.Color.G, dialog.Color.B);
+        CustomHex = rgb.ToHex();
         var control = SelectedControl;
         Edit(p => GameLightEditor.SetColor(p, control, rgb, rgb.ToHex()), $"{control} → {rgb.ToHex()}");
     }

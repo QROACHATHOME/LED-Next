@@ -29,8 +29,9 @@ public sealed class CabinetConfig
     /// 9 = adds Speech.PauseAfterNameSeconds (0, so speech sounds as before).
     /// 10 = adds Speech.SpeakNameWithoutLabels (on: a game without labels still says its name).
     /// 11 = adds <see cref="Idle"/> (off) and <see cref="Shows"/> (none), so nothing changes.
+    /// 12 = adds Idle.Speed (1). 13 = adds Games.PickerColors (empty).
     /// </summary>
-    public const int CurrentVersion = 12;
+    public const int CurrentVersion = 13;
 
     public int Version { get; set; } = CurrentVersion;
     public PanelLayout Panel { get; set; } = new();
@@ -86,4 +87,9 @@ public sealed class GameSettings
     /// without lights of their own light as many buttons as their banner uses. Added in config version 5.
     /// </summary>
     public string? ButtonBannersFolder { get; set; }
+    /// <summary>
+    /// The colour picker's custom colours (#RRGGBB, up to 16), the ones you added in the Games tab's picker.
+    /// Added in config version 13; empty by default.
+    /// </summary>
+    public List<string> PickerColors { get; set; } = new();
 }

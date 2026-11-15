@@ -104,6 +104,13 @@ public static class ConfigStore
             AppLog.Info("Config upgraded from version 11 to 12 (adds the idle animation's speed, normal).");
             config.Version = 12;
         }
+        if (config.Version < 13)
+        {
+            // v13 added Games.PickerColors (the colour picker's custom colours); empty by default.
+            AppLog.Info("Config upgraded from version 12 to 13 (adds the colour picker's custom colours, none yet).");
+            config.Version = 13;
+        }
+        config.Games.PickerColors ??= new();
         config.Lamps ??= new LampSettings();
         config.Idle ??= new LedNext.Core.Shows.IdleSettings();
         config.Shows ??= new LedNext.Core.Shows.FrontEndShowSettings();

@@ -737,3 +737,22 @@ which lights no buttons. They asked for a fallback that copies MAME's lights int
   and off while LED-Next wrote nothing. **Swapping the two boards' USB cables made it steady**: a cable or connection
   problem, not LED-Next. Boards are found by board id, so the swap needs no rewiring. To watch: whether board #1
   (now on board #2's old cable) starts doing it, and whether board #2's refused writes stop.
+- **Write times after the user replaced the "slow" cable (15 Nov, 06:44 start-up):** a frame to both boards still
+  takes 206-207 ms, as in every earlier session (log `Timing ... boards 206 ms`). One board takes ~200 ms per write,
+  the other ~10 ms, and the slow one moved: before (21:32 and 21:47) board #1 ~200 ms / #2 ~10 ms; now #1 ~13 ms /
+  #2 ~197 ms (from the gap between "1 write(s) so far" lines). So the ~200 ms follows the cable or USB port, not
+  the board. ~200 ms each time looks like a USB timeout rather than a slow link. Board #1 (1401) is on a Genesys
+  hub 05E3:0610 port 2; board #2 (1402) on hub 34D1:0609 port 4. To try: board #2 on another port / straight on the PC.
+- **Board #2 moved to another port (now Genesys hub 05E3:0610, hub 9 port 4) and LED-Next restarted (06:56):**
+  first write board #1 13 ms, board #2 9 ms. Both fast for the first time; a frame should now take ~20 ms instead
+  of ~206 ms. So the slow one was hub 34D1:0609's port (or that hub), not a board or cable. Confirm with BigBox's
+  `Timing ... boards N ms` lines. Note: restarting BigBox does not restart LED-Next (it stays in the tray).
+- **Confirmed with BigBox (06:57):** `Timing ... boards 18 ms` for game/platform changes (was 206 ms). The start-up
+  show wrote 90 frames per board in 3.4 s (~26/s, close to RefreshHz 30), where before it managed ~4-5/s.
+- **But board #2 flashes on its new port (06:59, BigBox restarted, LED-Next restarted with it).** The log has the
+  Arcade platform lit steadily from 06:59:11 and nothing else, so LED-Next wrote nothing while it flashed: the board
+  again. Board #2 swapped places with the 15A2 device: board #2 is now on hub 9 port 4 (Genesys 05E3:0610, with a
+  3416:1018 device on port 3), and 15A2 is on hub 10 port 4. Old port: steady but ~200 ms writes; new port: fast
+  but flashing. Points to power or the port, not LED-Next. To try: a port straight on the PC, or a powered hub.
+- **After a PC restart board #2 works fine on the new port** (user, 15 Nov): the flashing was gone. So the hot-plugged
+  board was in a bad state until Windows restarted; nothing in LED-Next. Keep the new port (fast writes).

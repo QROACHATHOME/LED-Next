@@ -196,6 +196,10 @@
 - [ ] Board #2 flickered on a still solid white: fixed by swapping the boards' USB cables (21:5x, visit 14). Check that it
       stays steady, that board #1 doesn't start, and whether the refused writes (about 1 in
       400 during shows) stop
+      (15 Nov: board #2 moved off hub 34D1:0609, whose port made every write ~200 ms; a frame now takes 18 ms
+      instead of 206 ms. It flashed on the new port until the PC was restarted, then fine.)
+- [x] Games tab colour picker (the + swatch after the colours, config v13 `games.pickerColors`): checked on the
+      cabinet that it opens over LED-Next, sets the button, and that added custom colours are there after a restart
 - [ ] Animations (`*.lwax`) — phase 5
 
 ## Ultimate I/O (2026-11-14) — needs online testers

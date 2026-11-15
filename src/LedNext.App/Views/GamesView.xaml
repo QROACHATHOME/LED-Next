@@ -328,6 +328,34 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
+                        <Button Command="{Binding PickColorCommand}" Focusable="False" Cursor="Hand" Margin="0,0,0,0"
+                                ToolTip="More colours: pick any colour. Colours you add to its custom colours are kept for next time.">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Swatch" Width="28" Height="28" CornerRadius="14" BorderBrush="#55585F" BorderThickness="2">
+                                        <Border.Background>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                <GradientStop Color="#FF3030" Offset="0" />
+                                                <GradientStop Color="#FFD030" Offset="0.25" />
+                                                <GradientStop Color="#30D040" Offset="0.5" />
+                                                <GradientStop Color="#3080FF" Offset="0.75" />
+                                                <GradientStop Color="#C040FF" Offset="1" />
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                        <TextBlock Text="+" FontSize="15" FontWeight="Bold" Foreground="White"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-2,0,0" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Swatch" Property="BorderBrush" Value="{StaticResource AppAccent}" />
+                                        </Trigger>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter TargetName="Swatch" Property="Opacity" Value="0.3" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
                         <TextBox Text="{Binding CustomHex}" Width="80" Margin="6,0,4,0" VerticalContentAlignment="Center"
                                  IsEnabled="{Binding CanEdit}" ToolTip="Any colour as #RRGGBB" />
                         <Button Content="Apply" Command="{Binding ApplyHexCommand}" />
