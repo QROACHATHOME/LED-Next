@@ -77,7 +77,8 @@ Tested on a 4-player cabinet with two Ultimarc PacLED64 boards, LaunchBox/BigBox
 - **MAME fallback for arcade platforms.** On a platform whose games are MAME rom names (Sega Naomi, Atomiswave,
   Model 2/3…), a game LEDBlinky didn't set up gets a copy of MAME's lights for the same rom instead of a blank or
   generic platform default. Games you've edited are left alone.
-- Per-game and per-platform colour overrides, templates, bulk copy, and saved smart lists.
+- Per-game and per-platform colour overrides, templates, bulk copy, and saved smart lists. Besides the colour
+  swatches, a colour picker (the "+" swatch) picks any colour and keeps your added colours for next time.
 - **Each emulator's own key bindings.** When a game's buttons are remapped in the emulator, the lights follow:
   - **MAME:** each install's `ctrlr` file, `default.cfg` and per-game `cfg` (for cabinets with several MAME installs);
   - **TeknoParrot:** each game's user profile (DirectInput and RawInput keyboard bindings).
@@ -93,7 +94,7 @@ Tested on a 4-player cabinet with two Ultimarc PacLED64 boards, LaunchBox/BigBox
 **Light shows** (Animations tab, all off by default; tested on the cabinet with BigBox)
 - **Idle animation**: after the controls haven't been touched for a set time (default 5 minutes), the panel plays
   one of ten animations (rainbow wave, comet, twinkle, player colours, scanner, ripple, fire, rain…) or a random
-  one that changes every so often with a cross-fade. Any key, button, joystick, mouse or trackball ends it and the
+  one that changes every so often with a cross-fade, at an adjustable speed. Any key, button, joystick, mouse or trackball ends it and the
   selected game lights again. It never starts while a game is playing, and by default only while LaunchBox / BigBox
   runs. BigBox's own attract mode moving the selection doesn't end it.
 - **Follow the sound**: during the idle animation the lights pulse with the music or sound playing on the PC
