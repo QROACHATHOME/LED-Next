@@ -60,7 +60,7 @@ public sealed class PacLed64Provider : ILedBoardProvider
                 AppLog.Info($"  {found.Key}: Ultimate I/O support is new and untested on real boards; please report how it behaves.");
 
             var board = new UltimarcLedBoard(index, found);
-            board.TrySetInstantFade();
+            board.ResetEffects();
             boards.Add(board);
         }
 
@@ -100,7 +100,9 @@ internal sealed class UltimarcLedBoard : ILedBoard
     private readonly bool _batchOnlyForBigChanges;
     private bool _batchAvailable = true;
     private bool _hasWritten;
-    private long _writes, _batchWrites;
+    private bool _flashAvailable = true;
+    private bool _resetPending;
+    private long _writes, _batchWrites, _resets;
 
     public UltimarcLedBoard(int sdkIndex, DetectedBoard found)
     {
@@ -121,16 +123,45 @@ internal sealed class UltimarcLedBoard : ILedBoard
     public int PinCount { get; }
     public bool IsSimulated => false;
 
-    public void TrySetInstantFade()
+    /// <summary>
+    /// Instant fades and no flashing: the board's own effects, which LED-Next never uses. A PacLED64 keeps them until
+    /// it loses power, so a garbled command can leave LEDs blinking on their own while LED-Next sends steady colours
+    /// (seen on the cabinet after a refused write: LEDs going on and off, P2 button 1 blinking; a PC restart cleared it).
+    /// Called when the board is opened and before the write after a refused one. Never throws.
+    /// </summary>
+    public void ResetEffects()
     {
         try
         {
             if (!PacDriveNative.Pac64SetLEDFadeTime(_sdkIndex, 0)) AppLog.Warn($"{Key}: Pac64SetLEDFadeTime returned false.");
         }
         catch (EntryPointNotFoundException) { AppLog.Warn($"{Key}: Pac64SetLEDFadeTime not available."); }
+        catch (Exception ex) { AppLog.Warn($"{Key}: Pac64SetLEDFadeTime failed: {ex.Message}"); }
+        if (!_flashAvailable) return;
+        try
+        {
+            if (!PacDriveNative.Pac64SetLEDFlashSpeeds(_sdkIndex, 0)) AppLog.Warn($"{Key}: Pac64SetLEDFlashSpeeds returned false.");
+        }
+        catch (EntryPointNotFoundException) { _flashAvailable = false; AppLog.Warn($"{Key}: Pac64SetLEDFlashSpeeds not available."); }
+        catch (Exception ex) { AppLog.Warn($"{Key}: Pac64SetLEDFlashSpeeds failed: {ex.Message}"); }
     }
 
     public void Write(ReadOnlySpan<byte> intensities)
+    {
+        if (_resetPending)
+        {
+            // The last write was refused and may have reached the board half done: clear any effect it set.
+            _resetPending = false;
+            ResetEffects();
+            _resets++;
+            if (_resets is 1 || _resets % 20 == 0)
+                AppLog.Info($"{Key}: cleared the board's own flashing and fades after a refused write ({_resets} so far).");
+        }
+        try { WriteIntensities(intensities); }
+        catch { _resetPending = true; throw; }
+    }
+
+    private void WriteIntensities(ReadOnlySpan<byte> intensities)
     {
         var data = new byte[PinCount];
         intensities[..Math.Min(PinCount, intensities.Length)].CopyTo(data);

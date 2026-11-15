@@ -97,4 +97,12 @@ internal static class PacDriveNative
     [DllImport(Lib, CallingConvention = CallingConvention.StdCall)]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static extern bool Pac64SetLEDFadeTime(int id, byte fadeTime);
+
+    /// <summary>
+    /// The board's own flashing, for every LED at once: 0 = no flashing (steady), 1–3 = flash, slow to fast.
+    /// Exported by the cabinet's PacDrive64.dll (checked in its export table); LED-Next only ever sets 0.
+    /// </summary>
+    [DllImport(Lib, CallingConvention = CallingConvention.StdCall)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool Pac64SetLEDFlashSpeeds(int id, byte flashSpeed);
 }

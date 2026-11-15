@@ -756,3 +756,26 @@ which lights no buttons. They asked for a fallback that copies MAME's lights int
   but flashing. Points to power or the port, not LED-Next. To try: a port straight on the PC, or a powered hub.
 - **After a PC restart board #2 works fine on the new port** (user, 15 Nov): the flashing was gone. So the hot-plugged
   board was in a bad state until Windows restarted; nothing in LED-Next. Keep the new port (fast writes).
+- **Long idle test in LaunchBox (15 Nov, 10:20-12:49, idle show 148.9 min):** board #2 went back to flickering /
+  going on and off, and after a key press P2 button 1 (board #2 pins 7-9) kept **blinking like a start lamp** on a
+  steady platform light (Gaelco G4, MAME default). The log: no emulator running, no lamps, the light source is a
+  plain platform default (no "+ lamps"), so LED-Next sends steady colours. One refused write during the show:
+  `10:57:32 PacLED64#2: a write failed and worked when retried`. Earlier the on/off survived restarting LED-Next
+  (06:59) and went away only when the board lost power (cable swap, PC restart).
+- **Likely cause:** the PacLED64's own per-LED flashing. The cabinet's PacDrive64.dll exports
+  `Pac64SetLEDFlashSpeed(s)` (and scripts: `Pac64RunScript`, `Pac64StartScriptRecording`...). LED-Next never set
+  them, so a half-done (refused) write may have left flash speeds set; the board keeps them until power is lost.
+- **Change:** LED-Next now sets flash speeds 0 (and fade 0) when it opens a board, and before the write after a
+  refused one (log: "cleared the board's own flashing and fades after a refused write"). To check: restarting
+  LED-Next stops a blinking button; after the next refused write no LEDs blink on their own.
+- Then the blinking **stopped on its own** while the user was reading (the next idle show started at 12:53:59 and
+  ran 4.9 min; steady Gaelco G4 again 12:58:53). A board-held flash speed shouldn't stop by itself, so the flash
+  theory is not proven. Installed at 13:01: both boards took `Pac64SetLEDFlashSpeeds(0)` without a warning.
+  Still to learn: whether P2 B1 blinked again on the steady lights after 12:58, and whether it comes back.
+- User: P2 B1 was **steady** after the show ended at 12:58, so the blink went away during the 12:54 idle show (only
+  LED-Next's normal writes) and didn't come back. That fits a passing board glitch better than a flash speed held
+  until power loss; still unproven either way.
+- **Run after the install (13:01-14:22, LaunchBox):** idle shows up to 7.6 min (not hours), two ATV Track games in
+  Odin. One refused write on board #2 at 13:07:52; the new reset ran first ("cleared the board's own flashing and
+  fades after a refused write (1 so far)") and the retry worked. Writes 9-19 ms. Needs a run of hours idle.
+- User: all steady from 13:01 to 14:22 (no blinking, no on/off), including after the refused write at 13:07.
