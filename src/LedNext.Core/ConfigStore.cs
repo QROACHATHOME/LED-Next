@@ -98,6 +98,12 @@ public static class ConfigStore
             AppLog.Info("Config upgraded from version 10 to 11 (adds idle, start-up and shut-down light shows, all off).");
             config.Version = 11;
         }
+        if (config.Version < 12)
+        {
+            // v12 added Idle.Speed; 1 (the property's default), so the animations run as before.
+            AppLog.Info("Config upgraded from version 11 to 12 (adds the idle animation's speed, normal).");
+            config.Version = 12;
+        }
         config.Lamps ??= new LampSettings();
         config.Idle ??= new LedNext.Core.Shows.IdleSettings();
         config.Shows ??= new LedNext.Core.Shows.FrontEndShowSettings();

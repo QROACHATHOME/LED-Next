@@ -6,14 +6,14 @@ public sealed class AllOff : ILightSource
     public void Render(RenderContext ctx) { }
 }
 
-public sealed class SolidColor(Rgb color, string? name = null) : ILightSource
+public sealed class SolidColor(Rgb color, string? name = null) : ILightSource, ITestPattern
 {
     public string Name { get; } = name ?? $"Solid {color.ToHex()}";
     public void Render(RenderContext ctx) => ctx.SetAll(color);
 }
 
 /// <summary>Lights one button at a time in white, in panel order. Others glow dim.</summary>
-public sealed class ButtonChase(double stepSeconds = 0.35) : ILightSource
+public sealed class ButtonChase(double stepSeconds = 0.35) : ILightSource, ITestPattern
 {
     public string Name => "Button chase";
 
@@ -29,7 +29,7 @@ public sealed class ButtonChase(double stepSeconds = 0.35) : ILightSource
 }
 
 /// <summary>All buttons red → green → blue → white. A button showing the wrong colour has swapped channels.</summary>
-public sealed class RgbCycle(double stepSeconds = 1.0) : ILightSource
+public sealed class RgbCycle(double stepSeconds = 1.0) : ILightSource, ITestPattern
 {
     private static readonly (Rgb Color, string Name)[] Steps =
         { (Rgb.Red, "Red"), (Rgb.Green, "Green"), (Rgb.Blue, "Blue"), (Rgb.White, "White") };
@@ -45,7 +45,7 @@ public sealed class RgbCycle(double stepSeconds = 1.0) : ILightSource
 }
 
 /// <summary>A hue wave sweeping across the panel from left to right.</summary>
-public sealed class Rainbow(double degreesPerSecond = 90, double spread = 360) : ILightSource
+public sealed class Rainbow(double degreesPerSecond = 90, double spread = 360) : ILightSource, ITestPattern
 {
     public string Name => "Rainbow";
 
@@ -58,7 +58,7 @@ public sealed class Rainbow(double degreesPerSecond = 90, double spread = 360) :
 }
 
 /// <summary>Lights each pin of each board in turn, ignoring wiring. Used to discover physical wiring.</summary>
-public sealed class PinWalk(double stepSeconds = 0.6) : ILightSource
+public sealed class PinWalk(double stepSeconds = 0.6) : ILightSource, ITestPattern
 {
     public string Name => "Pin walk";
 
@@ -81,7 +81,7 @@ public sealed class PinWalk(double stepSeconds = 0.6) : ILightSource
 }
 
 /// <summary>One pin on at full brightness, steady (used by the wiring wizard).</summary>
-public sealed class SinglePin(string boardKey, string boardName, int pin) : ILightSource
+public sealed class SinglePin(string boardKey, string boardName, int pin) : ILightSource, ITestPattern
 {
     public string Name => "Wiring wizard";
 
@@ -93,7 +93,7 @@ public sealed class SinglePin(string boardKey, string boardName, int pin) : ILig
 }
 
 /// <summary>Flashes one button white so you can find it on the panel.</summary>
-public sealed class IdentifyButton(string buttonId) : ILightSource
+public sealed class IdentifyButton(string buttonId) : ILightSource, ITestPattern
 {
     public string ButtonId { get; } = buttonId;
     public string Name => $"Identify {ButtonId}";
@@ -107,7 +107,7 @@ public sealed class IdentifyButton(string buttonId) : ILightSource
 }
 
 /// <summary>Pins toggled by hand from the Boards view. Thread-safe.</summary>
-public sealed class ManualPins : ILightSource
+public sealed class ManualPins : ILightSource, ITestPattern
 {
     private readonly object _gate = new();
     private readonly HashSet<(string BoardKey, int Pin)> _on = new();
@@ -138,3 +138,9 @@ public sealed class ManualPins : ILightSource
         }
     }
 }
+
+/// <summary>
+/// A pattern the user turned on in LED-Next to test the panel (the Boards tab's patterns, the wiring wizard's pin,
+/// identifying a button). The idle show doesn't start over one.
+/// </summary>
+public interface ITestPattern { }

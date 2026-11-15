@@ -224,6 +224,7 @@ public sealed class ShowController : IDisposable
         if (life.Launched || life.Phase != LampPhase.Browsing) return GamePlaying;
         if (Active is ShowKind.Startup or ShowKind.Shutdown or ShowKind.Test) return "another show is playing";
         if (Idle.OnlyWithFrontEnd && !_frontEndOpen) return "no front end is open";
+        if (Active == ShowKind.None && _session.Engine.Source is ITestPattern) return "a test pattern is on";
         if (_lamps.Speech.Speaking) return "speaking";
         return null;
     }

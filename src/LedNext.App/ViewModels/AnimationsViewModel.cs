@@ -81,6 +81,12 @@ public sealed partial class AnimationsViewModel : ObservableObject
         set { I.ChangeEverySeconds = Math.Clamp(Math.Round(value / 5) * 5, 5, 3600); Changed(); }
     }
     public bool OnlyWithFrontEnd { get => I.OnlyWithFrontEnd; set { I.OnlyWithFrontEnd = value; Changed(); } }
+    /// <summary>Animation speed, 0.25–2 (1 = normal).</summary>
+    public double Speed
+    {
+        get => I.Speed;
+        set { I.Speed = Math.Clamp(Math.Round(value / 0.05) * 0.05, 0.25, 2); Changed(); }
+    }
 
     // ---- sound
 

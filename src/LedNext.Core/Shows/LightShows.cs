@@ -74,7 +74,7 @@ public static class LightShows
         var names = IsLoop(settings.Show)
             ? new[] { FindLoop(settings.Show)!.Value.Info.Name }
             : Loops.Where(l => envelope is not null || !l.NeedsAudio).Select(l => l.Name).ToArray();
-        return new IdleShow(names, settings.ChangeEvery, envelope, seed ?? Environment.TickCount);
+        return new IdleShow(names, settings.ChangeEvery, envelope, seed ?? Environment.TickCount, settings.ClampedSpeed);
     }
 
     /// <summary>The start-up show, or null for <see cref="None"/> / an unknown name.</summary>
@@ -115,16 +115,18 @@ public sealed class IdleShow : ILightSource
     private readonly TimeSpan _changeEvery;
     private readonly AudioEnvelope? _audio;
     private readonly System.Random _random;
+    private readonly double _speed;
     private ILightSource? _current, _previous;
     private string _currentName = "";
     private TimeSpan _since, _fadeFrom;
 
-    public IdleShow(IReadOnlyList<string> names, TimeSpan changeEvery, AudioEnvelope? audio, int seed)
+    public IdleShow(IReadOnlyList<string> names, TimeSpan changeEvery, AudioEnvelope? audio, int seed, double speed = 1)
     {
         _names = names.Count > 0 ? names : new[] { LightShows.Loops[0].Name };
         _changeEvery = changeEvery;
         _audio = audio;
         _random = new System.Random(seed);
+        _speed = speed;
         Name = _names.Count == 1 ? $"Idle: {_names[0]}" : "Idle: random shows";
     }
 
@@ -141,14 +143,14 @@ public sealed class IdleShow : ILightSource
         if (_current is null) Next(t, fade: false);
         else if (_names.Count > 1 && t - _since >= _changeEvery) Next(t, fade: true);
 
-        var now = Draw(_current!, ctx);
+        var now = Draw(_current!, ctx, _currentReacts);
         if (_previous is not null)
         {
             double f = (t - _fadeFrom) / FadeTime;
             if (f >= 1) _previous = null;
             else
             {
-                var before = Draw(_previous, ctx);
+                var before = Draw(_previous, ctx, _previousReacts);
                 foreach (var b in ctx.Panel.Buttons)
                 {
                     var a = before.TryGetValue(b.Id, out var x) ? x : Rgb.Black;
@@ -162,7 +164,7 @@ public sealed class IdleShow : ILightSource
         ctx.Status = $"Idle: {_currentName}" + (_audio is { Active: true } ? $" · sound {_audio.Level:P0}" : "");
     }
 
-    private bool _currentReacts;
+    private bool _currentReacts, _previousReacts;
 
     private void Next(TimeSpan t, bool fade)
     {
@@ -173,6 +175,7 @@ public sealed class IdleShow : ILightSource
             while (name == _currentName);
         }
         _previous = fade ? _current : null;
+        _previousReacts = _currentReacts;
         _fadeFrom = t;
         _since = t;
         _currentName = name;
@@ -180,9 +183,11 @@ public sealed class IdleShow : ILightSource
         _currentReacts = LightShows.Loops.Any(l => l.NeedsAudio && l.Name == name);
     }
 
-    private static Dictionary<string, Rgb> Draw(ILightSource source, RenderContext ctx)
+    /// <summary>Draws one show; shows that don't react to the sound run on the slowed (or sped up) clock.</summary>
+    private Dictionary<string, Rgb> Draw(ILightSource source, RenderContext ctx, bool reactsToSound)
     {
-        var tmp = new RenderContext(ctx.Panel, ctx.Time);
+        var time = reactsToSound || _speed == 1 ? ctx.Time : TimeSpan.FromTicks((long)(ctx.Time.Ticks * _speed));
+        var tmp = new RenderContext(ctx.Panel, time);
         source.Render(tmp);
         return new Dictionary<string, Rgb>(tmp.Colors);
     }

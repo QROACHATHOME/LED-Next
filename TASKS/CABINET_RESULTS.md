@@ -720,3 +720,20 @@ which lights no buttons. They asked for a fallback that copies MAME's lights int
 - Once, just before a reboot, board #2 showed wrong colours while every write was accepted (nothing in the log).
   After rebooting: 16.6 min of idle shows, retries only, no pause. Board #2 still refuses writes now and then: if
   the colours go wrong again, check its USB cable, port (not a hub) and power.
+- **Board #2 flicker is the board's, not LED-Next's.** Trying the idle show, every button on board #2 flickered
+  while board #1 was fine; the log had one refused write (retried fine). Then the Boards tab's solid white: board #2
+  still flickers. A solid colour is written once and then nothing (the engine skips unchanged frames), so the flicker
+  comes from the board, its USB link or its power. Most likely power: shows light every button at once. To try:
+  another USB port on the PC (no hub), a better or shorter cable, a powered hub, or the board's own power input.
+- Added on the cabinet: `idle.speed` (config v12, default 1 = as before), a Speed slider in the Animations tab.
+  The sound shows always run in real time.
+- The user then saw board #2 going fully **on and off** on solid white, not flickering. The log: "All white" at
+  21:36:03 and nothing else for 98 s, so LED-Next wrote nothing in that time; the on/off is the board's (supply
+  dips most likely).
+- **Bug found and fixed:** the idle show started over the white test at 21:37:41 (it only waited for 30 s without
+  input). Now it waits while a test pattern is on (`ITestPattern`: the Boards tab's patterns, manual pins, the
+  wiring wizard's pin, identify-button). BigBox's own "all off" doesn't block it.
+- With the fixed idle guard (`Idle: waiting (a test pattern is on)`), solid white for minutes: board #2 still went on
+  and off while LED-Next wrote nothing. **Swapping the two boards' USB cables made it steady**: a cable or connection
+  problem, not LED-Next. Boards are found by board id, so the swap needs no rewiring. To watch: whether board #1
+  (now on board #2's old cable) starts doing it, and whether board #2's refused writes stop.

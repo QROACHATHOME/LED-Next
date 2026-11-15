@@ -30,7 +30,7 @@ public sealed class CabinetConfig
     /// 10 = adds Speech.SpeakNameWithoutLabels (on: a game without labels still says its name).
     /// 11 = adds <see cref="Idle"/> (off) and <see cref="Shows"/> (none), so nothing changes.
     /// </summary>
-    public const int CurrentVersion = 11;
+    public const int CurrentVersion = 12;
 
     public int Version { get; set; } = CurrentVersion;
     public PanelLayout Panel { get; set; } = new();

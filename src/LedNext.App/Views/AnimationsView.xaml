@@ -20,6 +20,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <TextBlock Text="Start after (minutes)" VerticalAlignment="Center" />
                 <Slider Grid.Column="1" Minimum="0.5" Maximum="30" IsSnapToTickEnabled="True" TickFrequency="0.5"
@@ -36,6 +37,12 @@
                 <Slider Grid.Row="3" Grid.Column="1" Minimum="10" Maximum="600" IsSnapToTickEnabled="True" TickFrequency="5"
                         Value="{Binding ChangeEverySeconds}" IsEnabled="{Binding IsRandom}" Margin="0,6" />
                 <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding ChangeEverySeconds}" VerticalAlignment="Center" Margin="8,0,0,0" />
+
+                <TextBlock Grid.Row="4" Text="Speed (1 = normal)" VerticalAlignment="Center"
+                           ToolTip="Lower is slower. The sound meter and beat flash always follow the sound." />
+                <Slider Grid.Row="4" Grid.Column="1" Minimum="0.25" Maximum="2" IsSnapToTickEnabled="True" TickFrequency="0.05"
+                        Value="{Binding Speed}" Margin="0,6" />
+                <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding Speed, StringFormat=0.##}" VerticalAlignment="Center" Margin="8,0,0,0" />
             </Grid>
             <CheckBox Content="Only while LaunchBox / BigBox is running" IsChecked="{Binding OnlyWithFrontEnd}"
                       IsEnabled="{Binding IdleEnabled}" Margin="0,3,0,12"

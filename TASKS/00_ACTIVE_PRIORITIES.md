@@ -193,7 +193,9 @@
       Fixed there: the idle show stopped and restarted every few seconds (LastInputClock)
 - [ ] Unmapped known lamps show the map source of the table that was searched; show none instead
 - [x] PacLED64#2 write failures during shows: refused writes are retried (3 times) before the board pauses
-- [ ] Board #2 still refuses about 1 write in 400 during shows: check its USB cable / port / power if colours go wrong
+- [ ] Board #2 flickered on a still solid white: fixed by swapping the boards' USB cables (21:5x, visit 14). Check that it
+      stays steady, that board #1 doesn't start, and whether the refused writes (about 1 in
+      400 during shows) stop
 - [ ] Animations (`*.lwax`) — phase 5
 
 ## Ultimate I/O (2026-11-14) — needs online testers

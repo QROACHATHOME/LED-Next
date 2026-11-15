@@ -24,9 +24,13 @@ public sealed class IdleSettings
     /// <summary>Gain on the sound level: 1 = as Windows reports it, more for quiet sound.</summary>
     public double AudioSensitivity { get; set; } = 1.5;
 
+    /// <summary>Animation speed: 1 = normal, 0.5 = half as fast. The sound shows always follow the sound in real time. Version 12.</summary>
+    public double Speed { get; set; } = 1;
+
     public TimeSpan After => TimeSpan.FromMinutes(Math.Clamp(Minutes, 0.25, 240));
     public TimeSpan ChangeEvery => TimeSpan.FromSeconds(Math.Clamp(ChangeEverySeconds, 5, 3600));
     public double ClampedSensitivity => Math.Clamp(AudioSensitivity, 0.25, 8);
+    public double ClampedSpeed => Math.Clamp(Speed, 0.25, 2);
 }
 
 /// <summary>

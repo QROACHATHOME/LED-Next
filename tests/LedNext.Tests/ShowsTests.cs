@@ -26,7 +26,8 @@ public class ShowsTests
         config.Idle = null!;
         config.Shows = null!;
         ConfigStore.Migrate(config);
-        Assert.Equal(11, config.Version);
+        Assert.Equal(CabinetConfig.CurrentVersion, config.Version);
+        Assert.Equal(1, config.Idle.Speed);
         Assert.False(config.Idle.Enabled);
         Assert.False(config.Idle.ReactToAudio);
         Assert.Equal(LightShows.None, config.Shows.Startup);
@@ -122,6 +123,26 @@ public class ShowsTests
         Assert.Equal(first, idle.Current);
         Render(idle, 110.1);
         Assert.NotEqual(first, idle.Current);
+    }
+
+    [Fact]
+    public void HalfSpeedShowsAtTenSecondsWhatNormalSpeedShowsAtFive()
+    {
+        var slow = LightShows.Idle(new IdleSettings { Show = "Rainbow wave", Speed = 0.5 }, null, 1);
+        var normal = LightShows.Idle(new IdleSettings { Show = "Rainbow wave" }, null, 1);
+        Assert.Equal(Render(normal, 5), Render(slow, 10));
+        Assert.NotEqual(Render(normal, 10), Render(slow, 10));
+        Assert.Equal(0.25, new IdleSettings { Speed = 0 }.ClampedSpeed);
+    }
+
+    [Fact]
+    public void TestPatternsAreMarkedSoIdleWaitsButOffIsNot()
+    {
+        // On the cabinet the idle show replaced the Boards tab's "All white" mid-test.
+        ILightSource[] tests = [new SolidColor(Rgb.White), new ButtonChase(), new RgbCycle(), new Rainbow(), new PinWalk(),
+            new SinglePin("PacLED64#1", "PacLED64 #1", 1), new IdentifyButton("P1_B1"), new ManualPins()];
+        Assert.All(tests, t => Assert.IsAssignableFrom<ITestPattern>(t));
+        Assert.False(new AllOff() is ITestPattern); // BigBox's "all off" must not block idle
     }
 
     [Fact]
