@@ -14,6 +14,7 @@ public sealed class LedEngine : IDisposable
     private readonly Stopwatch _clock = Stopwatch.StartNew();
     private readonly Dictionary<string, byte[]> _lastWritten = new();
     private readonly Dictionary<string, TimeSpan> _faultedUntil = new();
+    private readonly Dictionary<string, long> _retried = new();
     private readonly AutoResetEvent _wake = new(false);
 
     private volatile PanelSnapshot _snapshot;
@@ -261,7 +262,7 @@ public sealed class LedEngine : IDisposable
 
             try
             {
-                board.Write(data);
+                WriteWithRetries(board, data);
                 _lastWritten[board.Key] = data;
                 if (_faultedUntil.Remove(board.Key)) AppLog.Info($"{board.Key}: writes working again.");
             }
@@ -272,6 +273,35 @@ public sealed class LedEngine : IDisposable
                 AppLog.Error($"{board.Key}: write failed; retrying in {FaultRetryInterval.TotalSeconds:0}s", ex);
             }
         }
+    }
+
+    /// <summary>Waits before each retry of a refused write; a board still refusing after them is paused.</summary>
+    internal static readonly TimeSpan[] RetryDelays = [TimeSpan.Zero, TimeSpan.FromMilliseconds(20), TimeSpan.FromMilliseconds(100)];
+
+    /// <summary>
+    /// A PacLED64 now and then refuses a write during long animations (about 1 in 400 on the cabinet's board #2),
+    /// sometimes twice in a row. Retry a few times, briefly, before <see cref="WriteLocked"/> pauses the board.
+    /// </summary>
+    private void WriteWithRetries(ILedBoard board, byte[] data)
+    {
+        Exception? first = null;
+        for (int attempt = 0; ; attempt++)
+        {
+            try
+            {
+                board.Write(data);
+                break;
+            }
+            catch (Exception ex)
+            {
+                first ??= ex;
+                if (attempt >= RetryDelays.Length) throw;
+                if (RetryDelays[attempt] > TimeSpan.Zero) Thread.Sleep(RetryDelays[attempt]);
+            }
+        }
+        if (first is null) return;
+        long n = _retried[board.Key] = _retried.GetValueOrDefault(board.Key) + 1;
+        if (n == 1 || n % 100 == 0) AppLog.Warn($"{board.Key}: a write failed and worked when retried ({n} so far): {first.Message}");
     }
 
     private void BlackoutLocked()

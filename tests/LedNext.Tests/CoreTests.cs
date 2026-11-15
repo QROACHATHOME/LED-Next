@@ -171,6 +171,47 @@ public class EngineTests
     }
 
     [Fact]
+    public void AWriteTheBoardRefusesOnceIsRetriedAtOnce()
+    {
+        // Seen on the cabinet: PacLED64 #2 refuses about 1 write in 400 during animations. Before, the board then
+        // got nothing for 5 s, so half the panel froze.
+        var board = new FlakyBoard("PacLED64#1", failures: 3); // the cabinet also saw two refusals in a row
+        using var engine = new LedEngine(OneButton()) { Source = new SolidColor(Rgb.White) };
+        engine.ReplaceProvider(new OneBoardProvider(board));
+        engine.Start();
+        Assert.True(board.Written.Wait(1000), "the refused write should be retried, not paused for 5 s");
+        Assert.Equal(4, board.Calls);
+        Assert.Equal(255, board.Last![9]);
+    }
+
+    private sealed class FlakyBoard(string key, int failures) : ILedBoard
+    {
+        private int _failures = failures;
+        public ManualResetEventSlim Written { get; } = new();
+        public int Calls { get; private set; }
+        public byte[]? Last { get; private set; }
+        public string Key => key;
+        public string Model => "PacLED64";
+        public string DisplayName => key;
+        public int PinCount => 64;
+        public bool IsSimulated => true;
+        public void Write(ReadOnlySpan<byte> intensities)
+        {
+            Calls++;
+            if (_failures-- > 0) throw new IOException("Pac64SetLEDIntensities returned false");
+            if (intensities.ToArray().Any(p => p != 0)) { Last = intensities.ToArray(); Written.Set(); }
+        }
+        public void Dispose() { }
+    }
+
+    private sealed class OneBoardProvider(ILedBoard board) : ILedBoardProvider
+    {
+        public string Name => "test";
+        public IReadOnlyList<ILedBoard> Discover() => [board];
+        public void Dispose() { }
+    }
+
+    [Fact]
     public void FailingSource_RendersBlackInsteadOfThrowing()
     {
         using var engine = new LedEngine(OneButton()) { Source = new Throwing() };

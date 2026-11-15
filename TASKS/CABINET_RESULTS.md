@@ -709,3 +709,14 @@ which lights no buttons. They asked for a fallback that copies MAME's lights int
 - **Known lamps**: after Galaga and Brave Firefighters, `lamp_outputs` holds MAME galaga `led0 → P1_START`
   (MameOutputs.ini) and Odin braveff `1p_start_lamp → P1_START`, `2p_start_lamp → P2_START`, and the unmapped
   `1p_nozzle_vibration`. Small thing: the unmapped row's `map_source` still says "LED-Next's built-in start lamps".
+
+## Board #2 write failures during light shows (after v0.1.7)
+- During long idle shows `PacLED64#2: write failed; retrying in 5s: … Pac64SetLEDIntensities returned false` came 23
+  times in about 50 minutes (about 1 write in 400; never board #1, almost never while browsing). Each one paused the
+  board for 5 s, so the P3/P4 side froze while the rest animated.
+- **Fixed** (`LedEngine.WriteWithRetries`): a refused write is retried at once, after 20 ms and after 100 ms; only then
+  is the board paused. Logged as `a write failed and worked when retried (n so far)` the first time and every 100th.
+  One instant retry wasn't enough (a write was refused twice in a row), hence the three.
+- Once, just before a reboot, board #2 showed wrong colours while every write was accepted (nothing in the log).
+  After rebooting: 16.6 min of idle shows, retries only, no pause. Board #2 still refuses writes now and then: if
+  the colours go wrong again, check its USB cable, port (not a hub) and power.
