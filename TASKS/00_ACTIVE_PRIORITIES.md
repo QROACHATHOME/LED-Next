@@ -199,8 +199,9 @@
       (15 Nov: board #2 moved off hub 34D1:0609, whose port made every write ~200 ms; a frame now takes 18 ms
       instead of 206 ms. It flashed on the new port until the PC was restarted, then fine.)
       15 Nov, after 2.5 h idle in LaunchBox: on/off again and P2 B1 blinking on steady lights (went away by itself).
-      LED-Next now clears the board's own flashing/fades at open and after a refused write. **Next: an idle run of
-      several hours**; look for "cleared the board's own flashing" lines and ask whether anything blinked.
+      LED-Next now clears the board's own flashing/fades at open and after a refused write. 15 Nov 14:38-17:01: a
+      143-min idle show in BigBox, all steady, no refused writes. Leave open for now: if the on/off or blinking
+      comes back, check for "cleared the board's own flashing" lines and a refused write before it.
 - [x] Games tab colour picker (the + swatch after the colours, config v13 `games.pickerColors`): checked on the
       cabinet that it opens over LED-Next, sets the button, and that added custom colours are there after a restart
 - [ ] Animations (`*.lwax`) — phase 5

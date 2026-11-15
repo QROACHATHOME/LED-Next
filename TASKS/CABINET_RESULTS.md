@@ -779,3 +779,7 @@ which lights no buttons. They asked for a fallback that copies MAME's lights int
   Odin. One refused write on board #2 at 13:07:52; the new reset ran first ("cleared the board's own flashing and
   fades after a refused write (1 so far)") and the retry worked. Writes 9-19 ms. Needs a run of hours idle.
 - User: all steady from 13:01 to 14:22 (no blinking, no on/off), including after the refused write at 13:07.
+- **Long idle run (BigBox, 14:38-17:01):** one idle random show ran 142.9 min without a break, the longest so far.
+  No refused writes, no resets, no warnings from the boards after 13:07:52. User: everything still working
+  (no blinking, no on/off). The idle on/off is not reproduced since the flash/fade reset went in; it hasn't
+  been tested against a refused write during a show of hours (none happened).
