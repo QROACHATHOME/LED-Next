@@ -786,3 +786,6 @@ which lights no buttons. They asked for a fallback that copies MAME's lights int
 - **16 Nov, 0.1.9 installed (new board types):** config upgraded 13 → 14 without warnings; both PacLED64s found as
   before (PID 1401 / 1402) and written in one command each; no warnings from the new LED-Wiz / strip code with
   none attached. User: everything works correctly on the panel.
+- **16 Nov, 0.2.0 installed (other front ends):** config upgraded 14 → 15 without warnings; both PacLED64s found
+  as before; it made `D:\LED-Next\LEDBlinky-stand-in\LEDBlinky.exe` (in its own folder). Plugin 0.2.0 built here
+  against LaunchBox 14.1.0.5 and attached to the release. User: BigBox lighting works correctly.
