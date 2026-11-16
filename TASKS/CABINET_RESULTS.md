@@ -783,3 +783,6 @@ which lights no buttons. They asked for a fallback that copies MAME's lights int
   No refused writes, no resets, no warnings from the boards after 13:07:52. User: everything still working
   (no blinking, no on/off). The idle on/off is not reproduced since the flash/fade reset went in; it hasn't
   been tested against a refused write during a show of hours (none happened).
+- **16 Nov, 0.1.9 installed (new board types):** config upgraded 13 → 14 without warnings; both PacLED64s found as
+  before (PID 1401 / 1402) and written in one command each; no warnings from the new LED-Wiz / strip code with
+  none attached. User: everything works correctly on the panel.
