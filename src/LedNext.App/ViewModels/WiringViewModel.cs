@@ -67,7 +67,9 @@ public sealed partial class WiringViewModel : ObservableObject
             var node = new NodeViewModel(this, board.Name, board.Key, new Point(board.GraphX, board.GraphY), boardKey: board.Key, buttonId: null);
             for (int pin = 1; pin <= board.PinCount; pin++)
             {
-                var c = new ConnectorViewModel(node, $"Pin {pin}", Brushes.Gainsboro, isInput: true) { BoardKey = board.Key, Pin = pin };
+                // A strip's LEDs that belong to a run (Boards tab) follow their control there; no pins for them here.
+                if (board.Segments?.Any(s => s.Contains((pin + 2) / 3)) == true) continue;
+                var c = new ConnectorViewModel(node, BoardModels.PinName(board, pin), Brushes.Gainsboro, isInput: true) { BoardKey = board.Key, Pin = pin };
                 node.Input.Add(c);
                 _inputs[(board.Key, pin)] = c;
             }
@@ -91,7 +93,7 @@ public sealed partial class WiringViewModel : ObservableObject
             output.IsConnected = input.IsConnected = true;
             var boardTag = bind.BoardKey.Contains('#') ? bind.BoardKey[(bind.BoardKey.LastIndexOf('#') + 1)..] : bind.BoardKey;
             output.Label = $"{bind.Channel} → #{boardTag} pin {bind.Pin}";
-            input.Label = $"Pin {bind.Pin}  ·  {bind.ButtonId} {bind.Channel}";
+            input.Label = $"{input.Title}  ·  {bind.ButtonId} {bind.Channel}";
             Connections.Add(new ConnectionViewModel(output, input, ColorUtil.ChannelBrush(bind.Channel)));
         }
 

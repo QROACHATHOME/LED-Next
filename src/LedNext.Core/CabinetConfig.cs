@@ -30,8 +30,10 @@ public sealed class CabinetConfig
     /// 10 = adds Speech.SpeakNameWithoutLabels (on: a game without labels still says its name).
     /// 11 = adds <see cref="Idle"/> (off) and <see cref="Shows"/> (none), so nothing changes.
     /// 12 = adds Idle.Speed (1). 13 = adds Games.PickerColors (empty).
+    /// 14 = adds the NanoLED, PacDrive, LED-Wiz and LED strip boards: a strip's ledCount / serialPort / baudRate /
+    /// segments on its board (absent on every other board, so nothing changes).
     /// </summary>
-    public const int CurrentVersion = 13;
+    public const int CurrentVersion = 14;
 
     public int Version { get; set; } = CurrentVersion;
     public PanelLayout Panel { get; set; } = new();

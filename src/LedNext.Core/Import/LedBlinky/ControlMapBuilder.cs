@@ -122,14 +122,17 @@ public static class ControlMapBuilder
     /// <summary>
     /// The LED-Next board a LEDBlinky controller is: "PACLED64" (seen on the cabinet, type 3), or any name with
     /// "ULTIMATE" in it for the I-PAC Ultimate I/O (LEDBlinky's exact name for it is not known yet; a tester's
-    /// LEDBlinkyInputMap.xml will tell).
+    /// LEDBlinkyInputMap.xml will tell). "NANOLED", "PACDRIVE" and "LEDWIZ" / "LED-WIZ" are guesses too.
     /// </summary>
     public static string? BoardKeyFor(InputMapPort port)
     {
-        if (port.ControllerName.Contains("PACLED64", StringComparison.OrdinalIgnoreCase))
-            return BoardModels.PacLed64.KeyFor(port.ControllerId);
-        if (port.ControllerName.Contains("ULTIMATE", StringComparison.OrdinalIgnoreCase))
-            return BoardModels.UltimateIO.KeyFor(Math.Max(1, port.ControllerId));
+        bool Has(string s) => port.ControllerName.Contains(s, StringComparison.OrdinalIgnoreCase);
+        int Id(BoardModel m) => Math.Clamp(port.ControllerId, 1, m.MaxBoardId);
+        if (Has("PACLED64")) return BoardModels.PacLed64.KeyFor(port.ControllerId);
+        if (Has("ULTIMATE")) return BoardModels.UltimateIO.KeyFor(Id(BoardModels.UltimateIO));
+        if (Has("NANOLED")) return BoardModels.NanoLed.KeyFor(Id(BoardModels.NanoLed));
+        if (Has("PACDRIVE")) return BoardModels.PacDrive.KeyFor(Id(BoardModels.PacDrive));
+        if (Has("LEDWIZ") || Has("LED-WIZ")) return BoardModels.LedWiz.KeyFor(Id(BoardModels.LedWiz));
         return null;
     }
 

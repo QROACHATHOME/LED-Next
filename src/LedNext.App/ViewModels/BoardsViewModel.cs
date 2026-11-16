@@ -29,6 +29,7 @@ public sealed partial class BoardsViewModel : ObservableObject
     {
         Boards.Clear();
         foreach (var def in _session.Config.Wiring.Boards) Boards.Add(new BoardViewModel(def));
+        OnPropertyChanged(nameof(ControlIds));
         ApplyModelFilter();
         RefreshUsage();
         RefreshStatus();
@@ -45,12 +46,22 @@ public sealed partial class BoardsViewModel : ObservableObject
     {
         var wiring = _session.Config.Wiring;
         foreach (var board in Boards)
+        {
+            var segments = wiring.FindBoard(board.Key)?.Segments ?? [];
             foreach (var pin in board.Pins)
             {
                 var bind = wiring.FindByPin(board.Key, pin.Pin);
+                if (bind is null && segments.FirstOrDefault(s => s.Contains((pin.Pin + 2) / 3)) is { } seg)
+                {
+                    // A strip segment's LED: it shows the control's colour.
+                    pin.Usage = seg.ButtonId;
+                    pin.Channel = (ColorChannel)((pin.Pin - 1) % 3);
+                    continue;
+                }
                 pin.Usage = bind is null ? "" : $"{bind.ButtonId} {bind.Channel}";
                 pin.Channel = bind?.Channel;
             }
+        }
     }
 
     public void ApplyFrame(IReadOnlyDictionary<string, byte[]> pins)
@@ -91,7 +102,29 @@ public sealed partial class BoardsViewModel : ObservableObject
     [ObservableProperty] private string? _boardStatus;
 
     public IReadOnlyList<int> AddIds => Enumerable.Range(1, AddModel.MaxBoardId).ToArray();
-    public string AddNote => $"{AddModel.PinCount} pins. {AddModel.Notes}";
+    public string AddNote => AddModel.IsStrip ? AddModel.Notes : $"{AddModel.PinCount} pins. {AddModel.Notes}";
+
+    // A strip's settings when adding one.
+    [ObservableProperty] private int _addLeds = BoardModels.DefaultStripLeds;
+    [ObservableProperty] private string? _addPort;
+    [ObservableProperty] private int _addBaud = BoardModels.DefaultBaudRate;
+    public IReadOnlyList<int> BaudRates => BoardModels.BaudRates;
+    /// <summary>The PC's serial ports right now (refreshed when the list opens).</summary>
+    public ObservableCollection<string> Ports { get; } = new();
+
+    [RelayCommand]
+    private void RefreshPorts()
+    {
+        string[] names;
+        try { names = System.IO.Ports.SerialPort.GetPortNames(); }
+        catch { names = []; }
+        foreach (var n in names.Order(StringComparer.OrdinalIgnoreCase).Where(n => !Ports.Contains(n))) Ports.Add(n);
+        foreach (var gone in Ports.Where(p => !names.Contains(p)).ToArray()) Ports.Remove(gone);
+        AddPort ??= Ports.FirstOrDefault();
+    }
+
+    /// <summary>The panel's controls, for strip segments.</summary>
+    public IReadOnlyList<string> ControlIds => _session.Config.Panel.Buttons.Select(b => b.Id).ToArray();
 
     /// <summary>Only the boards of the model picked in "Add a board" are shown (the user's request).</summary>
     private void ApplyModelFilter()
@@ -109,6 +142,7 @@ public sealed partial class BoardsViewModel : ObservableObject
     partial void OnAddModelChanged(BoardModel value)
     {
         BoardStatus = null; // the last add/remove message was about the other model
+        if (value.IsStrip) RefreshPorts();
         ApplyModelFilter();
         PickFreeId();
     }
@@ -124,13 +158,62 @@ public sealed partial class BoardsViewModel : ObservableObject
     private void AddBoard()
     {
         if (_session.Config.Wiring.FindBoard(AddModel.KeyFor(AddId)) is not null) { BoardStatus = $"{AddModel.NameFor(AddId)} is already there."; return; }
+        if (AddModel.IsStrip && string.IsNullOrWhiteSpace(AddPort)) { BoardStatus = "Pick the strip's serial port (COM…) first."; return; }
         _session.Checkpoint();
-        var def = BoardModels.Add(_session.Config.Wiring, AddModel, AddId);
+        var def = BoardModels.Add(_session.Config.Wiring, AddModel, AddId, AddLeds, AddPort, AddBaud);
         if (def is null) { BoardStatus = $"{AddModel.NameFor(AddId)} is already there."; return; }
-        AppLog.Info($"Boards: added {def.Name} ({def.Key}, {def.PinCount} pins).");
+        AppLog.Info($"Boards: added {def.Name} ({def.Key}, {def.PinCount} pins" +
+                    (def.SerialPort is { } p ? $", {def.LedCount} LEDs on {p} at {def.BaudRate} baud)." : ")."));
         _session.NotifyChanged(structural: true);
-        BoardStatus = $"Added {def.Name}. Wire its pins in the Wiring tab (or run the wiring wizard).";
+        BoardStatus = AddModel.IsStrip
+            ? $"Added {def.Name}. Wire single LEDs in the Wiring tab, or give runs of LEDs to a control below."
+            : $"Added {def.Name}. Wire its pins in the Wiring tab (or run the wiring wizard).";
         PickFreeId();
+    }
+
+    // ---- LED strips: settings and segments
+
+    [RelayCommand]
+    private void ApplyStrip(BoardViewModel? board)
+    {
+        if (board?.IsStrip != true || _session.Config.Wiring.FindBoard(board.Key) is not { } def) return;
+        if (string.IsNullOrWhiteSpace(board.EditPort)) { BoardStatus = "Pick the strip's serial port first."; return; }
+        _session.Checkpoint();
+        def.SerialPort = board.EditPort.Trim();
+        def.BaudRate = board.EditBaud;
+        int lost = BoardModels.SetStripLeds(_session.Config.Wiring, def, board.EditLeds);
+        AppLog.Info($"Boards: {def.Key} now {def.LedCount} LEDs on {def.SerialPort} at {def.BaudRate} baud" +
+                    (lost > 0 ? $"; {lost} pin(s) past the end unwired." : "."));
+        _session.NotifyChanged(structural: true);
+        BoardStatus = $"{def.Name}: {def.LedCount} LEDs on {def.SerialPort}." + (lost > 0 ? $" {lost} wired pin(s) past the new end were disconnected." : "");
+    }
+
+    [RelayCommand]
+    private void AddSegment(BoardViewModel? board)
+    {
+        if (board?.IsStrip != true || _session.Config.Wiring.FindBoard(board.Key) is not { } def) return;
+        if (string.IsNullOrEmpty(board.SegmentControl)) { BoardStatus = "Pick the control the LEDs should follow."; return; }
+        int leds = def.LedCount ?? def.PinCount / 3;
+        int first = Math.Clamp(board.SegmentFirst, 1, leds);
+        int count = Math.Clamp(board.SegmentCount, 1, leds - first + 1);
+        _session.Checkpoint();
+        (def.Segments ??= new()).Add(new StripSegment { ButtonId = board.SegmentControl, FirstLed = first, Count = count });
+        AppLog.Info($"Boards: {def.Key} {def.Segments[^1]}.");
+        _session.NotifyChanged(structural: true);
+        BoardStatus = $"{def.Name}: {def.Segments[^1]}.";
+    }
+
+    [RelayCommand]
+    private void RemoveSegment(SegmentViewModel? segment)
+    {
+        if (segment is null || _session.Config.Wiring.FindBoard(segment.BoardKey) is not { Segments: { } list } def) return;
+        if (segment.Index < 0 || segment.Index >= list.Count) return;
+        _session.Checkpoint();
+        var s = list[segment.Index];
+        list.RemoveAt(segment.Index);
+        AppLog.Info($"Boards: {def.Key} removed {s}.");
+        _session.NotifyChanged(structural: true);
+        BoardStatus = $"{def.Name}: removed {s}.";
     }
 
     [RelayCommand]
@@ -160,23 +243,52 @@ public sealed partial class BoardViewModel : ObservableObject
         Key = def.Key;
         Name = def.Name;
         Model = def.Model;
-        for (int pin = 1; pin <= def.PinCount; pin++) Pins.Add(new PinCellViewModel(def.Key, pin));
+        IsStrip = BoardModels.Find(def.Model)?.IsStrip == true;
+        for (int pin = 1; pin <= def.PinCount; pin++)
+            Pins.Add(new PinCellViewModel(def.Key, pin, IsStrip ? BoardModels.PinName(def, pin)[4..] : pin.ToString()));
+        if (!IsStrip) return;
+        _editPort = def.SerialPort;
+        _editBaud = def.BaudRate ?? BoardModels.DefaultBaudRate;
+        _editLeds = def.LedCount ?? def.PinCount / 3;
+        StripSummary = $"{def.SerialPort ?? "no port"} · {_editBaud} baud · {_editLeds} LEDs (Adalight)";
+        var list = def.Segments ?? [];
+        for (int i = 0; i < list.Count; i++) Segments.Add(new SegmentViewModel(def.Key, i, list[i].ToString()));
+        _segmentFirst = list.Count == 0 ? 1 : Math.Min(_editLeds, list.Max(s => s.LastLed) + 1);
+        _segmentCount = Math.Max(1, _editLeds - _segmentFirst + 1);
     }
 
     public string Key { get; }
     public string Name { get; }
     public string Model { get; }
     public ObservableCollection<PinCellViewModel> Pins { get; } = new();
+    /// <summary>Strips: 15 columns, so a row is five whole LEDs.</summary>
+    public int Columns => IsStrip ? 15 : 16;
+
+    // ---- strips
+    public bool IsStrip { get; }
+    public string? StripSummary { get; }
+    public ObservableCollection<SegmentViewModel> Segments { get; } = new();
+    [ObservableProperty] private string? _editPort;
+    [ObservableProperty] private int _editBaud;
+    [ObservableProperty] private int _editLeds;
+    [ObservableProperty] private string? _segmentControl;
+    [ObservableProperty] private int _segmentFirst = 1;
+    [ObservableProperty] private int _segmentCount = 1;
 
     [ObservableProperty] private string _status = "";
     /// <summary>False when another model is picked in "Add a board".</summary>
     [ObservableProperty] private bool _isShown = true;
 }
 
-public sealed partial class PinCellViewModel(string boardKey, int pin) : ObservableObject
+/// <summary>One strip segment in the Boards tab; <see cref="Index"/> is its place in the board's list.</summary>
+public sealed record SegmentViewModel(string BoardKey, int Index, string Text);
+
+public sealed partial class PinCellViewModel(string boardKey, int pin, string label) : ObservableObject
 {
     public string BoardKey { get; } = boardKey;
     public int Pin { get; } = pin;
+    /// <summary>"7", or "3 G" (LED 3's green) on a strip.</summary>
+    public string Label { get; } = label;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Fill))]

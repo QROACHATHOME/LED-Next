@@ -56,9 +56,14 @@ public sealed class PacLed64Provider : ILedBoardProvider
                 AppLog.Warn($"  two {found.Model.DisplayName} boards report ID {found.BoardId}. Give each board a unique ID with Ultimarc's configuration tool; skipping the duplicate.");
                 continue;
             }
-            if (found.Model == BoardModels.UltimateIO)
-                AppLog.Info($"  {found.Key}: Ultimate I/O support is new and untested on real boards; please report how it behaves.");
+            if (found.Model != BoardModels.PacLed64)
+                AppLog.Info($"  {found.Key}: {found.Model.DisplayName} support is new and untested on real boards; please report how it behaves.");
 
+            if (found.Model == BoardModels.PacDrive)
+            {
+                boards.Add(new PacDriveBoard(index, found));
+                continue;
+            }
             var board = new UltimarcLedBoard(index, found);
             board.ResetEffects();
             boards.Add(board);
@@ -113,7 +118,9 @@ internal sealed class UltimarcLedBoard : ILedBoard
         DisplayName = found.Model.NameFor(found.BoardId);
         PinCount = found.Model.PinCount;
         _current = new byte[PinCount];
-        _batchOnlyForBigChanges = found.Model == BoardModels.UltimateIO;
+        // Ultimarc's readme: the all-LEDs command is "long" on the Ultimate I/O and NanoLED; use it only for big changes.
+        // (The PacLED64 is fast with it on every frame, verified on the cabinet.)
+        _batchOnlyForBigChanges = found.Model != BoardModels.PacLed64;
     }
 
     public int BoardId { get; }
@@ -208,6 +215,36 @@ internal sealed class UltimarcLedBoard : ILedBoard
         if (batch) _batchWrites++;
         if (_writes is 1 or 10 or 100)
             AppLog.Info($"{Key}: {_writes} write(s) so far, {_batchWrites} as one all-pins command.");
+    }
+
+    public void Dispose() { }
+}
+
+/// <summary>
+/// A PacDrive: 16 outputs, on or off only, all set in one PacSetLEDStates call. An output is on when its value is at
+/// least <see cref="BoardModels.OnOffThreshold"/> (25 %), so fades and dimmed colours snap on or off. Not yet tested
+/// on a real board.
+/// </summary>
+internal sealed class PacDriveBoard(int sdkIndex, DetectedBoard found) : ILedBoard
+{
+    private ushort? _current;
+    private long _writes;
+
+    public string Key { get; } = found.Key;
+    public string Model { get; } = found.Model.Model;
+    public string DisplayName { get; } = found.Model.NameFor(found.BoardId);
+    public int PinCount { get; } = found.Model.PinCount;
+    public bool IsSimulated => false;
+
+    public void Write(ReadOnlySpan<byte> intensities)
+    {
+        var states = PacDriveProtocol.States(intensities);
+        if (_current == states) return;
+        if (!PacDriveNative.PacSetLEDStates(sdkIndex, states))
+            throw new IOException($"{Key}: PacSetLEDStates returned false");
+        _current = states;
+        _writes++;
+        if (_writes is 1 or 10 or 100) AppLog.Info($"{Key}: {_writes} write(s) so far (outputs {states:X4}).");
     }
 
     public void Dispose() { }

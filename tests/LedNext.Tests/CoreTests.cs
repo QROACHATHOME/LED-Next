@@ -306,7 +306,7 @@ public class PickerColorsTests
         var config = new CabinetConfig { Version = 12 };
         config.Games.PickerColors = null!;
         ConfigStore.Migrate(config);
-        Assert.Equal(13, config.Version);
+        Assert.Equal(CabinetConfig.CurrentVersion, config.Version);
         Assert.Empty(config.Games.PickerColors);
     }
 }

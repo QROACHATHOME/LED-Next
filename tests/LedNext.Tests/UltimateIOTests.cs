@@ -25,7 +25,7 @@ public class UltimateIOTests
 
     [Theory]
     [InlineData(0xD209, 0x1405, 5)]   // PacLED64 IDs stop at 4
-    [InlineData(0xD209, 0x0001, 1)]   // a PacDrive
+    [InlineData(0xD209, 0x0001, 2)]   // a U-HID (a PacDrive is an LED board since config v14)
     [InlineData(0x045E, 0x028E, -1)]  // an Ultimate I/O in XInput mode: an Xbox 360 pad, no LEDs
     public void IgnoresOtherDevices(int vid, int pid, int type) => Assert.Null(BoardModels.Identify(vid, pid, type));
 
@@ -72,7 +72,11 @@ public class UltimateIOTests
     [InlineData("PACLED64", 2, "PacLED64#2")]
     [InlineData("IPAC ULTIMATE IO", 1, "UltimateIO#1")]
     [InlineData("Ultimate I/O", 2, "UltimateIO#2")]
-    [InlineData("NANOLED", 1, null)]
+    [InlineData("NANOLED", 1, "NanoLED#1")]       // config v14
+    [InlineData("PACDRIVE", 2, "PacDrive#2")]
+    [InlineData("LEDWIZ", 8, "LEDWiz#8")]
+    [InlineData("LED-Wiz", 0, "LEDWiz#1")]
+    [InlineData("U-HID", 1, null)]
     public void MapsLedBlinkyControllersToBoards(string name, int id, string? key) =>
         Assert.Equal(key, ControlMapBuilder.BoardKeyFor(new InputMapPort(id, name, 1, "P1B1", "R", Array.Empty<string>())));
 }

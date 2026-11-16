@@ -110,6 +110,23 @@ public static class ConfigStore
             AppLog.Info("Config upgraded from version 12 to 13 (adds the colour picker's custom colours, none yet).");
             config.Version = 13;
         }
+        if (config.Version < 14)
+        {
+            // v14 added the NanoLED, PacDrive, LED-Wiz and LED strip boards; strip settings live on a strip's own
+            // board entry, so existing boards are unchanged.
+            AppLog.Info("Config upgraded from version 13 to 14 (adds NanoLED, PacDrive, LED-Wiz and LED strip boards).");
+            config.Version = 14;
+        }
+        foreach (var board in config.Wiring.Boards)
+        {
+            if (BoardModels.Find(board.Model)?.IsStrip != true) continue;
+            // A strip's pins follow its LED count; a hand-edited file may have one without the other.
+            int leds = Math.Clamp(board.LedCount ?? Math.Max(1, board.PinCount / 3), 1, BoardModels.MaxStripLeds);
+            board.LedCount = leds;
+            board.PinCount = leds * 3;
+            board.BaudRate ??= BoardModels.DefaultBaudRate;
+            board.Segments ??= new();
+        }
         config.Games.PickerColors ??= new();
         config.Lamps ??= new LampSettings();
         config.Idle ??= new LedNext.Core.Shows.IdleSettings();

@@ -8,7 +8,7 @@
 | `src/LedNext.LaunchBox` | FrontEnd, LaunchBox's plugin API | LaunchBox / BigBox plugin (thin: events → pipe). Built against `<LaunchBox>\Core\Unbroken.LaunchBox.Plugins.dll`, else against `tools/LaunchBoxPluginStubs` (compile-only stand-in) |
 | `src/LedNext.Core` | FrontEnd | Data model (panel, wiring, config), JSON store, lighting engine, test patterns, board interfaces, logging, game model + light resolver (`Games/`), LEDBlinky importer (`Import/LedBlinky/`) |
 | `src/LedNext.Data` | Core, Microsoft.Data.Sqlite | The game library in SQLite (`GameDatabase`, implements `IGameLibrary`) |
-| `src/LedNext.Hardware` | Core | Board drivers: Ultimarc PacLED64 and Ultimate I/O (via PacDrive SDK DLL) and a simulator |
+| `src/LedNext.Hardware` | Core | Board drivers: Ultimarc PacLED64, Ultimate I/O, NanoLED, PacDrive (PacDrive SDK DLL), LED-Wiz (HID), LED strips (serial, Adalight), and a simulator |
 | `src/LedNext.App` | Core, Data, Hardware | WPF desktop app: panel designer, games browser, Nodify wiring graph, board test view |
 | `tests/LedNext.Tests` | Core, Data | xUnit tests; the importer tests run on the real files in `import-samples/` and `cabinet/` |
 
@@ -355,14 +355,33 @@ per-board byte[PinCount]  ──►  write only if changed  ──►  ILedBoard
     `docs/TESTING_ULTIMATE_IO.md` and report with the "Ultimate I/O test report" issue template. Sources:
     github.com/benbaker76/PacDriveSDK (readme, `PacDrive.cs`), LEDSpicer `src/devices/Ultimarc/README.md`,
     Ultimarc-linux `ipacultimate.h`.
+  - **NanoLED**: PID `0x1481` + ID − 1 (IDs 1–4) or SDK type 4; 60 pins; the same Pac64 calls, all-pins only for
+    big changes (as the Ultimate I/O). **PacDrive**: PID `0x1500` + ID − 1 or SDK type 1; 16 outputs on / off
+    (`PacSetLEDStates`, on at `BoardModels.OnOffThreshold` = 64), `PacDriveBoard`. IDs from LEDSpicer; untested.
   - The first, 10th and 100th write of each board are logged with how many were all-pins commands.
+- In hardware mode `BoardProviders.Create` builds a `CompositeBoardProvider` of three: the PacDrive SDK one, the
+  LED-Wiz one and the LED strip one. One failing (no PacDrive DLL) doesn't stop the others; keys found twice keep
+  the first.
+- `LedWizProvider` (Hardware/Hid): lists HID interfaces with SetupAPI / hid.dll (`HidDevices`, no library), keeps
+  VID `0xFAFA` PID `0x00F0`–`0x00FF` (unit 1–16; Pinscape in LED-Wiz mode and clones too) with 9-byte output
+  reports (a Pinscape's keyboard / joystick interfaces have other sizes). Each changed frame: SBA (all on, resets
+  the board's output pointer) + four PBA reports of levels 0–48 (`LedWizProtocol`, Core, tested). Untested on a
+  real board.
+- `LedStripProvider` (Hardware/Serial, System.IO.Ports): strips can't be scanned, so each configured `LedStrip`
+  board is opened on its `serialPort` / `baudRate` (DTR / RTS off). Frames are Adalight (`AdalightProtocol`, Core,
+  tested); the last frame is resent every second while nothing changes (WLED leaves realtime mode after 2.5 s of
+  silence). A strip's pins are LED n's R, G, B at 3n−2..3n (`ledCount` × 3, up to 600 LEDs). In hardware mode a
+  change to a strip's port, speed or LED count reopens the boards (`MainViewModel.StripSignature`).
+- **Strip runs** (`BoardDefinition.Segments`, `StripSegment`): LEDs a..b show one control's colour.
+  `PanelSnapshot.From` adds their pins to the control's targets, so the engine, shows and tests need nothing else;
+  rename / remove of a control follows. The wiring graph leaves out pins inside a run.
 - `BoardModels` (Core) is the catalogue: model, pin count, board IDs; `Add` / `Remove` put a board in the wiring
   (the Boards tab's "Add a board" and per-board Remove, which also drops that board's pin bindings). Both are undo
   steps. In simulator mode a change to the board list rescans, so the virtual boards follow (also after undo).
   The Boards tab shows only the boards of the model picked in "Add a board" (the user's request); it starts on
   the first configured board's model and says how many boards are hidden.
-- LEDBlinky import: controller `PACLED64` → `PacLED64#id`; any name containing `ULTIMATE` → `UltimateIO#id`
-  (LEDBlinky's real name for the Ultimate I/O isn't known yet).
+- LEDBlinky import: controller `PACLED64` → `PacLED64#id`; any name containing `ULTIMATE` → `UltimateIO#id`,
+  `NANOLED`, `PACDRIVE`, `LEDWIZ` / `LED-WIZ` likewise (LEDBlinky's real names for these aren't known yet).
 - `SimulatedBoardProvider` creates a virtual board for every board in the wiring config, so wiring
   designed on a dev PC carries over unchanged to the cabinet.
 

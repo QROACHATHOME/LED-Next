@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace LedNext.Core;
 
 public enum ColorChannel { R, G, B }
@@ -12,6 +14,36 @@ public sealed class BoardDefinition
     public int PinCount { get; set; } = 64;
     public double GraphX { get; set; }
     public double GraphY { get; set; }
+
+    // ---- LED strips only (model "LedStrip"); null on every other board, and then not written to the config.
+
+    /// <summary>How many RGB LEDs the strip has; its pins are LED n's R, G, B at 3n−2, 3n−1, 3n.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? LedCount { get; set; }
+    /// <summary>The strip controller's serial port, e.g. "COM5".</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? SerialPort { get; set; }
+    /// <summary>The port's speed; the controller's sketch / WLED must use the same (115200 by default).</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? BaudRate { get; set; }
+    /// <summary>Runs of LEDs that all show one control's colour (lighting around the cabinet, a lit marquee…).</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<StripSegment>? Segments { get; set; }
+}
+
+/// <summary>
+/// LEDs <see cref="FirstLed"/> .. <see cref="FirstLed"/> + <see cref="Count"/> − 1 of a strip (1-based) all show the
+/// colour of control <see cref="ButtonId"/>, as well as any pins wired to it one by one.
+/// </summary>
+public sealed class StripSegment
+{
+    public string ButtonId { get; set; } = "";
+    public int FirstLed { get; set; } = 1;
+    public int Count { get; set; } = 1;
+
+    [JsonIgnore] public int LastLed => FirstLed + Count - 1;
+    public bool Contains(int led) => led >= FirstLed && led <= LastLed;
+    public override string ToString() => Count == 1 ? $"LED {FirstLed} → {ButtonId}" : $"LEDs {FirstLed}–{LastLed} → {ButtonId}";
 }
 
 /// <summary>One colour channel of one button, wired to one board pin. Pins are 1-based.</summary>
@@ -67,12 +99,14 @@ public sealed class WiringMap
     public void RemoveButton(string buttonId)
     {
         Bindings.RemoveAll(b => b.ButtonId == buttonId);
+        foreach (var board in Boards) board.Segments?.RemoveAll(s => s.ButtonId == buttonId);
         ButtonNodePositions.Remove(buttonId);
     }
 
     public void RenameButton(string oldId, string newId)
     {
         foreach (var b in Bindings.Where(b => b.ButtonId == oldId)) b.ButtonId = newId;
+        foreach (var s in Boards.SelectMany(b => b.Segments ?? []).Where(s => s.ButtonId == oldId)) s.ButtonId = newId;
         if (ButtonNodePositions.Remove(oldId, out var pos)) ButtonNodePositions[newId] = pos;
     }
 

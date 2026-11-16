@@ -40,6 +40,7 @@ public sealed partial class MainViewModel : ObservableObject
         };
         session.Engine.FrameRendered += OnFrameRendered;
 
+        _stripSignature = StripSignature();
         _brightness = Math.Round(session.Config.Output.Brightness * 100);
         _gamma = session.Config.Output.Gamma;
         RefreshBoardStatus();
@@ -158,12 +159,25 @@ public sealed partial class MainViewModel : ObservableObject
             : $"Hardware · {found} of {expected} board(s) online";
     }
 
+    private string _stripSignature;
+
+    private string StripSignature() => string.Join("|", _session.Config.Wiring.Boards
+        .Where(b => BoardModels.Find(b.Model)?.IsStrip == true)
+        .Select(b => $"{b.Key},{b.SerialPort},{b.BaudRate},{b.LedCount}"));
+
     private void OnStructureChanged()
     {
         // The simulator makes one virtual board per configured board: after a board was added or removed (or an
         // undo brought one back), make them again. Real boards are found whether configured or not.
-        if (_session.Config.Hardware.Mode == HardwareMode.Simulator &&
-            !_session.Engine.Boards.Select(b => b.Key).Order().SequenceEqual(_session.Config.Wiring.Boards.Select(b => b.Key).Order()))
+        // LED strips can't be found by scanning: each configured one is opened on its port, so a strip added, removed
+        // or changed (port, speed, LED count) opens the boards again in hardware mode too.
+        var strips = StripSignature();
+        bool stripsChanged = strips != _stripSignature;
+        _stripSignature = strips;
+        if (_session.Config.Hardware.Mode == HardwareMode.Simulator
+                ? !_session.Engine.Boards.Select(b => b.Key).Order().SequenceEqual(_session.Config.Wiring.Boards.Select(b => b.Key).Order())
+                  || _session.Engine.Boards.Any(b => _session.Config.Wiring.FindBoard(b.Key)?.PinCount is { } n && n != b.PinCount)
+                : stripsChanged)
             _session.Rescan();
         Panel.Rebuild();
         Wiring.Rebuild();

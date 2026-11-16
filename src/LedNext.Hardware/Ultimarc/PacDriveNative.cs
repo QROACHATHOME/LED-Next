@@ -105,4 +105,9 @@ internal static class PacDriveNative
     [DllImport(Lib, CallingConvention = CallingConvention.StdCall)]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static extern bool Pac64SetLEDFlashSpeeds(int id, byte flashSpeed);
+
+    /// <summary>PacDrive (and U-HID): all 16 outputs on or off at once, bit 0 = output 1.</summary>
+    [DllImport(Lib, CallingConvention = CallingConvention.StdCall)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool PacSetLEDStates(int id, ushort data);
 }

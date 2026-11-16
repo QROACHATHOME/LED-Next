@@ -29,9 +29,27 @@ public sealed class PanelSnapshot
             .Select(b => new ButtonInfo(b.Id, b.Label, b.Player, b.Kind, b.X, b.Y, Math.Clamp(b.X / w, 0, 1), Math.Clamp(b.Y / h, 0, 1)))
             .ToArray();
 
-        var targets = config.Wiring.Bindings
+        var targetLists = config.Wiring.Bindings
             .GroupBy(b => b.ButtonId)
-            .ToDictionary(g => g.Key, g => g.Select(b => new PinTarget(b.BoardKey, b.Pin, b.Channel)).ToArray());
+            .ToDictionary(g => g.Key, g => g.Select(b => new PinTarget(b.BoardKey, b.Pin, b.Channel)).ToList());
+        // A strip segment: every LED in it takes the control's colour (R, G, B on its three pins).
+        foreach (var board in config.Wiring.Boards)
+        {
+            if (board.Segments is not { Count: > 0 } segments) continue;
+            foreach (var s in segments)
+            {
+                if (string.IsNullOrEmpty(s.ButtonId) || s.Count < 1) continue;
+                if (!targetLists.TryGetValue(s.ButtonId, out var list)) targetLists[s.ButtonId] = list = new();
+                for (int led = Math.Max(1, s.FirstLed); led <= s.LastLed && led * 3 <= board.PinCount; led++)
+                {
+                    int pin = led * 3 - 2;
+                    list.Add(new PinTarget(board.Key, pin, ColorChannel.R));
+                    list.Add(new PinTarget(board.Key, pin + 1, ColorChannel.G));
+                    list.Add(new PinTarget(board.Key, pin + 2, ColorChannel.B));
+                }
+            }
+        }
+        var targets = targetLists.ToDictionary(kv => kv.Key, kv => kv.Value.ToArray());
 
         var boards = config.Wiring.Boards.Select(b => new BoardInfo(b.Key, b.Name, b.PinCount)).ToArray();
 

@@ -17,7 +17,18 @@
                     <ComboBox ItemsSource="{Binding Models}" SelectedItem="{Binding AddModel}" DisplayMemberPath="DisplayName" Width="140" />
                     <TextBlock Text="ID" VerticalAlignment="Center" Margin="10,0,6,0" />
                     <ComboBox ItemsSource="{Binding AddIds}" SelectedItem="{Binding AddId}" Width="50"
-                              ToolTip="The board ID set with Ultimarc's configuration tool (PacLED64: 1-4; Ultimate I/O: 1, or 2 with the ID #2 firmware)." />
+                              ToolTip="Ultimarc boards: the ID set with Ultimarc's configuration tool (PacLED64, NanoLED, PacDrive: 1-4; Ultimate I/O: 1, or 2 with the ID #2 firmware). LED-Wiz / Pinscape: the unit number (1-16; a Pinscape's default is 8). LED strips: any number, to tell them apart." />
+                    <StackPanel Orientation="Horizontal" Visibility="{Binding AddModel.IsStrip, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="LEDs" VerticalAlignment="Center" Margin="10,0,6,0" />
+                        <TextBox Text="{Binding AddLeds, UpdateSourceTrigger=PropertyChanged}" Width="50" VerticalContentAlignment="Center"
+                                 ToolTip="How many LEDs the strip has (up to 600). Three pins each." />
+                        <TextBlock Text="Port" VerticalAlignment="Center" Margin="10,0,6,0" />
+                        <ComboBox ItemsSource="{Binding Ports}" Text="{Binding AddPort}" IsEditable="True" Width="80"
+                                  DropDownOpened="OnPortsDropDownOpened" ToolTip="The controller's serial port (Device Manager, Ports)." />
+                        <TextBlock Text="Baud" VerticalAlignment="Center" Margin="10,0,6,0" />
+                        <ComboBox ItemsSource="{Binding BaudRates}" SelectedItem="{Binding AddBaud}" Width="85"
+                                  ToolTip="The same speed as the controller's sketch, or WLED's serial speed (115200 by default)." />
+                    </StackPanel>
                     <Button Content="Add" Command="{Binding AddBoardCommand}" Margin="8,0,0,0" />
                     <TextBlock Text="{Binding AddNote}" Foreground="{StaticResource AppTextDim}" VerticalAlignment="Center" Margin="12,0" />
                 </StackPanel>
@@ -65,10 +76,54 @@
                                             CommandParameter="{Binding}"
                                             ToolTip="Remove this board from LED-Next (its wired pins are disconnected)." />
                                 </StackPanel>
+                                <!-- LED strips: port, speed, LED count, and runs of LEDs that follow one control. -->
+                                <StackPanel Visibility="{Binding IsStrip, Converter={StaticResource BoolToVis}}" Margin="0,0,0,10">
+                                    <TextBlock Text="{Binding StripSummary}" Foreground="{StaticResource AppTextDim}" Margin="0,0,0,6" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Port" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                        <ComboBox ItemsSource="{Binding DataContext.Ports, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                  Text="{Binding EditPort}" IsEditable="True" Width="80" DropDownOpened="OnPortsDropDownOpened" />
+                                        <TextBlock Text="Baud" VerticalAlignment="Center" Margin="10,0,6,0" />
+                                        <ComboBox ItemsSource="{Binding DataContext.BaudRates, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                  SelectedItem="{Binding EditBaud}" Width="85" />
+                                        <TextBlock Text="LEDs" VerticalAlignment="Center" Margin="10,0,6,0" />
+                                        <TextBox Text="{Binding EditLeds, UpdateSourceTrigger=PropertyChanged}" Width="50" VerticalContentAlignment="Center" />
+                                        <Button Content="Apply" Margin="8,0,0,0" Padding="8,0"
+                                                Command="{Binding DataContext.ApplyStripCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}" />
+                                    </StackPanel>
+                                    <TextBlock Text="Runs of LEDs that show one control's colour (lighting around the cabinet, a marquee, a button with several LEDs):"
+                                               Foreground="{StaticResource AppTextDim}" Margin="0,10,0,4" />
+                                    <ItemsControl ItemsSource="{Binding Segments}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" Margin="0,1">
+                                                    <TextBlock Text="{Binding Text}" VerticalAlignment="Center" MinWidth="200" />
+                                                    <Button Content="Remove" Padding="6,0" FontSize="11"
+                                                            Command="{Binding DataContext.RemoveSegmentCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                        <TextBlock Text="LEDs from" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                        <TextBox Text="{Binding SegmentFirst, UpdateSourceTrigger=PropertyChanged}" Width="45" VerticalContentAlignment="Center" />
+                                        <TextBlock Text="count" VerticalAlignment="Center" Margin="8,0,6,0" />
+                                        <TextBox Text="{Binding SegmentCount, UpdateSourceTrigger=PropertyChanged}" Width="45" VerticalContentAlignment="Center" />
+                                        <TextBlock Text="follow" VerticalAlignment="Center" Margin="8,0,6,0" />
+                                        <ComboBox ItemsSource="{Binding DataContext.ControlIds, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                  SelectedItem="{Binding SegmentControl}" Width="130"
+                                                  ToolTip="Any panel control. For lighting that isn't a button, add a control of kind Other in the Panel tab (e.g. MARQUEE): games, idle shows and tests then light it like a button." />
+                                        <Button Content="Add run" Margin="8,0,0,0" Padding="8,0"
+                                                Command="{Binding DataContext.AddSegmentCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}" />
+                                    </StackPanel>
+                                </StackPanel>
                                 <ItemsControl ItemsSource="{Binding Pins}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
-                                            <UniformGrid Columns="16" />
+                                            <UniformGrid Columns="{Binding Columns}" />
                                         </ItemsPanelTemplate>
                                     </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
@@ -83,7 +138,7 @@
                                                             <Grid>
                                                                 <Border CornerRadius="3" Background="{Binding Fill}" />
                                                                 <StackPanel VerticalAlignment="Center">
-                                                                    <TextBlock Text="{Binding Pin}" HorizontalAlignment="Center" FontWeight="SemiBold" />
+                                                                    <TextBlock Text="{Binding Label}" HorizontalAlignment="Center" FontWeight="SemiBold" />
                                                                     <TextBlock Text="{Binding Usage}" HorizontalAlignment="Center" FontSize="9"
                                                                                Foreground="#B0B3BC" TextTrimming="CharacterEllipsis" Margin="2,0" />
                                                                 </StackPanel>

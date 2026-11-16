@@ -206,6 +206,18 @@
       cabinet that it opens over LED-Next, sets the button, and that added custom colours are there after a restart
 - [ ] Animations (`*.lwax`) — phase 5
 
+## NanoLED, PacDrive, LED-Wiz, LED strips (2026-11-16) — need online testers
+- [x] NanoLED and PacDrive through the PacDrive SDK; LED-Wiz (+ Pinscape in LED-Wiz mode, clones) over HID with no
+      DLL; LED strips (Adalight over serial: Arduino / Teensy / WLED) with runs of LEDs that follow one control.
+      Config v14. 266 tests. Simulator-checked (add each, strip run lights with Rainbow, wiring graph); hardware
+      mode checked without boards (no PacDrive DLL, strip on a missing port: warnings only). HID listing checked on
+      the dev PC's own HID devices. The user has none of these boards
+- [x] Tester guide `docs/TESTING_NEW_BOARDS.md` + issue template "Board test report"
+- [ ] First reports: NanoLED / PacDrive device lines (PIDs 1481 / 1500 from LEDSpicer), LED-Wiz SBA + PBA on a real
+      LED-Wiz and a Pinscape, a strip on an Arduino sketch and on WLED (does the 1 s resend keep WLED in realtime?)
+- [ ] Maybe later: WLED over the network (DDP / UDP realtime), Pinscape's own protocol (more than 32 outputs),
+      the wiring wizard skipping strip pins in runs
+
 ## Ultimate I/O (2026-11-14) — needs online testers
 - [x] I-PAC Ultimate I/O support from Ultimarc's documentation (`BoardModels`, `UltimarcLedBoard`, Boards tab add /
       remove, LEDBlinky "ULTIMATE" controllers). 96 pins; batch write only for big changes. Simulator-checked (add,

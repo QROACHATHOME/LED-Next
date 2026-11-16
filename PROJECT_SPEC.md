@@ -60,7 +60,8 @@ LaunchBox ↔ LEDBlinky platform-name mapping, control map editor.
 - Attract mode, per-event effects, LEDBlinky animation playback
 
 ### Later
-- More boards (Ultimate I/O, NanoLED, PacDrive, LED-Wiz, …), more front ends
+- More boards: Ultimate I/O, NanoLED, PacDrive, LED-Wiz (+ Pinscape, clones) and LED strips are in (untested on
+  real boards); more front ends
 
 ## Non-goals (for now)
 - Non-Windows platforms

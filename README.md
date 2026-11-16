@@ -61,9 +61,16 @@ Tested on a 4-player cabinet with two Ultimarc PacLED64 boards, LaunchBox/BigBox
 - Ultimarc **I-PAC Ultimate I/O** (96 pins, 32 RGB LEDs): **new and untested on a real board.** Written from
   Ultimarc's documentation; if you have one, please try it with
   [docs/TESTING_ULTIMATE_IO.md](docs/TESTING_ULTIMATE_IO.md) and report back.
+- **New and untested on real boards** (written from the makers' documentation; please try them with
+  [docs/TESTING_NEW_BOARDS.md](docs/TESTING_NEW_BOARDS.md)):
+  - Ultimarc **NanoLED** (60 pins, 20 RGB LEDs) and **PacDrive** (16 outputs, on / off only).
+  - **LED-Wiz** (32 outputs), which also covers **Pinscape** in LED-Wiz mode and the LED-Wiz clones. No DLL needed.
+  - **LED strips**: addressable RGB LEDs (WS2812 / SK6812) on an Arduino or Teensy with an Adalight sketch, or on
+    WLED, over a serial port. Wire single LEDs to buttons (RGB buttons with LEDs inside), or give a run of LEDs to
+    one control, for lighting around the cabinet or a lit marquee.
 - Add or remove boards in the **Boards** tab.
 - **Simulator** mode: everything works with no boards attached.
-- Not supported yet: other Ultimarc boards (PacDrive, Nano-LED, I-PAC LED), LEDWiz, and other makers' boards.
+- Not supported yet: Ultimarc's I-PAC LED and U-HID, Pinscape's own (non LED-Wiz) protocol, WLED over the network.
 
 **Panel and wiring**
 - A visual panel designer: buttons, joysticks, trackball, coin and start, with a photo of your panel as a background.
@@ -133,8 +140,9 @@ Tested on a 4-player cabinet with two Ultimarc PacLED64 boards, LaunchBox/BigBox
 **Not yet:** other front ends (only LaunchBox/BigBox), LEDBlinky animations (`.lwax`), BigBox playlists, and
 lighting by front-end section.
 
-**Needs:** Windows 10 or 11, the .NET 8 Desktop Runtime (or the self-contained build), and, for PacLED64 or Ultimate I/O
-boards, Ultimarc's `PacDrive64.dll`, which you supply yourself.
+**Needs:** Windows 10 or 11, the .NET 8 Desktop Runtime (or the self-contained build), and, for Ultimarc boards (PacLED64,
+Ultimate I/O, NanoLED, PacDrive), Ultimarc's `PacDrive64.dll`, which you supply yourself. LED-Wiz boards and LED
+strips need nothing extra.
 
 ## Install
 **From a release** (no build tools needed): download from the
