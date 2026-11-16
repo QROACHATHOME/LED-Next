@@ -206,6 +206,21 @@
       cabinet that it opens over LED-Next, sets the button, and that added custom colours are there after a restart
 - [ ] Animations (`*.lwax`) — phase 5
 
+## Other front ends (2026-11-16) — need testers
+- [x] `LedNextCmd.exe` (LEDBlinky's command line + ES-DE / RetroBat script arguments → the pipe), the
+      `LEDBlinky-stand-in\LEDBlinky.exe` copy (HyperSpin 2 / 1.x, RetroFE / CoinOPS, RocketLauncher), LED-Next's
+      Attract-Mode plugin, ES-DE and RetroBat scripts, Playnite extension, PinballX plugin, PinUP Popper script lines.
+      Front ends tab (setup only writes LED-Next's own files), config v15. 308 tests. Checked on the dev PC: each
+      command form sent to a running LED-Next (simulator) and matched (snes, a genesis rom from its path, retroarch →
+      the list before); release zip; install / update / uninstall into a scratch folder. Start-up / shut-down shows
+      now play for every cabinet front end (desktop LaunchBox and Playnite only with the box)
+- [ ] First reports from real front ends (none tried yet): HyperSpin 2's commands (does it send 9 / 8?), HyperSpin
+      1.x's LEDBlinky setting, RetroFE's emulator names, ES-DE on Windows (scripts folder, browsing while scripts
+      run), RetroBat, Attract-Mode (plugin loads? Info.System empty?), Playnite 10 (extension loads), PinballX
+      (plugin loads, GameInfo fields), PinUP Popper ([GAMENAME] variable)
+- [ ] The user's pinball PC (PinUP Popper / PinballX, no LED controller): try the events in Simulator mode
+- [ ] Maybe later: GameEx, Popper's selection (web remote `getcuritem` polling, or its menu script), Pegasus (launch only)
+
 ## NanoLED, PacDrive, LED-Wiz, LED strips (2026-11-16) — need online testers
 - [x] NanoLED and PacDrive through the PacDrive SDK; LED-Wiz (+ Pinscape in LED-Wiz mode, clones) over HID with no
       DLL; LED strips (Adalight over serial: Arduino / Teensy / WLED) with runs of LEDs that follow one control.

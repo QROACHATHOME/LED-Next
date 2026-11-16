@@ -173,7 +173,7 @@ public class MoreBoardsTests
         c.Wiring.Boards.Add(new BoardDefinition { Key = "PacLED64#1" });
         ConfigStore.Migrate(c);
 
-        Assert.Equal(14, c.Version);
+        Assert.Equal(CabinetConfig.CurrentVersion, c.Version);
         var strip = c.Wiring.Boards[0];
         Assert.Equal((10, 30, 115200), (strip.LedCount!.Value, strip.PinCount, strip.BaudRate!.Value));
         Assert.NotNull(strip.Segments);

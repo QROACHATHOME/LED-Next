@@ -1,7 +1,8 @@
 # LED-Next
 
 A modern replacement for LEDBlinky: visual arcade panel layout, node-graph LED wiring,
-multiple LED boards per PC, and per-game lighting for LaunchBox/BigBox.
+multiple LED boards per PC, and per-game lighting for LaunchBox/BigBox, HyperSpin, RetroFE / CoinOPS,
+Attract-Mode, ES-DE, RetroBat, Playnite, PinballX and PinUP Popper.
 
 > **Still in development.** LED-Next is used and tested on one real cabinet (4 players, two PacLED64 boards,
 > LaunchBox/BigBox), but it is not finished: expect rough edges and changes, and check
@@ -43,6 +44,10 @@ LED-Next reads LEDBlinky's data, so your existing setup carries over, and then a
   or still needing setup. LaunchBox's control-panel pictures show beside each game.
 - **Live BigBox lighting.** The plugin sends every selection, platform-wheel move, launch and exit straight
   to LED-Next. Each change is timed in the log, so slow spots are easy to find.
+- **Many front ends, set up from one tab.** Besides LaunchBox/BigBox: HyperSpin 2 and 1.x, RetroFE / CoinOPS and
+  RocketLauncher (they run LED-Next's LEDBlinky.exe stand-in as they would LEDBlinky), Attract-Mode, ES-DE,
+  RetroBat, Playnite and PinballX (LED-Next plugins and scripts, installed with one click), and PinUP Popper.
+  See [docs/FRONT_ENDS.md](docs/FRONT_ENDS.md). These are new and not yet tried on a real cabinet.
 - **Live emulator lamps.** MAME's network output and Windows messages are both supported (for example, Start blinks
   while a game waits for a coin), and every output a game sends is logged.
 - **Several boards, the same order every time.** Boards are found by their board id, not USB order, so unplugging
@@ -137,8 +142,12 @@ Tested on a 4-player cabinet with two Ultimarc PacLED64 boards, LaunchBox/BigBox
     Operation G.H.O.S.T., Brave Firefighters, Scud Race Plus, Daytona USA); other lamps need rows.
   - No lamp outputs at all: pcsx2x6, the Xemu Chihiro fork, Hypseus Singe. Their games keep the front end's lights.
 
-**Not yet:** other front ends (only LaunchBox/BigBox), LEDBlinky animations (`.lwax`), BigBox playlists, and
-lighting by front-end section.
+**Other front ends** (new, not yet tried on a cabinet; set up in the **Front ends** tab, see
+[docs/FRONT_ENDS.md](docs/FRONT_ENDS.md)): HyperSpin 2 and 1.x, RetroFE / CoinOPS and RocketLauncher (through a
+LEDBlinky.exe stand-in: they run it as they would LEDBlinky), Attract-Mode, ES-DE, RetroBat, Playnite, PinballX
+(LED-Next plugins and scripts) and PinUP Popper (game start and exit). Not Batocera (Linux) or GameEx.
+
+**Not yet:** LEDBlinky animations (`.lwax`), BigBox playlists, and lighting by front-end section.
 
 **Needs:** Windows 10 or 11, the .NET 8 Desktop Runtime (or the self-contained build), and, for Ultimarc boards (PacLED64,
 Ultimate I/O, NanoLED, PacDrive), Ultimarc's `PacDrive64.dll`, which you supply yourself. LED-Wiz boards and LED
@@ -151,6 +160,9 @@ strips need nothing extra.
   [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0), x64), **or**
   `LED-Next-x.y.z-win-x64-self-contained.zip` (bigger, needs nothing else);
 - for LaunchBox/BigBox, also **`LED-Next-LaunchBox-plugin-x.y.z.zip`**.
+
+Other front ends need nothing more to download: after installing, set them up in LED-Next's **Front ends** tab
+([docs/FRONT_ENDS.md](docs/FRONT_ENDS.md)).
 
 Unzip the LED-Next zip, unzip the plugin zip into the same folder, and close LED-Next, LaunchBox and BigBox.
 Then double-click **`Install LED-Next.cmd`**.
@@ -166,6 +178,9 @@ folder holds only:
 
 ```
 LED-Next.exe      the whole app in one file
+LedNextCmd.exe    the command tool other front ends run (LEDBlinky's commands, ES-DE / RetroBat scripts)
+front-ends\       LED-Next's PinballX plugin and Playnite extension (installed from the Front ends tab)
+LEDBlinky-stand-in\  LedNextCmd.exe named LEDBlinky.exe, for front ends that run LEDBlinky (made by LED-Next)
 PacDrive64.dll    Ultimarc's SDK DLL (copied from your current setup; not shipped with LED-Next)
 config\           cabinet.json, games.db, window.json (your settings; never overwritten)
 logs\             led-next.log

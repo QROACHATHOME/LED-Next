@@ -44,4 +44,26 @@
     <None Include="native\*.dll" CopyToOutputDirectory="PreserveNewest" Link="%(Filename)%(Extension)" />
   </ItemGroup>
 
+  <!--
+    The front-end helpers (.NET Framework, so not referenced as assemblies): built first, then copied beside the exe
+    on a plain build, as a release lays them out: LedNextCmd.exe, front-ends\PinballX\, front-ends\Playnite\.
+    A publish (single file) leaves them out; build\Build-Release.ps1 and tools\install.ps1 add them.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\LedNext.Cmd\LedNext.Cmd.csproj" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" />
+    <ProjectReference Include="..\LedNext.PinballX\LedNext.PinballX.csproj" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" />
+    <ProjectReference Include="..\LedNext.Playnite\LedNext.Playnite.csproj" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" />
+  </ItemGroup>
+
+  <Target Name="CopyFrontEndHelpers" AfterTargets="Build" Condition="'$(_IsPublishing)' != 'true'">
+    <ItemGroup>
+      <_Cmd Include="..\LedNext.Cmd\bin\$(Configuration)\net48\LedNextCmd.exe" />
+      <_Pbx Include="..\LedNext.PinballX\bin\$(Configuration)\net48\LED-Next PinballX Plugin.dll" />
+      <_Playnite Include="..\LedNext.Playnite\bin\$(Configuration)\net462\LedNext.Playnite.dll;..\LedNext.Playnite\bin\$(Configuration)\net462\extension.yaml;..\LedNext.Playnite\bin\$(Configuration)\net462\icon.png" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_Cmd)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_Pbx)" DestinationFolder="$(OutDir)front-ends\PinballX" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_Playnite)" DestinationFolder="$(OutDir)front-ends\Playnite" SkipUnchangedFiles="true" />
+  </Target>
+
 </Project>

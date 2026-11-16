@@ -81,6 +81,9 @@
             <TabItem Header="Lamps">
                 <views:KnownLampsView DataContext="{Binding KnownLamps}" />
             </TabItem>
+            <TabItem Header="Front ends">
+                <views:FrontEndsView DataContext="{Binding FrontEnds}" />
+            </TabItem>
             <TabItem Header="Wiring">
                 <views:WiringView DataContext="{Binding Wiring}" />
             </TabItem>

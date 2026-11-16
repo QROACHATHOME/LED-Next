@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    LedNextCmd.exe: the LEDBlinky-style command tool. Front ends that can run LEDBlinky.exe (HyperSpin, HyperHQ,
+    RetroFE / CoinOPS, Attract-Mode, RocketLauncher, PinUP Popper scripts…) and EmulationStation's event scripts
+    (ES-DE, RetroBat) run this instead; it hands each event to the running LED-Next over its pipe and exits.
+
+    .NET Framework 4.8 on purpose: it is part of Windows 10 / 11, so the tool needs no runtime of its own (also with
+    the self-contained LED-Next), is a few KB and starts in a few tens of ms (it runs on every selection while
+    scrolling). A WinExe: no console window flashes up in front of the front end.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <OutputType>WinExe</OutputType>
+    <AssemblyName>LedNextCmd</AssemblyName>
+    <RootNamespace>LedNext.Cmd</RootNamespace>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <ApplicationIcon>..\LedNext.App\Assets\LedNext.ico</ApplicationIcon>
+    <GenerateSupportedRuntime>true</GenerateSupportedRuntime>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\LedNext.FrontEnd.Lite\*.cs" LinkBase="Lite" />
+  </ItemGroup>
+
+</Project>

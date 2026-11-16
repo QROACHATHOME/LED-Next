@@ -51,8 +51,19 @@ public sealed class FrontEndShowSettings
     public TimeSpan StartupDuration => TimeSpan.FromSeconds(Math.Clamp(StartupSeconds, 1, 60));
     public TimeSpan ShutdownDuration => TimeSpan.FromSeconds(Math.Clamp(ShutdownSeconds, 1, 30));
 
-    /// <summary>True when the shows apply to this front end ("BigBox", "LaunchBox").</summary>
-    public bool AppliesTo(string? source) =>
-        string.Equals(source, "BigBox", StringComparison.OrdinalIgnoreCase) ||
-        (AlsoLaunchBox && string.Equals(source, "LaunchBox", StringComparison.OrdinalIgnoreCase));
+    /// <summary>
+    /// True when the shows apply to this front end: the cabinet front ends (BigBox, HyperSpin, RetroFE, ES-DE,
+    /// RetroBat, Attract-Mode, PinballX, Playnite Fullscreen…) always; the desktop library apps (LaunchBox,
+    /// Playnite's desktop mode) only with <see cref="AlsoLaunchBox"/>; never LED-Next itself or a command typed by hand.
+    /// </summary>
+    public bool AppliesTo(string? source)
+    {
+        if (string.IsNullOrWhiteSpace(source)) return false;
+        var s = source.Trim();
+        if (s.Equals("LED-Next", StringComparison.OrdinalIgnoreCase) || s.Equals("Command line", StringComparison.OrdinalIgnoreCase))
+            return false;
+        if (s.Equals("LaunchBox", StringComparison.OrdinalIgnoreCase) || s.Equals("Playnite", StringComparison.OrdinalIgnoreCase))
+            return AlsoLaunchBox;
+        return true;
+    }
 }

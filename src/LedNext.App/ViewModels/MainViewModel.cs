@@ -60,6 +60,7 @@ public sealed partial class MainViewModel : ObservableObject
     [ObservableProperty] private AnimationsViewModel? _animations;
     /// <summary>Lamps tab: every output emulators have reported (games.db).</summary>
     [ObservableProperty] private KnownLampsViewModel? _knownLamps;
+    [ObservableProperty] private FrontEndsViewModel? _frontEnds;
     [ObservableProperty] private string _sourceName = "";
     [ObservableProperty] private string? _frameStatus;
     [ObservableProperty] private string _boardsSummary = "";

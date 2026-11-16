@@ -5,6 +5,10 @@
 | Project | Depends on | Role |
 |---|---|---|
 | `src/LedNext.FrontEnd` | nothing | Front-end pipe protocol (`FrontEndMessage`, JSON lines) and `FrontEndClient`; all a plugin carries |
+| `src/LedNext.FrontEnd.Lite` | nothing (netstandard2.0) | The same front-end messages for .NET Framework helpers, compiled into each: `LiteMessage` (hand-written JSON), `LitePipe` / `LiteClient`, `LedBlinkyCommand` and `EsEvent` (command lines → messages). Tested |
+| `src/LedNext.Cmd` | Lite (compiled in), .NET Framework 4.8 | `LedNextCmd.exe`: one event per run (LEDBlinky's command line, ES-DE / RetroBat script arguments) → the pipe; also `LEDBlinky-stand-in\LEDBlinky.exe` |
+| `src/LedNext.PinballX` | Lite (compiled in), .NET Framework 4.8 | PinballX plugin (`PinballX.Plugin`, interface as DirectOutput's PinballX plugin) |
+| `src/LedNext.Playnite` | Lite (compiled in), PlayniteSDK (compile only), .NET Framework 4.6.2 | Playnite extension (GenericPlugin) |
 | `src/LedNext.LaunchBox` | FrontEnd, LaunchBox's plugin API | LaunchBox / BigBox plugin (thin: events → pipe). Built against `<LaunchBox>\Core\Unbroken.LaunchBox.Plugins.dll`, else against `tools/LaunchBoxPluginStubs` (compile-only stand-in) |
 | `src/LedNext.Core` | FrontEnd | Data model (panel, wiring, config), JSON store, lighting engine, test patterns, board interfaces, logging, game model + light resolver (`Games/`), LEDBlinky importer (`Import/LedBlinky/`) |
 | `src/LedNext.Data` | Core, Microsoft.Data.Sqlite | The game library in SQLite (`GameDatabase`, implements `IGameLibrary`) |
@@ -161,6 +165,48 @@ LaunchBox / BigBox process                      LED-Next app (owns the boards)
   `Timing '<game>': pipe, wait (UI thread), lookup (game + lights), boards (write); total`.
 - **Idle cost**: while minimized the panel/boards previews aren't redrawn (`MainViewModel.PreviewVisible`);
   the engine writes boards only when a value changes. Measured on the dev PC: ~0 % CPU, ~146 MB.
+
+## Other front ends (LedNextCmd, plugins, scripts)
+
+```
+HyperSpin / HyperHQ / RetroFE / CoinOPS / RocketLauncher ─► LEDBlinky-stand-in\LEDBlinky.exe  ┐
+Attract-Mode plugin.nut · PinUP Popper scripts ───────────► LedNextCmd.exe (LEDBlinky syntax)  ├─ one connection
+ES-DE scripts\<event>\LED-Next.bat ───────────────────────► LedNextCmd.exe --es-de <event> …   │  per event
+RetroBat scripts\LED-Next.bat ────────────────────────────► LedNextCmd.exe --retrobat <event> …┘
+Playnite extension · PinballX plugin ── LiteClient (kept open, background thread) ─────────────┐
+                                                                  pipe "LedNext.FrontEnd" ◄────┴── FrontEndServer
+```
+- Everything speaks the same JSON lines as the LaunchBox plugin (`LiteMessage` writes what `FrontEndProtocol`
+  reads; a test checks the event names and the JSON). The helpers are .NET Framework 4.x: part of Windows, tiny,
+  fast to start (LedNextCmd runs on every selection), and loadable by PinballX (.NET Framework 4.8) and Playnite 10
+  (4.6.2). They have no DLLs of their own: Lite's files are compiled into each (a host wouldn't find a second DLL).
+- `LedNextCmd.exe` checks the pipe exists first (`WaitNamedPipe`: no wait when LED-Next isn't running), sends with
+  its process start time as `sentAtMs` (RetroBat starts its scripts without waiting, so copies can arrive out of
+  order; `FrontEndSession` drops a selection older than the last one from the same source), logs every command to
+  `logs\led-next-commands.log`, names the source by its parent process (skipping cmd / powershell), always exits 0,
+  and on a front-end start (`1`) starts LED-Next.exe from its folder (or the one above, for the stand-in) when it
+  isn't running. RetroFE sends an undocumented `3 "<rom>" "<emulator>"` for game start; it is read as one.
+- `FrontEndServer` logs a connection only once it has stayed open 2 s (LedNextCmd's last a few ms).
+- `FrontEndSession`: a game without a platform gets the last one named, else `MAME` (as LEDBlinky). A platform-only
+  select (`8 <emulator>`, system-select) is `LastListPlatform`; `FrontEndController.LightGame` uses it when a game's
+  named emulator isn't a platform (RetroFE's launcher names, "retroarch"), only for messages without a game id.
+- `PlatformMatcher` aliases: EmulationStation's short system names (`snes`, `megadrive`, `psx`…) and pinball names.
+- `FrontEndSetup` (Core) does the Front ends tab's setup and only ever writes or deletes LED-Next's own files (a
+  "Written by LED-Next" marker; a file of the same name without it is never touched): the stand-in (copied from
+  LedNextCmd.exe when newer, at app start), ES-DE's eight `scripts\<event>\LED-Next.bat`, RetroBat's
+  `emulationstation\.emulationstation\scripts\LED-Next.bat` (RetroBat runs a script there for every event, the
+  event first), `plugins\LED-Next\plugin.nut` (`AttractModePlugin`), the PinballX DLL into `Plugins\`, the Playnite
+  extension into `Extensions\LED-Next`. Picked folders: `CabinetConfig.FrontEnds` (config v15).
+- Start-up / shut-down shows (`FrontEndShowSettings.AppliesTo`): every cabinet front end; desktop LaunchBox and
+  Playnite's desktop mode only with `AlsoLaunchBox`; never "LED-Next" or "Command line".
+- Release / install layout: `LED-Next.exe`, `LedNextCmd.exe`, `front-ends\PinballX\`, `front-ends\Playnite\`
+  (`build\Build-Release.ps1`, `tools\install.ps1`); a plain app build copies them beside the exe
+  (`CopyFrontEndHelpers`), a single-file publish doesn't.
+- Sources for the arguments: RetroBat's EmulationStation `FileData.cpp` / `SystemScreenSaver.cpp` / `Scripting.cpp`
+  (game-start: rom, basename, name; game-selected: system, path, name), ES-DE's `Scripting.cpp` / INSTALL.md (rom
+  path, game name, system name, full name; quoted on Windows), RetroFE's `Launcher::LEDBlinky`
+  (`LEDBlinkyDirectory`), LEDBlinky's Readme.txt, DirectOutput's PinballX plugin (`GameInfo` layout). None tried
+  with the real front ends yet.
 
 ## Live lamps from emulators (phase 5, first part)
 

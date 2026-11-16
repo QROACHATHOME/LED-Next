@@ -5,6 +5,8 @@
 .DESCRIPTION
   The installed folder is kept small:
       LED-Next.exe      the whole app in one file (Release, win-x64, debug info embedded)
+      LedNextCmd.exe    the command tool other front ends run (LEDBlinky's commands, ES-DE / RetroBat scripts)
+      front-ends\       LED-Next's PinballX plugin and Playnite extension (installed from the Front ends tab)
       PacDrive64.dll    Ultimarc's SDK DLL (copied from your current setup; never shipped by LED-Next)
       config\           cabinet.json, games.db, window.json (your settings; never overwritten)
       logs\             led-next.log
@@ -87,6 +89,10 @@ if ($Uninstall) {
     if (Test-Path $shortcut) { Remove-Item -Force $shortcut; "Removed $shortcut" }
     if (Test-Path $exe) {
         Remove-Item -Force $exe; "Removed $exe"
+        foreach ($x in "LedNextCmd.exe", "front-ends", "LEDBlinky-stand-in") {
+            $p = Join-Path $InstallDir $x
+            if (Test-Path $p) { Remove-Item -Recurse -Force $p; "Removed $p" }
+        }
         Remove-OldBuildFiles $InstallDir
         Get-ChildItem $InstallDir -Filter "PacDrive*.dll" -File | ForEach-Object { Remove-Item -Force $_.FullName; "Removed $($_.Name)" }
     } else { "LED-Next is not installed in $InstallDir." }
@@ -119,6 +125,18 @@ if ($fromRelease) {
     if ($LASTEXITCODE -ne 0) { throw "Build failed." }
     $built = Get-ChildItem $stage -File
     if ($built.Count -ne 1 -or $built[0].Name -ne "LED-Next.exe") { throw "Expected only LED-Next.exe in $stage, got: $($built.Name -join ', ')" }
+    # The other front ends' helpers (.NET Framework 4.x), laid out as in a release.
+    "Building the front-end helpers (LedNextCmd.exe, PinballX plugin, Playnite extension)..."
+    $h = Join-Path $repo "publish\helpers"
+    foreach ($p in "LedNext.Cmd", "LedNext.PinballX", "LedNext.Playnite") {
+        & dotnet build (Join-Path $repo "src\$p\$p.csproj") -c Release -o (Join-Path $h $p) -nologo -v q
+        if ($LASTEXITCODE -ne 0) { throw "Building $p failed." }
+    }
+    Copy-Item (Join-Path $h "LedNext.Cmd\LedNextCmd.exe") $stage
+    $pbx = New-Item -ItemType Directory -Force (Join-Path $stage "front-ends\PinballX")
+    Copy-Item (Join-Path $h "LedNext.PinballX\LED-Next PinballX Plugin.dll") $pbx
+    $pn = New-Item -ItemType Directory -Force (Join-Path $stage "front-ends\Playnite")
+    Copy-Item (Join-Path $h "LedNext.Playnite\LedNext.Playnite.dll"), (Join-Path $h "LedNext.Playnite\extension.yaml"), (Join-Path $h "LedNext.Playnite\icon.png") $pn
 }
 if ((Resolve-Path $InstallDir -ErrorAction SilentlyContinue).Path -eq (Resolve-Path $stage).Path) { throw "Unzip the release somewhere else than the install folder ($InstallDir)." }
 
@@ -128,6 +146,16 @@ New-Item -ItemType Directory -Force $InstallDir | Out-Null
 Remove-OldBuildFiles $InstallDir
 Copy-Item (Join-Path $stage "LED-Next.exe") $exe -Force
 "Installed $exe ($([math]::Round((Get-Item $exe).Length / 1MB, 1)) MB)"
+# The other front ends' helpers (docs\FRONT_ENDS.md): LedNextCmd.exe and front-ends\. LED-Next makes
+# LEDBlinky-stand-in\LEDBlinky.exe (a copy of LedNextCmd.exe) itself when it starts.
+$cmdSrc = Join-Path $stage "LedNextCmd.exe"
+if (Test-Path $cmdSrc) {
+    Copy-Item $cmdSrc (Join-Path $InstallDir "LedNextCmd.exe") -Force
+    $standIn = Join-Path $InstallDir "LEDBlinky-stand-in\LEDBlinky.exe"
+    if (Test-Path $standIn) { Copy-Item $cmdSrc $standIn -Force }
+    if (Test-Path (Join-Path $stage "front-ends")) { Copy-Item (Join-Path $stage "front-ends") $InstallDir -Recurse -Force }
+    "Installed LedNextCmd.exe and front-ends\ (set up other front ends in LED-Next's Front ends tab)."
+} else { Write-Warning "No LedNextCmd.exe in $stage; the Front ends tab's setup won't work until it is there." }
 
 # 3. PacDrive64.dll (Ultimarc's; LED-Next never ships it).
 $pac = Join-Path $InstallDir "PacDrive64.dll"

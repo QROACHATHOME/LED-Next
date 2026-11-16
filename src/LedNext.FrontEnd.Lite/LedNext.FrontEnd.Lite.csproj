@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The front-end messages, with no dependencies and no newer C# runtime features, for the small helpers that run
+    inside or beside other front ends: LedNextCmd.exe (the LEDBlinky-style command tool), the PinballX plugin and the
+    Playnite plugin. Those are .NET Framework 4.x, so they compile these files in directly (a plugin's extra DLLs are
+    not found from the host's folder); this project exists so the tests can use the same code.
+    Writes the same JSON lines as LedNext.FrontEnd (FrontEndProtocol) to the same pipe.
+  -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>LedNext.FrontEnd.Lite</RootNamespace>
+  </PropertyGroup>
+
+</Project>

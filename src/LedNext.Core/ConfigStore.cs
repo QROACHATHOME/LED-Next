@@ -117,6 +117,13 @@ public static class ConfigStore
             AppLog.Info("Config upgraded from version 13 to 14 (adds NanoLED, PacDrive, LED-Wiz and LED strip boards).");
             config.Version = 14;
         }
+        if (config.Version < 15)
+        {
+            // v15 added FrontEnds (the Front ends tab's folders), all empty: nothing is set up.
+            AppLog.Info("Config upgraded from version 14 to 15 (adds the Front ends tab's folders, none picked).");
+            config.Version = 15;
+        }
+        config.FrontEnds ??= new();
         foreach (var board in config.Wiring.Boards)
         {
             if (BoardModels.Find(board.Model)?.IsStrip != true) continue;

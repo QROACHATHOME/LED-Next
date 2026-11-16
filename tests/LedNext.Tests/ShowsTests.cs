@@ -221,6 +221,19 @@ public class ShowsTests
         Assert.True(s.AppliesTo("LaunchBox"));
         Assert.False(s.AppliesTo("LED-Next"));
     }
+
+    [Fact]
+    public void AppliesToTheOtherCabinetFrontEnds()
+    {
+        var s = new FrontEndShowSettings();
+        foreach (var fe in new[] { "HyperSpin", "RetroFE", "ES-DE", "RetroBat", "Attract-Mode", "PinballX", "Playnite Fullscreen" })
+            Assert.True(s.AppliesTo(fe), fe);
+        Assert.False(s.AppliesTo("Playnite"));      // desktop mode, like LaunchBox
+        Assert.False(s.AppliesTo("Command line"));  // LedNextCmd typed by hand
+        Assert.False(s.AppliesTo(null));
+        s.AlsoLaunchBox = true;
+        Assert.True(s.AppliesTo("Playnite"));
+    }
 }
 
 public class IdleMonitorTests

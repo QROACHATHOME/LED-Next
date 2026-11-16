@@ -61,10 +61,19 @@ public sealed class FrontEndServer : IDisposable
         pipe.Dispose();
     }
 
+    /// <summary>A connection shorter than this (a LedNextCmd command) isn't logged.</summary>
+    private static readonly TimeSpan QuietConnection = TimeSpan.FromSeconds(2);
+
     private async Task ReadClient(NamedPipeServerStream pipe, CancellationToken ct)
     {
         int n = Interlocked.Increment(ref _clients);
-        AppLog.Info($"Front end connected ({n} connected).");
+        // A plugin stays connected; LedNextCmd connects once per command (every selection while scrolling). Only a
+        // connection still open after a moment is logged, and only then its end.
+        var logged = 0;
+        using var announce = new Timer(_ =>
+        {
+            if (Interlocked.Exchange(ref logged, 1) == 0) AppLog.Info($"Front end connected ({Volatile.Read(ref _clients)} connected).");
+        }, null, QuietConnection, Timeout.InfiniteTimeSpan);
         try
         {
             using var reader = new StreamReader(pipe, new UTF8Encoding(false));
@@ -88,7 +97,8 @@ public sealed class FrontEndServer : IDisposable
         {
             pipe.Dispose();
             n = Interlocked.Decrement(ref _clients);
-            if (!ct.IsCancellationRequested) AppLog.Info($"Front end disconnected ({n} connected).");
+            var wasLogged = Interlocked.Exchange(ref logged, 1) == 1;
+            if (wasLogged && !ct.IsCancellationRequested) AppLog.Info($"Front end disconnected ({n} connected).");
         }
     }
 

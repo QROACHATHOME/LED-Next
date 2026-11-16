@@ -201,6 +201,38 @@ public static class PlatformMatcher
         ["SNK Neo Geo"] = "SNK_Neo_Geo_MVS",
         ["TeknoParrot"] = "TEKNO_PARROT",
         ["Sega Mega Drive"] = "Sega_Genesis",
+
+        // EmulationStation's system short names (ES-DE, RetroBat / Batocera; also RetroFE launcher names).
+        ["arcade"] = "MAME", ["mame"] = "MAME", ["fbneo"] = "MAME", ["fba"] = "MAME", ["cps1"] = "MAME", ["cps2"] = "MAME",
+        ["cps3"] = "MAME", ["neogeo"] = "SNK_Neo_Geo_MVS", ["naomi"] = "Sega_Naomi", ["naomi2"] = "Sega_Naomi",
+        ["atomiswave"] = "Sammy_Atomiswave", ["model2"] = "Sega_Model_2", ["model3"] = "Sega_Model_3",
+        ["triforce"] = "Sega_Triforce", ["daphne"] = "Daphne", ["laserdisc"] = "Daphne", ["teknoparrot"] = "TEKNO_PARROT",
+        ["nes"] = "Nintendo_Entertainment_System", ["famicom"] = "Nintendo_Famicom", ["fds"] = "Nintendo_Famicom_Disk_System",
+        ["snes"] = "Super_Nintendo_Entertainment_System", ["sfc"] = "Nintendo_Super_Famicom", ["n64"] = "Nintendo_64",
+        ["n64dd"] = "Nintendo_64DD", ["gc"] = "Nintendo_GameCube", ["gamecube"] = "Nintendo_GameCube", ["wii"] = "Nintendo_Wii",
+        ["gb"] = "Nintendo_Game_Boy", ["gbc"] = "Nintendo_Game_Boy_Color", ["gba"] = "Nintendo_Game_Boy_Advance",
+        ["nds"] = "Nintendo_DS", ["virtualboy"] = "Nintendo_Virtual_Boy", ["pokemini"] = "Nintendo_Pokemon_Mini",
+        ["genesis"] = "Sega_Genesis", ["megadrive"] = "Sega_Genesis", ["mastersystem"] = "Sega_Master_System",
+        ["markiii"] = "Sega_Mark_III", ["gamegear"] = "Sega_Game_Gear", ["segacd"] = "Sega_CD", ["megacd"] = "Sega_CD",
+        ["sega32x"] = "Sega_32X", ["saturn"] = "Sega_Saturn", ["dreamcast"] = "Sega_Dreamcast", ["sg-1000"] = "Sega_SG-1000",
+        ["sg1000"] = "Sega_SG-1000", ["psx"] = "Sony_Playstation", ["psp"] = "Sony_PSP", ["pcengine"] = "NEC_PC_Engine",
+        ["tg16"] = "NEC_TurboGrafx-16", ["pcenginecd"] = "NEC_PC_Engine-CD", ["tg-cd"] = "NEC_TurboGrafx-CD",
+        ["supergrafx"] = "NEC_SuperGrafx", ["pcfx"] = "NEC_PC-FX", ["atari2600"] = "Atari_2600", ["atari5200"] = "Atari_5200",
+        ["atari7800"] = "Atari_7800", ["atari800"] = "Atari_8-bit", ["lynx"] = "Atari_Lynx", ["atarilynx"] = "Atari_Lynx",
+        ["jaguar"] = "Atari_Jaguar", ["atarijaguar"] = "Atari_Jaguar", ["jaguarcd"] = "Atari_Jaguar_CD", ["atarist"] = "Atari_ST",
+        ["colecovision"] = "ColecoVision", ["vectrex"] = "GCE_Vectrex", ["3do"] = "Panasonic_3DO", ["neogeocd"] = "SNK_Neo_Geo_CD",
+        ["ngp"] = "SNK_Neo_Geo_Pocket", ["ngpc"] = "SNK_Neo_Geo_Pocket_Color", ["wswan"] = "Bandai_WonderSwan",
+        ["wonderswan"] = "Bandai_WonderSwan", ["wswanc"] = "Bandai_WonderSwan_Color", ["wonderswancolor"] = "Bandai_WonderSwan_Color",
+        ["msx"] = "Microsoft_MSX", ["msx1"] = "Microsoft_MSX", ["msx2"] = "Microsoft_MSX2", ["c64"] = "Commodore_64",
+        ["amiga"] = "Commodore_Amiga", ["amiga500"] = "Commodore_Amiga", ["amigacd32"] = "Commodore_Amiga_CD32",
+        ["cd32"] = "Commodore_Amiga_CD32", ["amstradcpc"] = "Amstrad_CPC", ["zxspectrum"] = "Sinclair_ZX_Spectrum",
+        ["zx81"] = "Sinclair_ZX81", ["x68000"] = "Sharp_X68000", ["dos"] = "Microsoft_MS-DOS", ["scummvm"] = "ScummVM",
+        ["openbor"] = "OpenBOR", ["mugen"] = "MUGEN",
+
+        // Pinball front ends (PinballX, PinUP Popper) and ES's pinball systems.
+        ["vpinball"] = "Visual_Pinball", ["vpx"] = "Visual_Pinball", ["visualpinball"] = "Visual_Pinball",
+        ["Visual Pinball X"] = "Visual_Pinball", ["fpinball"] = "Future_Pinball", ["futurepinball"] = "Future_Pinball",
+        ["Pinball FX"] = "Pinball_FX2", ["Pinball FX3"] = "Pinball_FX2",
     };
 
     /// <summary>

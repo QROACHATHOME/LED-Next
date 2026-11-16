@@ -67,6 +67,7 @@ public partial class App : Application
         _lamps.Shows = _shows;
         vm.Animations = new ViewModels.AnimationsViewModel(_session, _shows);
         vm.KnownLamps = new ViewModels.KnownLampsViewModel(_session);
+        vm.FrontEnds = new ViewModels.FrontEndsViewModel(_session);
         _lamps.KnownLampsChanged += () => vm.KnownLamps.Refresh();
         _frontEnd = new FrontEndController(_session, vm, _lamps, _shows);
         _frontEnd.ShowRequested += () => BringToFront(window);

@@ -32,8 +32,9 @@ public sealed class CabinetConfig
     /// 12 = adds Idle.Speed (1). 13 = adds Games.PickerColors (empty).
     /// 14 = adds the NanoLED, PacDrive, LED-Wiz and LED strip boards: a strip's ledCount / serialPort / baudRate /
     /// segments on its board (absent on every other board, so nothing changes).
+    /// 15 = adds <see cref="FrontEnds"/>: the folders picked in the Front ends tab (empty: found where they usually are).
     /// </summary>
-    public const int CurrentVersion = 14;
+    public const int CurrentVersion = 15;
 
     public int Version { get; set; } = CurrentVersion;
     public PanelLayout Panel { get; set; } = new();
@@ -51,6 +52,22 @@ public sealed class CabinetConfig
     public LedNext.Core.Shows.IdleSettings Idle { get; set; } = new();
     /// <summary>Light shows when BigBox (or LaunchBox) starts and closes. Version 11, none.</summary>
     public LedNext.Core.Shows.FrontEndShowSettings Shows { get; set; } = new();
+    /// <summary>The other front ends' folders, as picked in the Front ends tab. Version 15, all empty.</summary>
+    public FrontEndFolders FrontEnds { get; set; } = new();
+}
+
+/// <summary>
+/// Folders of the front ends set up from the Front ends tab (FrontEndSetup). Empty = not picked: LED-Next looks
+/// where the front end usually is (%USERPROFILE%\ES-DE, X:\RetroBat…). Added in config version 15.
+/// </summary>
+public sealed class FrontEndFolders
+{
+    public string? EsDe { get; set; }
+    public string? RetroBat { get; set; }
+    public string? AttractMode { get; set; }
+    public string? PinballX { get; set; }
+    /// <summary>A portable Playnite's folder; empty = the installed Playnite (%APPDATA%\Playnite).</summary>
+    public string? Playnite { get; set; }
 }
 
 /// <summary>Live lamps from emulators (MAME's output system). Added in config version 6.</summary>

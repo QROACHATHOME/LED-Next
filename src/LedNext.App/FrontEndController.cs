@@ -13,7 +13,7 @@ using LedNext.FrontEnd;
 namespace LedNext.App;
 
 /// <summary>
-/// Lights the panel from LaunchBox / BigBox: listens on the pipe, runs <see cref="FrontEndSession"/>,
+/// Lights the panel from the front ends (LaunchBox / BigBox, LedNextCmd, the Playnite and PinballX plugins): listens on the pipe, runs <see cref="FrontEndSession"/>,
 /// resolves the game like the Games tab does and hands the lights to the engine. The last front-end
 /// event wins over a test pattern or a Games-tab preview, and the other way round.
 /// </summary>
@@ -58,7 +58,7 @@ public sealed class FrontEndController : IDisposable
         try
         {
             _server.Start();
-            _main.FrontEndStatus = "Front end: waiting for LaunchBox / BigBox";
+            _main.FrontEndStatus = "Front end: waiting for a front end";
             return true;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
@@ -177,6 +177,16 @@ public sealed class FrontEndController : IDisposable
         var db = _session.Games;
         var config = _session.Config;
         var source = g.Source ?? "Front end";
+        // A front end without its own game ids (LedNextCmd: RetroFE, HyperSpin…) may name a launcher ("retroarch")
+        // instead of a platform: then the list / system it last selected names the platform.
+        if (db is not null && string.IsNullOrWhiteSpace(g.GameId) && _state.LastListPlatform is { } list
+            && !string.Equals(list, g.Platform, StringComparison.OrdinalIgnoreCase)
+            && db.FindFrontEndPlatform(g.Platform, config.Games.LaunchBoxPlatformMap) is null
+            && db.FindFrontEndPlatform(list, config.Games.LaunchBoxPlatformMap) is not null)
+        {
+            AppLog.Info($"{source}: '{g.Platform}' is not a platform; using the list selected before, '{list}'.");
+            g = g with { Platform = list };
+        }
         var found = db?.FindFrontEndGame(g.GameId, g.Platform, g.Title, g.ApplicationPath, config.Games.LaunchBoxPlatformMap);
         if (db is null || found is not { } f)
         {

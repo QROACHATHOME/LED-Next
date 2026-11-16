@@ -26,16 +26,44 @@ public abstract record FrontEndAction
 /// </summary>
 public sealed class FrontEndSession
 {
+    /// <summary>A game with no platform (LEDBlinky's command line without an emulator) is a MAME game, as in LEDBlinky.</summary>
+    public const string DefaultPlatform = "MAME";
+
     public FrontEndMessage? Selected { get; private set; }
     public FrontEndMessage? Playing { get; private set; }
+
+    /// <summary>The last platform a front end named (a list / system change, or a selected game's).</summary>
+    public string? LastPlatform { get; private set; }
+
+    /// <summary>
+    /// The last list / system selected on its own (LEDBlinky's "8 &lt;emulator&gt;", ES's system-select). RetroFE names
+    /// a game's emulator by its launcher ("retroarch"); the controller falls back to this list when that isn't a platform.
+    /// </summary>
+    public string? LastListPlatform { get; private set; }
+
+    private long _lastSelectSentAt;
 
     /// <summary>The action to take, or null when the lights stay as they are.</summary>
     public FrontEndAction? Handle(FrontEndMessage m)
     {
+        // LEDBlinky-style front ends often leave out the emulator: the last one named, else MAME.
+        if (m.HasPlatform)
+        {
+            LastPlatform = m.Platform!.Trim();
+            if (!m.HasGame && m.Event == FrontEndEvents.Select) LastListPlatform = LastPlatform;
+        }
+        else if (m.HasGame) m = m with { Platform = LastPlatform ?? DefaultPlatform };
+
         switch (m.Event)
         {
             case FrontEndEvents.Select:
                 if (!m.HasGame && !m.HasPlatform) return null;
+                // LedNextCmd runs once per selection and its copies can arrive out of order: keep the newest.
+                if (m.SentAtMs is { } at)
+                {
+                    if (at < _lastSelectSentAt && Selected?.Source == m.Source) return null;
+                    _lastSelectSentAt = at;
+                }
                 Selected = m;
                 if (Playing is not null) return null;
                 return ForSelection(m);

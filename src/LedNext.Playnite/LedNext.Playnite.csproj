@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    LED-Next's Playnite extension (a GenericPlugin): the selected game, game starting / stopped and Playnite starting /
+    closing go to LED-Next over its pipe. Playnite 10 runs .NET Framework 4.6.2 extensions; Playnite.SDK.dll is
+    Playnite's own, so it is referenced for compiling only (ExcludeAssets=runtime: never shipped).
+    The front-end messages (LedNext.FrontEnd.Lite) are compiled in: no other DLL to ship.
+    Install: copy the build output (LedNext.Playnite.dll + extension.yaml + icon.png) to
+    %APPDATA%\Playnite\Extensions\LED-Next (LED-Next's Front ends tab does it), or open LED-Next.pext with Playnite.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net462</TargetFramework>
+    <AssemblyName>LedNext.Playnite</AssemblyName>
+    <RootNamespace>LedNext.Playnite</RootNamespace>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PlayniteSDK" Version="6.18.0" ExcludeAssets="runtime" />
+    <Compile Include="..\LedNext.FrontEnd.Lite\*.cs" LinkBase="Lite" />
+  </ItemGroup>
+
+  <!--
+    The manifest and icon go beside the DLL with a Copy after the build, not as items copied to the output: those
+    would also flow into LED-Next.exe's single-file publish through its project reference.
+  -->
+  <Target Name="CopyExtensionFiles" AfterTargets="Build">
+    <Copy SourceFiles="extension.yaml" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="..\LedNext.App\Assets\LedNext.png" DestinationFiles="$(OutDir)icon.png" SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>

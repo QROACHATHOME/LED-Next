@@ -21,6 +21,9 @@ public static class FrontEndEvents
     public const string Closing = "closing";
     /// <summary>Bring the LED-Next window to the front (sent by a second LED-Next start).</summary>
     public const string Show = "show";
+    /// <summary>The front end's screensaver started / stopped (LedNextCmd; logged, LED-Next has its own idle show).</summary>
+    public const string ScreensaverStart = "screensaver-start";
+    public const string ScreensaverStop = "screensaver-stop";
 }
 
 /// <param name="Event">One of <see cref="FrontEndEvents"/>.</param>

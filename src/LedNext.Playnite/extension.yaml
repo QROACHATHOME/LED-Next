@@ -1,0 +1,10 @@
+Id: LedNext_Playnite_8f3c2a71
+Name: LED-Next
+Author: LED-Next contributors
+Version: 0.2.0
+Module: LedNext.Playnite.dll
+Type: GenericPlugin
+Icon: icon.png
+Links:
+  - Name: GitHub
+    Url: https://github.com/QROACHATHOME/LED-Next

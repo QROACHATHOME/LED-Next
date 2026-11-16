@@ -61,7 +61,8 @@ LaunchBox ↔ LEDBlinky platform-name mapping, control map editor.
 
 ### Later
 - More boards: Ultimate I/O, NanoLED, PacDrive, LED-Wiz (+ Pinscape, clones) and LED strips are in (untested on
-  real boards); more front ends
+  real boards); other front ends (HyperSpin, RetroFE / CoinOPS, RocketLauncher, Attract-Mode, ES-DE, RetroBat,
+  Playnite, PinballX, PinUP Popper) are in, untested with the real front ends
 
 ## Non-goals (for now)
 - Non-Windows platforms

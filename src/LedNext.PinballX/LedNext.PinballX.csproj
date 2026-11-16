@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    "LED-Next PinballX Plugin.dll": a PinballX plugin (copy it to <PinballX>\Plugins, then tick it in PinballX's
+    Plugin Manager). PinballX looks for the class PinballX.Plugin with Initialize / Event_GameSelect / Event_GameRun /
+    Event_GameExit / Event_App_Exit…; the interface and its GameInfo struct follow DirectOutput's open-source PinballX
+    plugin (github.com/DirectOutput/DirectOutput, "DirectOutput PinballX Plugin"). .NET Framework 4.8 like that one.
+    No dependencies: the front-end messages (LedNext.FrontEnd.Lite) are compiled in, since PinballX wouldn't find a
+    second DLL next to the plugin.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <AssemblyName>LED-Next PinballX Plugin</AssemblyName>
+    <RootNamespace>PinballX</RootNamespace>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\LedNext.FrontEnd.Lite\*.cs" LinkBase="Lite" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+
+</Project>
