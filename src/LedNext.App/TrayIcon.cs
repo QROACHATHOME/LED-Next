@@ -1,6 +1,7 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
+using LedNext.Core;
 using Forms = System.Windows.Forms;
 
 namespace LedNext.App;
@@ -47,11 +48,27 @@ public sealed class TrayIcon : IDisposable
         _icon.ContextMenuStrip?.Dispose();
         _icon.Dispose();
         _image.Dispose();
-        DestroyIcon(_hIcon);
+        if (_hIcon != IntPtr.Zero) DestroyIcon(_hIcon);
+    }
+
+    /// <summary>
+    /// The app icon (Assets/LedNext.ico) at the tray's size; if it can't be read, a small panel drawn here.
+    /// </summary>
+    private static (Icon Icon, IntPtr Handle) DrawIcon()
+    {
+        try
+        {
+            var res = System.Windows.Application.GetResourceStream(new Uri("pack://application:,,,/Assets/LedNext.ico"));
+            if (res != null)
+                using (res.Stream)
+                    return (new Icon(res.Stream, Forms.SystemInformation.SmallIconSize), IntPtr.Zero);
+        }
+        catch (Exception ex) { AppLog.Warn($"Tray icon: couldn't read the app icon ({ex.Message}); using a drawn one."); }
+        return DrawFallbackIcon();
     }
 
     /// <summary>A small control panel: dark rounded square with four lit buttons.</summary>
-    private static (Icon Icon, IntPtr Handle) DrawIcon()
+    private static (Icon Icon, IntPtr Handle) DrawFallbackIcon()
     {
         using var bmp = new Bitmap(32, 32);
         using (var g = Graphics.FromImage(bmp))
